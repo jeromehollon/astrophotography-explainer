@@ -9,7 +9,7 @@
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  calState, exportPng, loadReferenceStats, referenceStf, stack, useCalibratedRoi, useStack,
+  autoStf, calState, exportPng, fetchNormalization, stack, useCalibratedRoi, useStack,
   type StackRequest, type StfParams,
 } from '../../shared/pipeline';
 import type { AlgorithmName, CalibrationChoice } from './store';
@@ -23,27 +23,37 @@ export type View =
 
 export type StackInputs = { frames: string[]; calibration: CalibrationChoice; algorithm: AlgorithmName };
 
-/* normalization.json → reference STF per calibration state (SPEC §4.5). The design assets were rendered with
- * target background 0.30 and shadows clip −1.8 (assets/light-frames-review/stats.json), so every live view uses it. */
+/*
+ * normalization.json → reference STF per calibration state (SPEC §4.5). The design assets were rendered with
+ * target background 0.30 and shadows clip −1.8 from the reference frame's statistics *at bin 2*
+ * (assets/light-frames-review/stats.json: c0 ≈ 872 DN, m ≈ 0.0014). normalization.json holds bin-1 statistics,
+ * whose MADN is about twice the bin-2 value (a 2×2 mean halves the noise), so the MADN is divided by the display
+ * bin before AutoSTF. Every view on both pages, and the exported PNG, shares this one stretch.
+ */
 export const DISPLAY_STF = { targetBg: 0.3, clip: -1.8 };
-let statsReady = false;
-const statsPromise = loadReferenceStats().then(() => { statsReady = true; }, (e) => console.error('normalization.json', e));
+const DISPLAY_BIN = 2;
+type NormStats = { median_dn: number; madn_dn: number };
+let normStates: Record<string, NormStats> | null = null;
+const statsPromise = fetchNormalization().then(
+  (n) => { normStates = n.frames[REFERENCE]?.states ?? null; },
+  (e) => console.error('normalization.json', e),
+);
 function useStatsReady(): boolean {
-  const [ready, setReady] = useState(statsReady);
+  const [ready, setReady] = useState(normStates !== null);
   useEffect(() => { let on = true; statsPromise.then(() => { if (on) setReady(true); }); return () => { on = false; }; }, []);
   return ready;
 }
 /** Design-time stretch from stats.json is in [0,1] units; the pipeline works in DN. */
 const FALLBACK: StfParams = { c0: FALLBACK_STF.c0 * 65535, m: FALLBACK_STF.m };
+function displayStf(state: string): StfParams {
+  const s = normStates?.[state];
+  return s ? autoStf(s.median_dn, s.madn_dn / DISPLAY_BIN, DISPLAY_STF) : FALLBACK;
+}
 export function useReferenceStf(calibration: CalibrationChoice): StfParams {
   const ready = useStatsReady();
   const state = calState(calibration);
-  return useMemo(() => {
-    if (!ready) return FALLBACK;
-    try { return referenceStf(REFERENCE, state, DISPLAY_STF); } catch { return FALLBACK; }
-  }, [ready, state]);
+  return useMemo(() => (ready ? displayStf(state) : FALLBACK), [ready, state]);
 }
-
 
 const grid = (r: Rect, bin: 1 | 2 | 4 | 8): StackRequest['grid'] => ({ ref: REFERENCE, x: r.x, y: r.y, w: r.w, h: r.h, bin });
 const regionRect = (region: RoiKey | 'wide'): Rect => (region === 'wide' ? WIDE_RECT : ROIS[region].rect);
@@ -96,7 +106,7 @@ export async function stackFullPng(inputs: StackInputs, onProgress: (done: numbe
   const req: StackRequest = { grid: grid({ x: 0, y: 0, w: SENSOR.w, h: SENSOR.h }, 1), frames: inputs.frames, calibration: inputs.calibration, algorithm: { name: inputs.algorithm } };
   const result = await stack(req, { signal, onProgress });
   await statsPromise;
-  const stf = referenceStf(REFERENCE, calState(inputs.calibration), DISPLAY_STF);
+  const stf = displayStf(calState(inputs.calibration));
   return exportPng(result, stf, { rotate180: true });
 }
 
