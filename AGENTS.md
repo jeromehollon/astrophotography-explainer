@@ -5,7 +5,8 @@ Read this before working in the repo. It covers what we're building, the tools, 
 ## Product requirements
 
 - **What:** a single-page educational web app that explains **image stacking and calibration frames** (lights, darks, flats, dark-flats/flat-darks, bias) in astrophotography: why each frame exists, what noise or artifact it removes, and how stacking improves SNR.
-- **Build:** a static site built with Node. The output must be plain HTML/CSS/JS that works from any static host, with no server at runtime.
+- **Spec:** `SPEC.md` is the source of truth for scope, architecture, contracts, milestones and agent orchestration. Read it before starting any story.
+- **Build:** a React/TS/Tailwind SPA built with Vite, served by a small Node (Fastify) server. That server exposes exactly **one** API, `GET /api/roi`, which returns a pixel region of one image (SPEC §4.3). All image processing runs in the browser. Everything ships as one Docker container.
 - **Platform:** desktop only. Target the latest **Chrome and Firefox**. Don't spend time on mobile layouts, Safari, or touch.
 - **Assets:** every example image is made from real or synthetic data by `tools/astro.py`, so the numbers the page shows (FWHM, noise, SNR) are reproducible.
 - **Status:** setup only. The app hasn't been scaffolded yet.
@@ -55,7 +56,8 @@ uv run tools/astro.py denoise in.fits out.xisf --layers 1:3:1,2:2:0.8,3:1:0.5 --
   - `light_registered/`: registered subs (`.xisf` plus PixInsight `.xdrz` drizzle data).
   - `light_synthetic_disaster/`
   - `final/`: the integrated master light and `NGC7331.png`.
-- `data/`: put regenerable intermediates here. Git ignores it.
+- `data/derived/` (git-ignored): regenerable outputs. `data/derived/precompute/` holds metrics, masters and normalization. `data/derived/runtime/` holds the pixel files and manifest baked into the Docker image. Scripts live in `tools/precompute/`, one `run_stage_<x>.sh` per stage (SPEC §5).
+- Dataset quirks every agent must know (verified): the synthetic FITS frames are vertically flipped relative to the raw XISF; the `.xdrz` `AlignmentMatrix` maps reference (FRAME_0007) coordinates → raw frame coordinates; `light_registered/*_r.xisf` are registered but **uncalibrated**; the master dark includes the bias pedestal. See SPEC §3.
 - Web-ready assets go wherever the app scaffold puts static files. Commit those, and commit the exact `astro.py` command that produced each one (a `Makefile` or a script) so they can be regenerated.
 
 ## Parallel work (hackathon mode)
@@ -91,6 +93,9 @@ Regenerated: uv run tools/astro.py stars source_images/light/<frame>.xisf --mode
 ```
 
 ## References
+
+**Local knowledge**
+- `docs/knowledge/wbpp.md`: how PixInsight WBPP calibrates, normalizes, registers and integrates, and the settings recorded in this dataset's masters. Our pipeline replicates it.
 
 **Astrophotography accuracy**
 - Astropy CCD Data Reduction Guide (bias, darks, flats; the rigorous basics): https://www.astropy.org/ccd-reduction-and-photometry-guide/
