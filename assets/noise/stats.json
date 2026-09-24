@@ -1,0 +1,148 @@
+{
+ "crop_size": [
+  720,
+  480
+ ],
+ "light_stf": {
+  "target_bg": 0.3,
+  "shadows_clip": -1.8
+ },
+ "f03_whole_frame": {
+  "median_dn": 1062.0000302698463,
+  "madn_dn": 85.99084522464965
+ },
+ "problem_galaxy": {
+  "frame": "f03",
+  "centre": [
+   3160,
+   2120
+  ],
+  "size": [
+   880,
+   660
+  ],
+  "stf": {
+   "c0": 0.016946609554812312,
+   "m": 0.0033192842872212134,
+   "target_bg": 0.3,
+   "shadows_clip": -1.8
+  }
+ },
+ "tour_noise": {
+  "frame": "f03",
+  "centre": [
+   2400,
+   3200
+  ],
+  "median_dn": 1071.0000150091946,
+  "madn_dn": 48.9257773662731,
+  "stf": {
+   "c0": 0.014998605565726757,
+   "m": 0.003129941883313365,
+   "target_bg": 0.3,
+   "shadows_clip": -1.8
+  }
+ },
+ "tour_bias": {
+  "centre": [
+   2400,
+   3200
+  ],
+  "median_dn": 160.49495700979605,
+  "madn_dn": 0.43731236695800907,
+  "stretch": {
+   "linear_lo_dn": 159.189999505179,
+   "linear_hi_dn": 162.43000133545138
+  }
+ },
+ "tour_dark": {
+  "centre": [
+   1216,
+   960
+  ],
+  "size": [
+   360,
+   240
+  ],
+  "median_dn": 160.99999996251427,
+  "madn_dn": 0.9434645007492508,
+  "hot_pixels_over_500dn_whole_frame": 10228,
+  "hot_pixels_over_500dn_in_crop": 47,
+  "stretch": {
+   "linear_lo_dn": 157.99999996321276,
+   "linear_hi_dn": 194.38200578351083
+  }
+ },
+ "tour_flat": {
+  "source": "flat_50_darkflat, binned x8 (whole field)",
+  "corner_over_centre": 0.7643598076489087,
+  "mote_contrast": -0.048011031550034944,
+  "stretch": {
+   "linear_lo_dn": 29422.74327102305,
+   "linear_hi_dn": 38094.48471664427
+  }
+ },
+ "tour_misaligned": {
+  "frames": [
+   "f02",
+   "f05"
+  ],
+  "centre": [
+   3060,
+   3780
+  ],
+  "offset_px": [
+   31.527842953282033,
+   35.12018509084633
+  ],
+  "offset_len_px": 47.19568075684596,
+  "stf": {
+   "c0": 0.013368738783672451,
+   "m": 0.0021826600596687863,
+   "target_bg": 0.3,
+   "shadows_clip": -1.8
+  }
+ },
+ "tour_satellite": {
+  "frame": "f03",
+  "centre": [
+   4760,
+   2850
+  ],
+  "stf": {
+   "c0": 0.015507303868606687,
+   "m": 0.002940558425041932,
+   "target_bg": 0.3,
+   "shadows_clip": -1.8
+  }
+ },
+ "tour_cloud": {
+  "frame": "f14_cloud",
+  "region": {
+   "x": 400,
+   "y": 600,
+   "w": 2880,
+   "h": 1920,
+   "bin": 4
+  },
+  "stf": {
+   "c0": 0.014035211313888431,
+   "m": 0.0036446008100736436,
+   "target_bg": 0.3,
+   "shadows_clip": -1.8
+  }
+ },
+ "tour_tracking": {
+  "frame": "f11_tracking",
+  "centre": [
+   3420,
+   780
+  ],
+  "stf": {
+   "c0": 0.011763876010663808,
+   "m": 0.0025616972035139495,
+   "target_bg": 0.3,
+   "shadows_clip": -1.8
+  }
+ }
+}

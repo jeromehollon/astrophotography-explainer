@@ -324,7 +324,8 @@
    "P4 Flats 1 C flat on darkflats": "49:1060",
    "P0 Welcome A": "57:619",
    "P2 Bias A bias off": "60:1200",
-   "P2 Bias B bias on": "61:1259"
+   "P2 Bias B bias on": "61:1259",
+   "P1 Noise & Defects A": "61:1149"
   },
   "nodes": {
    "P4 A flat-image": "44:612",
@@ -354,7 +355,25 @@
    "P2 A tile-raw": "60:1253",
    "P2 A tile-corrected": "60:1254",
    "P2 A tile-what-was-removed": "60:1255",
-   "P2 A average-brightness": "61:771"
+   "P2 A average-brightness": "61:771",
+   "P1 A reading": "61:1185",
+   "P1 A page-head": "61:1186",
+   "P1 A illustration": "61:1190",
+   "P1 A section-problem": "61:1245",
+   "P1 A problem-image": "61:1251",
+   "P1 A prose-why-stack": "61:1254",
+   "P1 A section-tour": "61:1460",
+   "P1 A tour-noise image": "61:1465",
+   "P1 A tour-bias image": "61:1476",
+   "P1 A tour-dark image": "61:1487",
+   "P1 A tour-flat image": "61:1498",
+   "P1 A tour-misaligned image": "61:1509",
+   "P1 A tour-satellite image": "61:1520",
+   "P1 A tour-cloud image-1": "61:1531",
+   "P1 A tour-cloud image-2": "61:1533",
+   "P1 A section-calibration": "61:1542",
+   "P1 A callout-masters": "61:1547",
+   "P1 A BottomNav": "61:1240"
   }
  },
  "completedSteps": [
@@ -384,7 +403,8 @@
   "R6.flats1-optical-path-and-real-flat",
   "R7.flats1-boxes-and-exp2-light-frame",
   "P0.welcome-page",
-  "S1.bias-page"
+  "S1.bias-page",
+  "N1.noise-defects-page"
  ],
  "notes": [
   "Prototype connections cannot cross Figma pages; agents build per page, then frames are moved onto one Prototype page and wired at the end.",
@@ -399,6 +419,7 @@
   "Flats-1 R7 (2026-09-24): the optical-path SVG sits in a cream bounding box (800 wide, instance rescaled to 752) with its two paragraphs; the real flat sits to its right (376 wide) with the caption 'The flat recorded by the camera'. Before/after is wrapped in a dark (surface/stage) box. Experiment 2 tiles are the LIGHT-FRAME ROI: Raw = frame divided by the flat as shot, Computed = divided by the dark-flat-calibrated flat, removed = their difference. 'What was removed' tiles are computed - raw centred on mid grey (lighter = added). The owner rewrote all Try-it prose and tile captions in frame A; B and C are clones of A with only toggle states, tile images and the two state-dependent captions changed.",
   "Flats-1 R8 (2026-09-24): 'What was removed' is populated with the real difference in EVERY toggle state (exp1: with flat minus without; exp2: dark-flat-calibrated flat minus flat as shot). Only the Computed tile follows the switch. The exp2 difference is ~0.4 DN but clean (the raw noise cancels because both tiles divide the same frame), so on its own symmetric stretch it shows the same donut as exp1, slightly different.",
   "P0 Welcome (2026-09-24): single frame A, no Try-it stage and no ROI tiles by owner direction; full-field images are allowed on Welcome. Assets from tools/assets/welcome_page.py in assets/welcome/.",
-  "Bias P2 (2026-09-24): built as a clone of Flats-1 frame A on page 8:5, then cut to intro (Bias illustration in a full-width cream box + two paragraphs) -> whole master bias in a dark box (subsampled every 5th pixel so grain survives) -> 'Taking the bias away' prose -> Try it. One experiment, Bias toggle; tiles Raw / Computed / What was removed, the removed tile shows -bias on its own 2 DN stretch in both states. Under the tiles an 'average-brightness' panel draws two horizontal bars (Raw 1,233 / Computed 1,233 or 1,073 with the 161 DN bias share as a cobalt segment, circle marker in the legend). B is a clone of A with toggle On, computed image swapped to roi_computed_bias.png, caption 'With the bias removed - Bias toggled on', and the computed bar shortened. BottomNav labels edited in the nested text ('← Noise & Defects', 'Darks →')."
+  "Bias P2 (2026-09-24): built as a clone of Flats-1 frame A on page 8:5, then cut to intro (Bias illustration in a full-width cream box + two paragraphs) -> whole master bias in a dark box (subsampled every 5th pixel so grain survives) -> 'Taking the bias away' prose -> Try it. One experiment, Bias toggle; tiles Raw / Computed / What was removed, the removed tile shows -bias on its own 2 DN stretch in both states. Under the tiles an 'average-brightness' panel draws two horizontal bars (Raw 1,233 / Computed 1,233 or 1,073 with the 161 DN bias share as a cobalt segment, circle marker in the legend). B is a clone of A with toggle On, computed image swapped to roi_computed_bias.png, caption 'With the bias removed - Bias toggled on', and the computed bar shortened. BottomNav labels edited in the nested text ('← Noise & Defects', 'Darks →').",
+  "Noise & Defects N1 (2026-09-24): reading-only introduction page, no Try-it stage, no rule, no state variants (owner direction). Structure: TopBar(Current=Noise & Defects) -> page-head -> illustration 35:2 (unchanged) -> section-problem (prose 680 + 440x330 image + caption) -> prose-why-stack -> section-tour (7 rows: 360x240 image column + caption | Badge/Source + h3 + p + 'fix' line in label/md) -> section-calibration (prose 680 + Callout Note 'Calibration frames are stacked too', 440 wide) -> BottomNav (Welcome / Bias). Images are plain FRAME wells with image fills from assets/noise/ (tools/assets/noise_page.py); upload_assets targets them directly. The owner may remove the tour crops entirely."
  ]
 }

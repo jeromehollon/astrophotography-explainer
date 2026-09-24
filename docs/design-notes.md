@@ -43,6 +43,7 @@ Figma file: https://www.figma.com/design/jtYi1LQf1fVyUAUfAgthP5/Astrophotography
 | P2 average-brightness bars | drawn rectangles sized from `assets/bias/stats.json` (raw 1,233, computed 1,073, bias 161 in the ROI) | live ROI means from the pipeline |
 | P0 Welcome image wells | real full-field images from `assets/welcome/` (script `tools/assets/welcome_page.py`): f07 sub, WBPP master, colour composite | Stage D static art |
 | Every other ROITile image well | "PLACEHOLDER · real ROI crop" | `/api/roi` crops, reference-frame STF (SPEC §4.5) |
+| P1 Noise & Defects image wells (problem crop and the 8 tour crops) | real crops from `assets/noise/` (script `tools/assets/noise_page.py`, numbers in `stats.json`) | Stage D static art; the flat and cloud crops are whole-field ×8 and quarter-field ×4, the rest native pixels |
 | P4 full-field flat and before/after frame | `assets/flats-1/flat_full.png`, `frame_before.png`, `frame_after.png` (binned ×5) | Stage D static art |
 | Histogram and Histogram/Mini | "PLACEHOLDER" bar shape | `histograms.json` |
 | FrameCard thumbnail | solid navy rect | bin-8 thumbnails |
@@ -67,6 +68,10 @@ Figma file: https://www.figma.com/design/jtYi1LQf1fVyUAUfAgthP5/Astrophotography
 11. **Welcome prose does not define its terms.** SPEC §9 asks that light, stack, calibration and similar words be defined on first use. The owner's Welcome text uses "calibration frames", "stacking" and "stack" without definitions and is kept verbatim; the definitions land on Noise & Defects. Reconcile §9 or the Welcome copy.
 12. **Deer Lick Group claim.** The Welcome prose says the four galaxies above NGC 7331 are gravitationally bound to it and will merge within 1–3 billion years. Published redshift distances place NGC 7335, 7336, 7337 and 7340 roughly ten times farther away, so they are a line-of-sight grouping. Kept verbatim at the owner's direction; flagged for a fact check before launch.
 13. **Spelling on Welcome.** The owner's prose uses American spelling ("color"); captions and the illustration label on that page follow it ("Color photograph"). The rest of the file uses British spelling ("colour"). Pick one before the copy is final.
+
+10. **P1 Noise & Defects is a reading-only introduction (owner direction, 2026-09-24).** No Try-it stage, no ink rule, no state variants. SPEC P1's interactive layer-selectable sensor SVG and the 1 → N averaging control with a 1/√N noise readout are not on the page; the illustration is the shared "Noise & Defects / Light path" component unchanged, and "why we stack" is explained in prose (four frames halve the random variation, sixteen quarter it). Item 5 above is therefore settled for this page: no readout. If the owner wants the averaging demo back, it belongs on the Alignment page (which already shows the √2 drop) or in the workbench.
+11. **P1 survey vs "one idea per page".** The owner asked this page to tour every error source (random variation, readout offset, dark signal and hot pixels, uneven response, misalignment, satellites, clouds and tracking) with its fix, so it deliberately touches the topics of every later lesson, in one short block each with a real crop. The crops are provisional: the owner may remove them and keep badges and prose only. The whole-field flat and quarter-field cloud crops are static reading-column images, allowed under the ROIs-only rule's static-area exception.
+12. **"Fix" lines in the P1 tour** are plain label text ("Removed with a dark frame."), not links or controls. They are set in label/md, text/primary.
 
 ## 6. Figma API gotchas recorded for other agents
 
