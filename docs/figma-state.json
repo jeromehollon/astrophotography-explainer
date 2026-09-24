@@ -326,9 +326,9 @@
    "P2 Bias B bias on": "99:260",
    "P1 Noise & Defects A": "61:1149",
    "P5 Flats 2 A no flat": "66:2",
-   "P5 Flats 2 B 10% flat": "104:392",
-   "P5 Flats 2 C 50% flat": "104:571",
-   "P5 Flats 2 D 85% flat": "104:750",
+   "P5 Flats 2 B 10% flat": "112:2178",
+   "P5 Flats 2 C 50% flat": "112:2357",
+   "P5 Flats 2 D 85% flat": "112:2536",
    "P6 Alignment A": "73:2",
    "P3 Darks A dark off": "78:2",
    "P3 Darks B dark on": "88:2220",
@@ -513,6 +513,7 @@
   "Noise & Defects N3 (2026-09-24): below the single-exposure image sits the same 2200x1650 region of the WBPP master light (assets/noise/problem_master.png), both binned x5 into 440x330 wells so the galaxy's halo fits. The master is registered to an East-side reference, so it is rotated 180 degrees to match the West-side sub f03; the galaxy core positions are in stats.json.",
   "Flats-2 owner prose pass (2026-09-24): the owner rewrote the lede and the full-well paragraph in frame A and edited the Note title and the three-flats heading in frame B. All were merged into A (A's rewritten paragraph kept; B had dropped it) and B, C, D were rebuilt as clones of A: 104:392 / 104:571 / 104:750.",
   "Algorithms P7 (2026-09-24, second owner review): page 8:10, frame A 84:2. Order: TopBar(Current=Algorithms) -> page head -> ink rule -> dark Try-it stage at the top (stage-head, experiment-1 with two 576x576 ROITiles Raw = frame 3 / Computed = four-frame stack f03+f02+f04+f05, Chip group Average / Median, strip of four 132 px input thumbnails, then Callout Kind=Why 'Why does a faint trace of the trail survive the median?' at 680 wide, moved here from the one-pixel section by owner direction) -> reading-2: section-one-pixel (real values box), section-methods (table, owner-edited), section-kappa-sigma / section-winsorized / section-rcr (owner-edited prose + a worked-example box each: the same trail pixel across the fifteen frames f00-f14 as fifteen 69 px value cards, every quantity the method computes, and the result; numbers from stats.json fifteen_frames.one_pixel_traces), section-fifteen (the satellite ROI stacked from f00-f14 with each method, five 208 px tiles in a dark box) -> BottomNav. No illustration. ROI: 2304 px crop at bin 4 (assets/algorithms/, tools/assets/algorithms_page.py). ROITile wells: set layoutSizingVertical FILL and resize the instance to 576x676. B and C are re-cloned from A after every owner edit: B = Median chip, stack4_median image and caption; C = the Median fifteen-frame tile enlarged to 576 px above the row, selected tile outlined in text/on-stage.",
-  "Noise & Defects N4 (2026-09-24): section-problem is a two-column layout: left-column (prose-problem + prose-why-stack, gap 32) and image-column (single-frame well, master well, captions). 'Why we stack' is no longer a separate section."
+  "Noise & Defects N4 (2026-09-24): section-problem is a two-column layout: left-column (prose-problem + prose-why-stack, gap 32) and image-column (single-frame well, master well, captions). 'Why we stack' is no longer a separate section.",
+  "Flats-2 second owner prose pass (2026-09-24): closing paragraph edited in frame A; removed tile in state A set to neutral grey; B, C, D rebuilt as clones of A: 112:2178 / 112:2357 / 112:2536."
  ]
 }

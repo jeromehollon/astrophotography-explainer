@@ -20,6 +20,7 @@ Try it (light-frame ROI around the left-side dust mote, native pixels, Flats-1 c
   roi_raw.png                  (L - D)
   roi_computed_<10|50|85>.png  (L - D) / (flat_<lvl>_darkflat / f_v)
   roi_removed_<10|50|85>.png   computed - raw centred on mid grey, one symmetric stretch for all three
+  roi_removed_none.png         no flat selected: nothing removed, uniform mid grey
   The light ROIs share one AutoSTF computed on the raw crop (target bg 0.30, clip -1.8 MADN), as on Flats-1.
 
   stats.json               per-level exposure, level, mote contrast and vignetting, plus every stretch
@@ -190,6 +191,8 @@ def main() -> None:
             "added_core_dn": comp_core - raw_core,
             "mote_contrast_after": check["variants"][f"flat_{lvl}_darkflat"]["mote_contrast"],
         }
+
+    save_gray(np.full_like(raw, 0.5), OUT / "roi_removed_none.png")  # no flat: nothing removed
 
     # ---- "The problem you can see": 4:3 crop of the 85 % result, same STF ----
     pys = slice(cy - PROBLEM_H // 2, cy + PROBLEM_H // 2)
