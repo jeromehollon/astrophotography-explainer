@@ -4,15 +4,22 @@
 // Callout Kind=Why (9:210, cream card with a 1 px ink border and a cobalt
 // "Why?" eyebrow). The stubs in src/shared/ui differ from these in size and
 // style; see TODO.md. Swap back to the shared ones once they match.
-import type { ReactNode } from 'react';
+import type { KeyboardEvent, ReactNode } from 'react';
 
-export function Chip({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: ReactNode }) {
+// Roving-tabindex radio group: the selected chip is the one tab stop; arrow keys
+// move selection and focus together (design-notes §3, Chip 9:130 description).
+export function Chip({ selected, onSelect, children }: { selected: boolean; onSelect: () => void; children: ReactNode }) {
   return (
     <button
       type="button"
       role="radio"
       aria-checked={selected}
-      onClick={onClick}
+      tabIndex={selected ? 0 : -1}
+      data-chip
+      onClick={onSelect}
+      onFocus={() => {
+        if (!selected) onSelect();
+      }}
       className={`flex items-center justify-center rounded-[999px] border-[1.5px] px-[16px] py-[8px] font-body text-[14px] font-medium leading-[20px] whitespace-nowrap ${
         selected ? 'border-accent-primary bg-accent-primary text-text-on-accent' : 'border-border-strong bg-surface-card text-text-primary'
       }`}
@@ -22,9 +29,18 @@ export function Chip({ selected, onClick, children }: { selected: boolean; onCli
   );
 }
 
-export function ChipGroup({ children }: { children: ReactNode }) {
+export function ChipGroup({ label, children }: { label?: string; children: ReactNode }) {
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    const step = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
+    if (!step) return;
+    e.preventDefault();
+    const chips = Array.from(e.currentTarget.querySelectorAll<HTMLButtonElement>('[data-chip]'));
+    const i = chips.findIndex((c) => c === document.activeElement);
+    const next = chips[(Math.max(i, 0) + step + chips.length) % chips.length];
+    next?.focus(); // the chip's onFocus selects it, which calls choose(...)
+  };
   return (
-    <div role="radiogroup" className="flex items-start gap-[8px]">
+    <div role="radiogroup" aria-label={label} onKeyDown={onKeyDown} className="flex items-start gap-[8px]">
       {children}
     </div>
   );

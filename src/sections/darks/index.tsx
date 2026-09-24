@@ -45,7 +45,7 @@ export default function DarksPage() {
         <div className="flex flex-col gap-[12px]">
           <Eyebrow>Chapter 4 · Calibration</Eyebrow>
           <h1 className="w-[900px] m-0 t-h1 tracking-[-0.5px] text-text-primary">What the camera records in the dark</h1>
-          <div className="w-[900px] m-0 t-body-lg text-text-secondary">
+          <div className="flex w-[900px] flex-col gap-[28px] t-body-lg text-text-secondary">
             <p>The electronic offset in a bias frame is only part of the camera’s contribution. While an exposure is running, the sensor also collects electrons that were not produced by incoming light. This is dark current, and some pixels accumulate much more of it than their neighbors. In a photograph, those hot pixels can look like tiny bright points that do not belong to the sky. The sensor’s temperature affects how quickly these unwanted electrons accumulate. Some cameras also record “amp glow” from nearby amplifier circuitry; a matching dark can measure this separate contribution.</p>
             <p>{'​'}</p>
             <p>Since this noise is time and temperature dependent, we take these photos with no light reaching the camera and we cool the camera to be the exact same temperature between the imaging session and the taking of calibration photos.</p>

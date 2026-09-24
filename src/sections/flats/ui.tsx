@@ -4,7 +4,7 @@
 // (see TODO.md), so the page keeps its own until they converge; the prop names
 // follow docs/contracts.md so the swap is an import change. The page chrome
 // (TopBar, BottomNav) comes from the shared LessonPage.
-import type { ReactNode } from 'react';
+import type { KeyboardEvent, ReactNode } from 'react';
 
 export function Reading({ children }: { children: ReactNode }) {
   return <div className="flex w-full flex-col items-start gap-[32px] px-[120px] py-[64px]">{children}</div>;
@@ -66,9 +66,9 @@ export function Toggle({ label, checked, onChange }: { label: string; checked: b
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="flex items-center gap-[12px] focus-visible:outline-3 focus-visible:outline-accent-focus-on-stage"
+      className="group flex items-center gap-[12px] focus-visible:outline-none"
     >
-      <svg width="44" height="24" viewBox="0 0 44 24" fill="none" aria-hidden="true" className="block shrink-0">
+      <svg width="44" height="24" viewBox="0 0 44 24" fill="none" aria-hidden="true" className="block shrink-0 rounded-[12px] group-focus-visible:outline-3 group-focus-visible:outline-accent-focus-on-stage">
         <rect x="1" y="1" width="42" height="22" rx="11" fill={checked ? '#1F4AA8' : '#F7F2EA'} stroke="#1C1A17" strokeWidth="2" />
         <circle cx={checked ? 32 : 12} cy="12" r="7" fill={checked ? '#F7F2EA' : '#1C1A17'} />
       </svg>
@@ -83,6 +83,7 @@ export function Chip({ selected, onClick, children }: { selected: boolean; onCli
       type="button"
       role="radio"
       aria-checked={selected}
+      tabIndex={selected ? 0 : -1}
       onClick={onClick}
       className={`flex items-center justify-center rounded-[999px] border-[1.5px] px-[16px] py-[8px] font-body text-[14px] leading-[20px] font-medium whitespace-nowrap focus-visible:outline-3 focus-visible:outline-accent-focus-on-stage ${
         selected ? 'border-accent-primary bg-accent-primary text-text-on-accent' : 'border-border-strong bg-surface-card text-text-primary'
@@ -93,9 +94,28 @@ export function Chip({ selected, onClick, children }: { selected: boolean; onCli
   );
 }
 
+/**
+ * Single-choice group with one tab stop (Figma Chip 9:130): the selected chip
+ * carries tabIndex 0, the others -1; ArrowLeft/Right/Home/End move focus and
+ * select the chip they land on.
+ */
 export function ChipGroup({ label, children }: { label: string; children: ReactNode }) {
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    const chips = Array.from(e.currentTarget.querySelectorAll<HTMLButtonElement>('[role="radio"]'));
+    const i = chips.indexOf(document.activeElement as HTMLButtonElement);
+    if (chips.length === 0 || i < 0) return;
+    let next = i;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (i + 1) % chips.length;
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (i - 1 + chips.length) % chips.length;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = chips.length - 1;
+    else return;
+    e.preventDefault();
+    chips[next].focus();
+    chips[next].click();
+  };
   return (
-    <div role="radiogroup" aria-label={label} className="flex items-start gap-[8px]">
+    <div role="radiogroup" aria-label={label} onKeyDown={onKeyDown} className="flex items-start gap-[8px]">
       {children}
     </div>
   );

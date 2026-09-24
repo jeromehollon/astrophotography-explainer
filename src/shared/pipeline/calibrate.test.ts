@@ -3,6 +3,7 @@ import fx from './__fixtures__/calibrate.json';
 import { calState, calibrate, flatId, lightSub, subtractId } from './calibrate';
 
 const f32 = (a: (number | null)[][]) => Float32Array.from(a.flat().map((v) => (v === null ? NaN : v)));
+const maxAbsDiff = (a: Float32Array, b: Float32Array) => a.reduce((m, v, i) => Math.max(m, Math.abs(v - b[i])), 0);
 
 describe('calibration choice → WBPP masters (SPEC §6.1)', () => {
   it('drops the bias for lights when a dark is selected', () => {
@@ -21,17 +22,17 @@ describe('calibrate matches the numpy formula on a 64×64 crop of f03', () => {
   it('dark|flat_50_darkflat', () => {
     const out = calibrate(L, D, f32(fx.flat_50_darkflat), fx.f_v.flat_50_darkflat);
     const exp = f32(fx.expected['dark|flat_50_darkflat']);
-    out.forEach((v, i) => expect(Math.abs(v - exp[i])).toBeLessThan(0.02));
+    expect(maxAbsDiff(out, exp)).toBeLessThan(0.02);
   });
   it('bias|flat_10_bias', () => {
     const out = calibrate(L, B, f32(fx.flat_10_bias), fx.f_v.flat_10_bias);
     const exp = f32(fx.expected['bias|flat_10_bias']);
-    out.forEach((v, i) => expect(Math.abs(v - exp[i])).toBeLessThan(0.02));
+    expect(maxAbsDiff(out, exp)).toBeLessThan(0.02);
   });
   it('dark|none and none|none', () => {
     const out = calibrate(L, D, null);
     const exp = f32(fx.expected['dark|none']);
-    out.forEach((v, i) => expect(Math.abs(v - exp[i])).toBeLessThan(0.002));
+    expect(maxAbsDiff(out, exp)).toBeLessThan(0.002);
     expect(calibrate(L, null, null)).toEqual(L);
   });
 });

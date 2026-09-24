@@ -9,6 +9,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     port: 5173,
+    watch: { ignored: ['**/.venv/**', '**/data/**', '**/source_images/**'] },
     proxy: {
       '/api': api,
       '/data': api,
@@ -18,6 +19,7 @@ export default defineConfig({
   worker: { format: 'es' },
   test: {
     environment: 'node',
+    passWithNoTests: true,
     include: ['src/**/*.test.ts', 'src/**/*.test.tsx', 'server/**/*.test.js', 'server/**/*.test.ts'],
   },
 });

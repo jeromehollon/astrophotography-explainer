@@ -3,7 +3,10 @@
 import type { Executor, FrameJob, IntegrateJob } from './jobs';
 import { inlineExecutor } from './jobs';
 
-type Pending = { resolve: (v: Float32Array) => void; reject: (e: Error) => void };
+type Pending = { resolve: (v: Float32Array) => void; reject: (e: Error) => void; kind: 'frame' | 'integrate'; t0: number };
+
+/** Timing counters (debug/benchmarks): in-worker compute ms and wall ms per job kind. */
+export const poolStats = { frameJobs: 0, frameComputeMs: 0, frameWallMs: 0, integrateJobs: 0, integrateComputeMs: 0, integrateWallMs: 0, reset() { this.frameJobs = this.frameComputeMs = this.frameWallMs = this.integrateJobs = this.integrateComputeMs = this.integrateWallMs = 0; } };
 type Queued = { kind: 'frame' | 'integrate'; job: FrameJob | IntegrateJob; transfer: ArrayBufferLike[] } & Pending;
 
 class WorkerPool implements Executor {
@@ -19,12 +22,16 @@ class WorkerPool implements Executor {
     this.lanes = n;
     for (let i = 0; i < n; i++) {
       const w = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
-      w.onmessage = (e: MessageEvent<{ id: number; ok: boolean; data?: Float32Array; error?: string }>) => {
+      w.onmessage = (e: MessageEvent<{ id: number; ok: boolean; data?: Float32Array; error?: string; ms?: number }>) => {
         const p = this.pending.get(e.data.id);
         this.pending.delete(e.data.id);
         this.byWorker.delete(w);
         this.idle.push(w);
-        if (p) e.data.ok ? p.resolve(e.data.data!) : p.reject(new Error(e.data.error));
+        if (p) {
+          if (p.kind === 'frame') { poolStats.frameJobs++; poolStats.frameComputeMs += e.data.ms ?? 0; poolStats.frameWallMs += performance.now() - p.t0; }
+          else { poolStats.integrateJobs++; poolStats.integrateComputeMs += e.data.ms ?? 0; poolStats.integrateWallMs += performance.now() - p.t0; }
+          e.data.ok ? p.resolve(e.data.data!) : p.reject(new Error(e.data.error));
+        }
         this.pump();
       };
       w.onerror = (ev) => {
@@ -37,6 +44,18 @@ class WorkerPool implements Executor {
       this.workers.push(w);
       this.idle.push(w);
     }
+    this.warmUp();
+  }
+
+  /** Run one small job per worker so each isolate JIT-compiles the warp before the first real request. */
+  private warmUp() {
+    const n = 96;
+    const src = new Float32Array(n * n).fill(500);
+    for (let i = 0; i < this.lanes; i++) {
+      const job: FrameJob = { light: src, dark: src, flat: src, fV: 1, src: { x: 0, y: 0, w: n, h: n }, imageW: n, imageH: n,
+        M: [1, 0, 0.37, 0, 1, 0.61, 0, 0, 1], ox: 0, oy: 0, outW: n - 8, outH: n - 8, norm: { scale: 1, offset: 0 } };
+      this.frame(job).catch(() => {});
+    }
   }
 
   private pump() {
@@ -44,7 +63,7 @@ class WorkerPool implements Executor {
       const w = this.idle.pop()!;
       const q = this.queue.shift()!;
       const id = this.nextId++;
-      this.pending.set(id, q);
+      this.pending.set(id, { ...q, t0: performance.now() });
       this.byWorker.set(w, id);
       w.postMessage({ id, kind: q.kind, job: q.job }, q.transfer as ArrayBuffer[]);
     }
@@ -52,7 +71,7 @@ class WorkerPool implements Executor {
 
   private submit(kind: 'frame' | 'integrate', job: FrameJob | IntegrateJob, transfer: ArrayBufferLike[]): Promise<Float32Array> {
     return new Promise((resolve, reject) => {
-      this.queue.push({ kind, job, transfer, resolve, reject });
+      this.queue.push({ kind, job, transfer, resolve, reject, t0: 0 });
       this.pump();
     });
   }

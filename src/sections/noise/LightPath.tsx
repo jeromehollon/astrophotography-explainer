@@ -15,15 +15,6 @@ export function LightPath() {
   return (
     <div className="relative h-[360px] w-[1200px]" role="img" aria-label="Light from a star passes through the telescope and focuser into the camera, through a filter, onto a layered sensor: pixel grid, amplifier, ADC.">
       <svg className="absolute top-0 left-0" width="1200" height="360" viewBox="0 0 1200 360" aria-hidden="true">
-        {/* light rays */}
-        <g stroke={MUTED} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none">
-          <path d="M136 130H266" />
-          <path d="M266 130L740 170" />
-          <path d="M136 170H266" />
-          <path d="M266 170H740" />
-          <path d="M136 210H266" />
-          <path d="M266 210L740 170" />
-        </g>
         {/* star */}
         <path transform="translate(86 156)" d="M14 0C14 9.33333 18.6667 14 28 14C18.6667 14 14 18.6667 14 28C14 18.6667 9.33333 14 0 14C9.33333 14 14 9.33333 14 0Z" fill={INK} />
         {/* telescope tube */}
@@ -75,6 +66,15 @@ export function LightPath() {
           <path d="M740 270H936" />
           <path d="M740 264V270" />
           <path d="M936 264V270" />
+        </g>
+        {/* light rays, painted last so they cross the tube and end on the pixel grid */}
+        <g stroke={MUTED} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none">
+          <path d="M136 130H266" />
+          <path d="M266 130L740 170" />
+          <path d="M136 170H266" />
+          <path d="M266 170H740" />
+          <path d="M136 210H266" />
+          <path d="M266 210L740 170" />
         </g>
       </svg>
       <Label x={103} y={104}>Light from a star</Label>

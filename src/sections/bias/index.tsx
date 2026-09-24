@@ -35,9 +35,11 @@ export default function BiasPage() {
   const calibration = useAppStore((s) => s.calibration);
   const set = useAppStore((s) => s.set);
   const setBias = (v: boolean) => set({ calibration: { ...calibration, bias: v } });
-  // The lesson opens in state A (bias off): "Turn Bias on, then off again."
+  // The lesson opens in state A (bias off): "Turn Bias on, then off again." It also holds
+  // dark=false so the bias is actually applied (SPEC §6.1 drops it when a dark is on;
+  // design-notes §5 item 9). Every other field keeps its value.
   useEffect(() => {
-    set({ calibration: { ...useAppStore.getState().calibration, bias: false } });
+    set({ calibration: { ...useAppStore.getState().calibration, bias: false, dark: false } });
   }, [set]);
 
   return (
