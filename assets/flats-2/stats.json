@@ -1,0 +1,100 @@
+{
+ "frame": "f03",
+ "mote_center_px": {
+  "x": 720,
+  "y": 2337
+ },
+ "levels": {
+  "10": {
+   "master": "flat_10_darkflat",
+   "exposure_s": 0.11,
+   "master_median_dn": 6433.187480382621,
+   "master_max_dn": 7507.090527266264,
+   "raw_flat_median_dn": 6595.999937430024,
+   "raw_flat_saturated_fraction": 0.0,
+   "mote_contrast_after": -0.0054291834793138705,
+   "vignetting_residual_after": 0.9628757747664003,
+   "flat_corner_over_centre": 0.7955179453158272
+  },
+  "50": {
+   "master": "flat_50_darkflat",
+   "exposure_s": 2.24,
+   "master_median_dn": 33420.40800601244,
+   "master_max_dn": 38777.90828704834,
+   "raw_flat_median_dn": 33583.99925976992,
+   "raw_flat_saturated_fraction": 0.0,
+   "mote_contrast_after": 0.003637421497300286,
+   "vignetting_residual_after": 0.9616937269133203,
+   "flat_corner_over_centre": 0.7976539871212956
+  },
+  "85": {
+   "master": "flat_85_darkflat",
+   "exposure_s": 10.0,
+   "master_median_dn": 51172.840246260166,
+   "master_max_dn": 55515.4927316308,
+   "raw_flat_median_dn": 51334.00184959173,
+   "raw_flat_saturated_fraction": 0.0,
+   "mote_contrast_after": -0.04810347051653718,
+   "vignetting_residual_after": 0.7746542093642944,
+   "flat_corner_over_centre": 0.9869974525460024
+  }
+ },
+ "flat_full": {
+  "source": "flat_<lvl>_darkflat relative response (f_v = 1), binned x5",
+  "stretch": {
+   "linear_lo": 0.8746950332082777,
+   "linear_hi": 1.132668296594264,
+   "taken_from": "flat_50_darkflat 0.1-99.9 percentiles"
+  }
+ },
+ "try_it": {
+  "crop": {
+   "x": 400,
+   "y": 2157,
+   "w": 720,
+   "h": 480
+  },
+  "stf": {
+   "c0": 0.011902945488020778,
+   "m": 0.0029061332681159045,
+   "target_bg": 0.3,
+   "shadows_clip": -1.8
+  },
+  "removed_stretch_dn": {
+   "grey": 0.0,
+   "span": 73.89828185953975
+  },
+  "core_radius_px": 25,
+  "raw_core_dn": 821.3819315088294,
+  "raw_mote_contrast": -0.048011031550034944,
+  "levels": {
+   "10": {
+    "response_at_core": 0.9278574611744063,
+    "computed_core_dn": 885.3131794735793,
+    "added_core_dn": 63.9312479647499,
+    "mote_contrast_after": -0.0054291834793138705
+   },
+   "50": {
+    "response_at_core": 0.9166671489140914,
+    "computed_core_dn": 896.0605080236028,
+    "added_core_dn": 74.67857651477334,
+    "mote_contrast_after": 0.003637421497300286
+   },
+   "85": {
+    "response_at_core": 1.0019931443120895,
+    "computed_core_dn": 819.9408952683262,
+    "added_core_dn": -1.4410362405031947,
+    "mote_contrast_after": -0.04810347051653718
+   }
+  }
+ },
+ "roi_problem_85": {
+  "crop": {
+   "x": 440,
+   "y": 2157,
+   "w": 640,
+   "h": 480
+  },
+  "stf": "try_it.stf"
+ }
+}

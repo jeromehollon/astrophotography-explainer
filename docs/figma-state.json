@@ -325,7 +325,11 @@
    "P0 Welcome A": "57:619",
    "P2 Bias A bias off": "60:1200",
    "P2 Bias B bias on": "61:1259",
-   "P1 Noise & Defects A": "61:1149"
+   "P1 Noise & Defects A": "61:1149",
+   "P5 Flats 2 A no flat": "66:2",
+   "P5 Flats 2 B 10% flat": "71:206",
+   "P5 Flats 2 C 50% flat": "71:380",
+   "P5 Flats 2 D 85% flat": "71:554"
   },
   "nodes": {
    "P4 A flat-image": "44:612",
@@ -373,7 +377,22 @@
    "P1 A tour-cloud image-2": "61:1533",
    "P1 A section-calibration": "61:1542",
    "P1 A callout-masters": "61:1547",
-   "P1 A BottomNav": "61:1240"
+   "P1 A BottomNav": "61:1240",
+   "P5 A reading": "66:4",
+   "P5 A section-light-path (chart box)": "66:9",
+   "P5 A histogram-chart": "68:211",
+   "P5 A chart curve-10/50/85": "69:105 / 69:107 / 69:109",
+   "P5 A chart band-pixels-full": "69:101",
+   "P5 A section-problem": "66:19",
+   "P5 A callout-note (full well aside)": "66:23",
+   "P5 A roi-image": "68:216",
+   "P5 A section-three-flats": "66:28",
+   "P5 A flat-10/50/85-image": "66:34 / 66:37 / 68:220",
+   "P5 A prose-levels": "66:39",
+   "P5 A experiment-1": "66:49",
+   "P5 A chips-flat-level": "68:1584",
+   "P5 A chip-none/10/50/85": "68:1585 / 68:1587 / 68:1589 / 68:1591",
+   "P5 A tile-raw / tile-corrected / tile-what-was-removed": "66:55 / 66:56 / 66:57"
   }
  },
  "completedSteps": [
@@ -404,7 +423,8 @@
   "R7.flats1-boxes-and-exp2-light-frame",
   "P0.welcome-page",
   "S1.bias-page",
-  "N1.noise-defects-page"
+  "N1.noise-defects-page",
+  "S2.flats2-page"
  ],
  "notes": [
   "Prototype connections cannot cross Figma pages; agents build per page, then frames are moved onto one Prototype page and wired at the end.",
@@ -420,6 +440,7 @@
   "Flats-1 R8 (2026-09-24): 'What was removed' is populated with the real difference in EVERY toggle state (exp1: with flat minus without; exp2: dark-flat-calibrated flat minus flat as shot). Only the Computed tile follows the switch. The exp2 difference is ~0.4 DN but clean (the raw noise cancels because both tiles divide the same frame), so on its own symmetric stretch it shows the same donut as exp1, slightly different.",
   "P0 Welcome (2026-09-24): single frame A, no Try-it stage and no ROI tiles by owner direction; full-field images are allowed on Welcome. Assets from tools/assets/welcome_page.py in assets/welcome/.",
   "Bias P2 (2026-09-24): built as a clone of Flats-1 frame A on page 8:5, then cut to intro (Bias illustration in a full-width cream box + two paragraphs) -> whole master bias in a dark box (subsampled every 5th pixel so grain survives) -> 'Taking the bias away' prose -> Try it. One experiment, Bias toggle; tiles Raw / Computed / What was removed, the removed tile shows -bias on its own 2 DN stretch in both states. Under the tiles an 'average-brightness' panel draws two horizontal bars (Raw 1,233 / Computed 1,233 or 1,073 with the 161 DN bias share as a cobalt segment, circle marker in the legend). B is a clone of A with toggle On, computed image swapped to roi_computed_bias.png, caption 'With the bias removed - Bias toggled on', and the computed bar shortened. BottomNav labels edited in the nested text ('← Noise & Defects', 'Darks →').",
-  "Noise & Defects N1 (2026-09-24): reading-only introduction page, no Try-it stage, no rule, no state variants (owner direction). Structure: TopBar(Current=Noise & Defects) -> page-head -> illustration 35:2 (unchanged) -> section-problem (prose 680 + 440x330 image + caption) -> prose-why-stack -> section-tour (7 rows: 360x240 image column + caption | Badge/Source + h3 + p + 'fix' line in label/md) -> section-calibration (prose 680 + Callout Note 'Calibration frames are stacked too', 440 wide) -> BottomNav (Welcome / Bias). Images are plain FRAME wells with image fills from assets/noise/ (tools/assets/noise_page.py); upload_assets targets them directly. The owner may remove the tour crops entirely."
+  "Noise & Defects N1 (2026-09-24): reading-only introduction page, no Try-it stage, no rule, no state variants (owner direction). Structure: TopBar(Current=Noise & Defects) -> page-head -> illustration 35:2 (unchanged) -> section-problem (prose 680 + 440x330 image + caption) -> prose-why-stack -> section-tour (7 rows: 360x240 image column + caption | Badge/Source + h3 + p + 'fix' line in label/md) -> section-calibration (prose 680 + Callout Note 'Calibration frames are stacked too', 440 wide) -> BottomNav (Welcome / Bias). Images are plain FRAME wells with image fills from assets/noise/ (tools/assets/noise_page.py); upload_assets targets them directly. The owner may remove the tour crops entirely.",
+  "Flats-2 P5 (2026-09-24): built as a clone of Flats-1 frame A on page 8:8. Reading column: page head -> cream box holding a drawn histogram chart (three raw flats, equal-height peaks on one 0..max brightness axis, grey 'Pixels are full' band from the 85 % curve to the right edge; vectors drawn from assets/flats-2/histograms.json, series colours cobalt/ochre/red with a text label at every peak) plus two paragraphs -> 'The problem you can see' with a Note callout (full well aside) and a 440x330 ROI slot (85 % result) -> dark box with the three master flats full field on one shared stretch -> 'So which flat should you take?' prose -> Try it. Stage: one experiment, four Chip instances (No flat / 10 % / 50 % / 85 %) in an auto-layout row replacing the toggle; tiles Raw / Computed / What was removed. B, C, D are clones of A with only the selected chip, the Computed and removed images, and the Computed caption changed. In state A (no flat) the removed tile shows the 50 % difference so it is never empty (owner to confirm). Non-breaking spaces are used before every % so '10 %' never wraps. Assets from tools/assets/flats_page2.py in assets/flats-2/."
  ]
 }
