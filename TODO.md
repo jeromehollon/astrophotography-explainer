@@ -54,3 +54,12 @@ imports at `src/shared/ui` (same prop names).
   chevron and "Next: …" as Secondary. `TopBar` row 2 in the frames underlines the current
   page with a 3 px cobalt indicator and colours the other tabs `text/link`; shared uses a
   text underline and `text/secondary`.
+
+## Pipeline (from the workbench track, 2026-09-24)
+
+- `src/shared/data/roi.ts` `fetchRoi` shares one in-flight fetch per ROI between callers, and that
+  fetch carries the first caller's `AbortSignal`. `useStack` / `useCalibratedRoi` abort on cleanup, so
+  under React StrictMode's double effect the second run receives an already-aborted fetch, its
+  AbortError is swallowed, and the tile stays "Result pending" forever. Fix: fetch without the caller's
+  signal (or count subscribers) in `fetchRoi`. The workbench pages use their own abort-free hooks
+  (`src/sections/workbench/live.ts`) until then.
