@@ -112,7 +112,7 @@ Per frame: **footprint** (map the output rectangle through M, pad by the interpo
 - **Result cache:** in memory, keyed by the canonical JSON of `StackRequest` (frames sorted), with a byte-capped LRU. It clears on refresh. No localStorage.
 
 ### 4.5 Display
-- **Lights and stacks:** PixInsight AutoSTF (target background 0.25, shadows clip −2.8·MADN, linked). The parameters come from the **reference frame's** precomputed median and MADN for the active calibration combination, so every view in that state shares one stretch. The JS STF must match `tools/astro.py` (unit-tested against Python output).
+- **Lights and stacks:** PixInsight AutoSTF (target background **0.30**, shadows clip **−1.8·MADN**, linked; changed from 0.25 / −2.8 on 2026-09-24 because every Figma asset was rendered with 0.30 / −1.8 and Figma is the source of truth for how images look). The parameters come from the **reference frame's** precomputed median and MADN for the active calibration combination, so every view in that state shares one stretch. The JS STF must match `tools/astro.py` (unit-tested against Python output).
 - **Bias, dark, dark flat:** each uses its own AutoSTF.
 - **Flats:** linear, no stretch. Map the 0.1–99.9 percentile range to display range.
 - **Reference view:** the reference frame at bin 4, calibrated, with markers for the 4 ROIs.
@@ -345,3 +345,4 @@ Gates for every merge to `main`: `uv run pytest tools`, `npm run typecheck`, `np
   - Rejected: pixel-stack inspector, rejection-map overlay. Deferred: live bin-8 full-field stack, transfer size over the internet, Lanczos cost. The satellite trail is visible with the right stretch, so lessons may use a per-ROI stretch.
   - WBPP deviations in §6.7 approved: global normalization and equal weights (for low complexity and CPU time); cosmetic correction off for now (it may return as a workbench option); linear fit and ESD are never explained to learners; no autocrop (it only matters at export).
   - Master flats use winsorized clipping (lowest complexity; precomputed, so no CPU cost for the learner).
+  - Phase 4 (implementation): the display AutoSTF for lights and stacks is 0.30 / −1.8 (the stretch every Figma asset used), not 0.25 / −2.8; the workbench review found the live tiles visibly flatter than the design otherwise.
