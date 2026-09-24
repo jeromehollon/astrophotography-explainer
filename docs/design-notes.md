@@ -123,3 +123,7 @@ Figma file: https://www.figma.com/design/jtYi1LQf1fVyUAUfAgthP5/Astrophotography
 ## 6. Brand mark (owner decision, 2026-09-24)
 
 The site mark is the "Registration" candidate: three copies of the NGC 7331 silhouette (an ellipse tilted 22°) offset like unaligned subs, with the cobalt copy on top and a cream core. Fills are red/400, ochre/300, cobalt/600 and cream/50. It lives in the library as `Logo/Mark` (64 px master, children scale) and `Logo/Favicon` (32 px) on "Library · Icons", with a 16/24/32 preview strip on cream and on the stage. Every TopBar variant now carries a 28 px instance in the brand slot in place of the earlier circle/square/triangle glyphs. The favicon is the same geometry: `assets/brand/favicon.svg`. The offsets blur at 16 px, so prefer 24 px or larger where possible.
+
+## 7. Site title (owner decision, 2026-09-24)
+
+The Welcome page head now reads "Astrophotography Calibration and Stacking, Explained." (Jost SemiBold 40, wraps to two lines at the 900 px measure) with a new `subtitle` line "Why every deep-sky photo starts with pictures of nothing." (Jost Medium 24/32, `text/secondary`) between the title and the lede. The lede paragraph is unchanged. The browser `<title>` should use the same title. The TopBar wordmark still says "Stacking Explainer": the full title is about 560 px at the wordmark size and the brand slot is 240 px, so a shorter nav name is needed if the wordmark is to change.
