@@ -57,9 +57,6 @@ imports at `src/shared/ui` (same prop names).
 
 ## Pipeline (from the workbench track, 2026-09-24)
 
-- `src/shared/data/roi.ts` `fetchRoi` shares one in-flight fetch per ROI between callers, and that
-  fetch carries the first caller's `AbortSignal`. `useStack` / `useCalibratedRoi` abort on cleanup, so
-  under React StrictMode's double effect the second run receives an already-aborted fetch, its
-  AbortError is swallowed, and the tile stays "Result pending" forever. Fix: fetch without the caller's
-  signal (or count subscribers) in `fetchRoi`. The workbench pages use their own abort-free hooks
-  (`src/sections/workbench/live.ts`) until then.
+- Done (core/pipeline): `fetchRoi` now refcounts waiters and aborts the shared fetch only when every
+  waiter has aborted; `useStack` / `useCalibratedRoi` drop stale results by key instead of aborting, so they are
+  safe under StrictMode. The workbench pages use the shared hooks again (`src/sections/workbench/live.ts`).

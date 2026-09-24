@@ -3,7 +3,7 @@
 export type { StackRequest, StackResult, CalibrationChoice, AlgorithmName, Bin, Rect, StfParams, DisplayStf, LinearRange, Mat3, FlatLevel } from './types';
 export { stack, calibrateRoi, stackWith, canonicalKey, resultCache, backgroundNoise, gridToSensor, getLiveSources, frameTransform } from './stack';
 export type { Sources, FrameInfo } from './stack';
-export { fetchRoi, roiCache } from '../data/roi';
+export { fetchRoi, roiCache, inflightCount } from '../data/roi';
 export { fetchManifest, fetchNormalization, fetchMasters, fetchJson, setDataBase } from '../data/json';
 export { autoStf, mtf, stfLut, stfTable, displayLut, medianMadn, percentiles, DN_MAX } from './stf';
 export { toImageData, toRgba, difference, differenceRange, rotate180, NAN_RGB } from './display';
