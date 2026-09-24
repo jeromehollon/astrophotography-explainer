@@ -155,7 +155,7 @@ export default function Flats() {
           />
           <ROITile
             title="What was removed"
-            caption={darkFlat ? 'This may appear identical to the earlier example but there are subtle differences' : removedCaption}
+            caption={flat || darkFlat ? 'This may appear identical to the earlier example but there are subtle differences' : removedCaption}
             src={roiExp2Removed}
             alt="Difference between the two corrections: a faint ring at the dust shadow"
           />
