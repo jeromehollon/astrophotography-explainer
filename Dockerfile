@@ -11,6 +11,8 @@ RUN npm ci --ignore-scripts
 COPY index.html vite.config.ts tsconfig.json tsconfig.app.json ./
 COPY public ./public
 COPY src ./src
+COPY assets/light-frames-review ./assets/light-frames-review
+COPY assets/workbench ./assets/workbench
 RUN npm run build
 
 FROM node:22-slim AS runtime
