@@ -333,8 +333,8 @@
    "P3 Darks A dark off": "78:2",
    "P3 Darks B dark on": "88:2220",
    "P7 Algorithms A average": "84:2",
-   "P7 Algorithms B median": "87:2513",
-   "P7 Algorithms C twenty frames, median enlarged": "87:2720"
+   "P7 Algorithms B median": "93:327",
+   "P7 Algorithms C eight frames, median enlarged": "93:665"
   },
   "nodes": {
    "P4 A flat-image": "44:612",
@@ -423,8 +423,6 @@
    "P7 A section-one-pixel / one-pixel-box": "87:73 / 87:76",
    "P7 A section-methods / table-methods": "87:2253 / 87:2256",
    "P7 A section-kappa-sigma / section-winsorized / section-rcr": "87:2287 / 87:2291 / 87:2295",
-   "P7 A section-twenty / twenty-box / tiles": "87:2493 / 87:2496 / 87:2497",
-   "P7 C tile-enlarged image": "87:2922",
    "P3 A patch-column": "88:744",
    "P3 A ampglow-column": "88:745",
    "P3 A marker-hot-pixel raw": "88:748",
@@ -440,7 +438,13 @@
    "P6 A aligned-frame05 image": "89:64",
    "P6 A aligned-frame02 image": "89:69",
    "P6 A aligned-average image": "89:74",
-   "P0 A credit": "93:2928"
+   "P0 A credit": "93:2928",
+   "P7 A callout-why-remnant": "91:208",
+   "P7 A example-kappa-sigma / example-winsorized / example-rcr": "92:212 / 93:212 / 93:271",
+   "P7 A section-eight / eight-box / tiles": "87:2493 / 87:2496 / 87:2497",
+   "P7 A eight-box image wells (average/median/kappa/winsorized/rcr)": "87:2499 / 87:2502 / 87:2505 / 87:2508 / 87:2511",
+   "P7 B tile-corrected": "93:348",
+   "P7 C tile-enlarged image": "93:1006"
   }
  },
  "completedSteps": [
@@ -475,7 +479,8 @@
   "S2.flats2-page",
   "A1.alignment-page",
   "D1.darks-page",
-  "A1.algorithms-page"
+  "A1.algorithms-page",
+  "A2.algorithms-owner-review"
  ],
  "notes": [
   "Prototype connections cannot cross Figma pages; agents build per page, then frames are moved onto one Prototype page and wired at the end.",
@@ -498,6 +503,7 @@
   "Bias P2 R1 (2026-09-24): the owner rewrote the prose in frame A and dropped the 'What was removed' tile (the Computed tile visibly darkens, which is the point). Bias has two tiles, Raw / Computed. B (87:388) rebuilt as a clone of the edited A.",
   "Bias P2 R2 (2026-09-24): 'Taking the bias away' is two columns like Flats-1's section-map: prose (680) left, a cream side-panel (440) right holding the single-number example '1,233 \u2212 161 = 1,073' with a one-line explanation. The paragraph that quoted those numbers moved into the box. B (87:2304) rebuilt as a clone of A.",
   "Darks P3 (2026-09-24, revised after owner review): frame A cloned from Flats-1 A. Reading column: page head -> Darks illustration box (752 wide) with two paragraphs, and to its right a 376x252 native-pixel piece of the master dark stretched hard ('The dark recorded by the camera') -> section-problem: left column = 64x64 light-frame patch at 5x (320x320) + 'The problem you can see' prose (440 wide), right column = old-camera amp-glow dark binned 2x (712 wide) with a label and caption -> 'Matching the dark to the light'. Try it: one experiment, toggle 'Dark', two tiles Raw / Computed with square 318 px wells (instance override) and an ochre ring marker (absolute-positioned ellipse in the tiles frame) around the hot pixel from stats.json circled_hot_pixel; no 'What was removed' tile (owner). Assets from tools/assets/darks_page.py in assets/darks/ (region x 106, y 852 of f03, chosen for the clearest removal). B is a clone of A with only the toggle, the Computed image and its caption changed. Owner decisions: bias applied to every light image and never mentioned; master dark used as supplied; temperature difference not mentioned.",
-  "Alignment P6 (2026-09-24, revised after owner review): reading-only page, no Try-it stage, no rule, single frame A. Built as a clone of Noise & Defects frame A on page 8:9. Order: TopBar(Current=Alignment) -> page-head -> illustration slot holds a drawn two-panel chart ('Random noise present in final image' 1/sqrt(N) in source/noise; 'Signal from galaxy in the image' sqrt(N) in accent/primary; marks at 1/4/16/64 exposures; vectors and text, no image) -> prose-why-stack -> Callout Kind=Why 'Where the square root comes from' at 680 wide -> section-problem (h2 + three paragraphs at 680, then a dark 'stack-box' with two equation rows: [Frame 5] + [Frame 2] = [Average, not aligned] and the same with the three alignment stars circled in red/600 and the aligned average; tiles 330x220, operators are h2 text in text/on-stage) -> BottomNav (Flats, continued / Algorithms). No 440x330 problem slot: the owner asked for the problem image and the stacking rows to be one block. Frames f05 + f02 (SPEC P6's pair, about 49 px apart): the owner's first choice, f14, is rotated ~180 degrees relative to f05 so its twins landed far away and did not read as misalignment. Images are plain FRAME wells with image fills from assets/alignment/ (tools/assets/alignment_page.py); circle positions come from stats.json scaled by 330/1200."
+  "Alignment P6 (2026-09-24, revised after owner review): reading-only page, no Try-it stage, no rule, single frame A. Built as a clone of Noise & Defects frame A on page 8:9. Order: TopBar(Current=Alignment) -> page-head -> illustration slot holds a drawn two-panel chart ('Random noise present in final image' 1/sqrt(N) in source/noise; 'Signal from galaxy in the image' sqrt(N) in accent/primary; marks at 1/4/16/64 exposures; vectors and text, no image) -> prose-why-stack -> Callout Kind=Why 'Where the square root comes from' at 680 wide -> section-problem (h2 + three paragraphs at 680, then a dark 'stack-box' with two equation rows: [Frame 5] + [Frame 2] = [Average, not aligned] and the same with the three alignment stars circled in red/600 and the aligned average; tiles 330x220, operators are h2 text in text/on-stage) -> BottomNav (Flats, continued / Algorithms). No 440x330 problem slot: the owner asked for the problem image and the stacking rows to be one block. Frames f05 + f02 (SPEC P6's pair, about 49 px apart): the owner's first choice, f14, is rotated ~180 degrees relative to f05 so its twins landed far away and did not read as misalignment. Images are plain FRAME wells with image fills from assets/alignment/ (tools/assets/alignment_page.py); circle positions come from stats.json scaled by 330/1200.",
+  "Algorithms P7 (2026-09-24, revised after owner review): built as a clone of Flats-1 frame A on page 8:10, restructured by owner direction: TopBar(Current=Algorithms) -> page head -> ink rule -> dark Try-it stage AT THE TOP (it replaces the illustration and the 440x330 problem slot; no illustration on this page) -> reading-2: section-one-pixel (real values box + Callout Kind=Why 'Why does a faint trace of the trail survive the median?'), section-methods (five-method table, owner-edited cells), section-kappa-sigma / section-winsorized / section-rcr (prose + a worked-example box each: the same trail pixel across the eight West-side frames f00-f07, every quantity the method computes, and the result; numbers from stats.json eight_frames.one_pixel_traces), section-eight (the satellite ROI stacked from f00-f07 with each method, five 208 px tiles in a dark box) -> BottomNav (Alignment / Light frames). Try it: two 576x576 ROITile instances (Raw = frame 3, Computed = the four-frame stack f03+f02+f04+f05), a two-Chip group Average / Median in place of a Toggle, and a strip of four 132 px thumbnails. ROITile image wells cannot be resized inside an instance: set the well's layoutSizingVertical to FILL and resize the instance (576x676 gives a 574 px well with a two-line caption). The satellite ROI is a 2304 px crop at BIN 4 (assets/algorithms/, tools/assets/algorithms_page.py): the trail is ~28 DN over ~42 DN native noise, so at bin 1 or 2 the median only halves it; at bin 4 it removes it. The owner edited page head, stage instructions, the one-pixel intro and the table cells in frame A; B and C were deleted and re-cloned from the edited A. B: Median chip selected, Computed image stack4_median and its caption. C: the Median eight-frame tile enlarged to 576 px above the row of five, the selected tile outlined in text/on-stage."
  ]
 }

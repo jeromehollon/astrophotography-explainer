@@ -76,6 +76,278 @@
   "background_median_dn": 910.2818078736227,
   "how_chosen": "on the fitted trail line within 96 px of the crop centre, the pixel where frame 3 exceeds the other three by the most, those three within 2 noise widths of the background"
  },
+ "share_of_trail_pixels_where_f03_is_the_largest_of_four": 0.8600441501103753,
+ "eight_frames": {
+  "frames": [
+   "f00",
+   "f01",
+   "f02",
+   "f03",
+   "f04",
+   "f05",
+   "f06",
+   "f07"
+  ],
+  "methods": {
+   "average": {
+    "trail_excess_dn": 3.022809277589747,
+    "noise_madn_dn": 5.493033791203142,
+    "share_of_trail_pixels_where_f03_was_rejected": 0.0
+   },
+   "median": {
+    "trail_excess_dn": 1.4266689256418579,
+    "noise_madn_dn": 5.827019498539194,
+    "share_of_trail_pixels_where_f03_was_rejected": 0.0
+   },
+   "kappa_sigma": {
+    "trail_excess_dn": 3.013880749539773,
+    "noise_madn_dn": 5.4922149578470965,
+    "share_of_trail_pixels_where_f03_was_rejected": 0.0
+   },
+   "winsorized": {
+    "trail_excess_dn": 1.6082003451934788,
+    "noise_madn_dn": 5.5077725976033625,
+    "share_of_trail_pixels_where_f03_was_rejected": 0.29713024282560707
+   },
+   "rcr": {
+    "trail_excess_dn": 1.1184312324119763,
+    "noise_madn_dn": 5.809250251553562,
+    "share_of_trail_pixels_where_f03_was_rejected": 0.47328918322295804
+   }
+  },
+  "one_pixel_traces": {
+   "crop_xy": [
+    363,
+    233
+   ],
+   "frames": [
+    "f00",
+    "f01",
+    "f02",
+    "f03",
+    "f04",
+    "f05",
+    "f06",
+    "f07"
+   ],
+   "brightness_dn": [
+    903.0,
+    913.0,
+    908.0,
+    985.0,
+    903.0,
+    909.0,
+    901.0,
+    918.0
+   ],
+   "average_dn": 917.5,
+   "median_dn": 908.5,
+   "kappa_sigma": {
+    "steps": [
+     {
+      "values": [
+       903.0,
+       913.0,
+       908.0,
+       985.0,
+       903.0,
+       909.0,
+       901.0,
+       918.0
+      ],
+      "middle": 908.5,
+      "standard_deviation": 26.057628441590765,
+      "limit_low": 804.2694862336369,
+      "limit_high": 986.6728853247723,
+      "rejected": []
+     }
+    ],
+    "result": 917.5,
+    "survivors": [
+     903.0,
+     913.0,
+     908.0,
+     985.0,
+     903.0,
+     909.0,
+     901.0,
+     918.0
+    ]
+   },
+   "winsorized": {
+    "passes": [
+     {
+      "values": [
+       903.0,
+       913.0,
+       908.0,
+       985.0,
+       903.0,
+       909.0,
+       901.0,
+       918.0
+      ],
+      "start": {
+       "middle": 908.5,
+       "spread": 8.1543
+      },
+      "pulled_in_values": [
+       903.0,
+       913.0,
+       908.0,
+       921.2987380690982,
+       903.0,
+       909.0,
+       901.0,
+       918.0
+      ],
+      "middle": 909.5373422586373,
+      "spread": 7.845824105441611,
+      "limit_low": 878.1540458368709,
+      "limit_high": 933.0748145749621,
+      "rejected": [
+       985.0
+      ]
+     },
+     {
+      "values": [
+       903.0,
+       913.0,
+       908.0,
+       903.0,
+       909.0,
+       901.0,
+       918.0
+      ],
+      "start": {
+       "middle": 908.0,
+       "spread": 7.412999999999999
+      },
+      "pulled_in_values": [
+       903.0,
+       913.0,
+       908.0,
+       903.0,
+       909.0,
+       901.0,
+       916.8507485540473
+      ],
+      "middle": 907.6929640791496,
+      "spread": 6.1018993374155395,
+      "limit_low": 883.2853667294875,
+      "limit_high": 925.9986620913962,
+      "rejected": []
+     }
+    ],
+    "result": 907.8571428571429,
+    "survivors": [
+     903.0,
+     913.0,
+     908.0,
+     903.0,
+     909.0,
+     901.0,
+     918.0
+    ]
+   },
+   "rcr": {
+    "steps": [
+     {
+      "round": 1,
+      "values": [
+       901.0,
+       903.0,
+       903.0,
+       908.0,
+       909.0,
+       913.0,
+       918.0,
+       985.0
+      ],
+      "middle": 908.5,
+      "spread": 8.043200901755375,
+      "darkest": 901.0,
+      "brightest": 985.0,
+      "expected_count_darkest": 1.4043859210759058,
+      "expected_count_brightest": 7.543464478955035e-21,
+      "limit": 0.1,
+      "action": "reject the brightest, 985.0"
+     },
+     {
+      "round": 1,
+      "values": [
+       901.0,
+       903.0,
+       903.0,
+       908.0,
+       909.0,
+       913.0,
+       918.0
+      ],
+      "middle": 908.0,
+      "spread": 7.8728097709122755,
+      "darkest": 901.0,
+      "brightest": 918.0,
+      "expected_count_darkest": 1.3087546396344982,
+      "expected_count_brightest": 0.7140536949381202,
+      "limit": 0.1,
+      "action": "both extremes are plausible: next round"
+     },
+     {
+      "round": 2,
+      "values": [
+       901.0,
+       903.0,
+       903.0,
+       908.0,
+       909.0,
+       913.0,
+       918.0
+      ],
+      "middle": 908.0,
+      "spread": 7.8728097709122755,
+      "darkest": 901.0,
+      "brightest": 918.0,
+      "expected_count_darkest": 1.3087546396344982,
+      "expected_count_brightest": 0.7140536949381202,
+      "limit": 0.1,
+      "action": "both extremes are plausible: next round"
+     },
+     {
+      "round": 3,
+      "values": [
+       901.0,
+       903.0,
+       903.0,
+       908.0,
+       909.0,
+       913.0,
+       918.0
+      ],
+      "middle": 907.8571428571429,
+      "spread": 5.667666978536393,
+      "darkest": 901.0,
+      "brightest": 918.0,
+      "expected_count_darkest": 0.7921501130553348,
+      "expected_count_brightest": 0.25731380318366476,
+      "limit": 0.1,
+      "action": "both extremes are plausible: next round"
+     }
+    ],
+    "result": 907.8571428571429,
+    "survivors": [
+     901.0,
+     903.0,
+     903.0,
+     908.0,
+     909.0,
+     913.0,
+     918.0
+    ]
+   }
+  },
+  "share_of_trail_pixels_where_f03_is_the_largest_of_eight": 0.7713024282560706
+ },
  "twenty_frames": {
   "frames": [
    "f00",

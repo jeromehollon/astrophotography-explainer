@@ -20,9 +20,13 @@ The crop centre is the spot the Noise & Defects page used):
 One pixel (the numbers in the "What happens to one pixel" box):
   stats.json  ->  "one_pixel"     the four brightnesses of one trail pixel, their average and median
 
-Closing comparison (the same crop, all 20 raw frames, one tile per method):
-  stack20_average.png, stack20_median.png, stack20_kappa_sigma.png,
-  stack20_winsorized.png, stack20_rcr.png
+Closing comparison (the same crop, the eight West-side frames f00-f07, one tile per method):
+  stack8_average.png, stack8_median.png, stack8_kappa_sigma.png,
+  stack8_winsorized.png, stack8_rcr.png
+
+Worked examples (stats.json -> "eight_frames" -> "one_pixel_traces"): the eight brightnesses of one
+trail pixel and, for each rejection method, every quantity the method computes on them (middle,
+spread, limits, what it rejects, the result), from scalar versions of the same algorithms.
   The rejection methods follow docs/knowledge/wbpp.md §4.6 with WBPP's constants: kappa-sigma
   4 / 3, winsorized 4 / 3 with cutoff 5, Robust Chauvenet with limit 0.1. The winsorized loop
   starts from 1.4826·MAD rather than Rousseeuw-Croux Sn (same stand-in as tools/precompute).
@@ -55,6 +59,7 @@ OUT = REPO / "assets" / "algorithms"
 REF = "f03"
 FOUR = ["f03", "f02", "f04", "f05"]  # SPEC's Satellite Trail Challenge minus f07 (owner: 4 frames)
 TWENTY = [f"f{i:02d}" for i in range(20)]  # the raw frames; synthetic variants excluded
+EIGHT = [f"f{i:02d}" for i in range(8)]  # the West-side frames (before the meridian flip), f03 among them
 CAL_STATE = "dark|flat_50_darkflat"
 FLAT_ID = "flat_50_darkflat"
 DN = 65535.0
@@ -222,6 +227,80 @@ def rcr(stack: np.ndarray, limit: float):
     return out, rejected
 
 
+# ----------------------------------------------------------------------------- one-pixel traces
+def trace_kappa_sigma(vals, sigma_low, sigma_high):
+    v = list(vals); steps = []
+    while True:
+        m, sd = float(np.median(v)), float(np.std(v))
+        lo, hi = m - sigma_low * sd, m + sigma_high * sd
+        rej = [x for x in v if x < lo or x > hi]
+        steps.append({"values": v, "middle": m, "standard_deviation": sd, "limit_low": lo, "limit_high": hi, "rejected": rej})
+        if not rej or len(v) - len(rej) < 3:
+            break
+        v = [x for x in v if x not in rej]
+    return {"steps": steps, "result": float(np.mean(v)), "survivors": v}
+
+
+def trace_winsorized(vals, sigma_low, sigma_high, cutoff):
+    v = list(vals); passes = []
+    while True:
+        m = float(np.median(v)); sd = float(1.4826 * np.median(np.abs(np.array(v) - m)))
+        start = {"middle": m, "spread": sd}
+        w = list(v)
+        for it in range(30):
+            t0, t1 = m - 1.5 * sd, m + 1.5 * sd
+            if it == 0:
+                w = [m if (x < m - cutoff * sd or x > m + cutoff * sd) else min(max(x, t0), t1) for x in w]
+            else:
+                w = [min(max(x, t0), t1) for x in v]
+            nsd = float(1.134 * np.std(w)); nm = float(np.mean(w))
+            delta = abs(nsd - sd) / sd if sd > 0 else 0
+            m, sd = nm, nsd
+            if it >= 1 and delta < 5e-4:
+                break
+        lo, hi = m - sigma_low * sd, m + sigma_high * sd
+        rej = [x for x in v if x < lo or x > hi]
+        passes.append({"values": v, "start": start, "pulled_in_values": w, "middle": m, "spread": sd, "limit_low": lo, "limit_high": hi, "rejected": rej})
+        if not rej or len(v) - len(rej) < 3:
+            break
+        v = [x for x in v if x not in rej]
+    return {"passes": passes, "result": float(np.mean(v)), "survivors": v}
+
+
+def trace_rcr(vals, limit):
+    data = sorted(vals); N = len(data); i, j = 0, N; steps = []
+    q = lambda z: 0.5 * float(erfc(z / np.sqrt(2.0)))
+    fn = lambda n: 1.0 / (1.0 - 2.9442 * n ** -1.073)
+    def sample_dev(dev):
+        return fn(len(dev)) * sorted(dev)[max(int(np.floor(0.683 * len(dev))) - 1, 0)]
+    def linefit_dev(dev):
+        n = len(dev); npr = int(0.683 * n + 0.317)
+        if npr < 8:
+            return sample_dev(dev)
+        y = np.array(sorted(dev)[:npr]); x = np.sqrt(2.0) * erfinv((np.arange(npr) + 1 - 0.317) / n)
+        b = ((x - x.mean()) * (y - y.mean())).sum() / ((x - x.mean()) ** 2).sum(); a = y.mean() - b * x.mean()
+        return fn(n) * (a + b)
+    for phase in range(3):
+        while True:
+            win = data[i:j]; n = len(win)
+            mean = float(np.median(win)) if phase < 2 else float(np.mean(win))
+            dev = [abs(x - mean) for x in win]
+            sigma = linefit_dev(dev) if phase == 0 else (sample_dev(dev) if phase == 1 else float(np.std(win)))
+            if 1 + sigma == 1 or n < 3:
+                return {"steps": steps, "result": float(np.mean(data[i:j])), "survivors": data[i:j]}
+            d0, d1 = n * q((mean - win[0]) / sigma), n * q((win[-1] - mean) / sigma)
+            step = {"round": phase + 1, "values": win, "middle": mean, "spread": float(sigma), "darkest": win[0], "brightest": win[-1],
+                    "expected_count_darkest": d0, "expected_count_brightest": d1, "limit": limit}
+            if d0 >= limit and d1 >= limit:
+                step["action"] = "both extremes are plausible: next round"; steps.append(step); break
+            if d1 < d0:
+                step["action"] = f"reject the brightest, {win[-1]}"; j -= 1
+            else:
+                step["action"] = f"reject the darkest, {win[0]}"; i += 1
+            steps.append(step)
+    return {"steps": steps, "result": float(np.mean(data[i:j])), "survivors": data[i:j]}
+
+
 # ----------------------------------------------------------------------------- main
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
@@ -298,6 +377,7 @@ def main() -> None:
     score = np.where(on_trail & quiet & near, crops[REF] - others4.max(axis=0), -np.inf)
     py, px = np.unravel_index(np.argmax(score), score.shape)
     vals = [float(round(crops[f][py, px] * DN)) for f in FOUR]
+    f03_is_max4 = float((s4.argmax(axis=0) == 0)[on_trail].mean())
     one_pixel = {
         "crop_xy": [int(px), int(py)],
         "frames": FOUR,
@@ -308,7 +388,28 @@ def main() -> None:
         "how_chosen": "on the fitted trail line within 96 px of the crop centre, the pixel where frame 3 exceeds the other three by the most, those three within 2 noise widths of the background",
     }
 
-    # --- twenty-frame stacks, one per method
+    # --- eight-frame stacks, one per method (the closing comparison)
+    s8 = np.stack([crops[f] for f in EIGHT])
+    r8 = {"average": (s8.mean(axis=0), np.zeros(s8.shape, bool)), "median": (np.median(s8, axis=0), np.zeros(s8.shape, bool))}
+    r8["kappa_sigma"] = kappa_sigma(s8, **KAPPA)
+    r8["winsorized"] = winsorized(s8, **WINSOR)
+    r8["rcr"] = rcr(s8, RCR_LIMIT)
+    stack8 = {}
+    for name, (img, rej) in r8.items():
+        save_gray(show(img), OUT / f"stack8_{name}.png")
+        stack8[name] = {"trail_excess_dn": trail_excess_dn(img), "noise_madn_dn": noise_dn(img),
+                        "share_of_trail_pixels_where_f03_was_rejected": float(rej[EIGHT.index(REF)][trail].mean())}
+    # one trail pixel across the eight frames, same choice rule as the four-frame example
+    others8 = np.stack([crops[f] for f in EIGHT if f != REF])
+    quiet8 = (np.abs(others8 - bg_level) < 2 * bg_noise).all(axis=0)
+    score8 = np.where(on_trail & quiet8 & near, crops[REF] - others8.max(axis=0), -np.inf)
+    p8y, p8x = np.unravel_index(np.argmax(score8), score8.shape)
+    vals8 = [float(round(crops[f][p8y, p8x] * DN)) for f in EIGHT]
+    traces = {"crop_xy": [int(p8x), int(p8y)], "frames": EIGHT, "brightness_dn": vals8,
+              "average_dn": float(np.mean(vals8)), "median_dn": float(np.median(vals8)),
+              "kappa_sigma": trace_kappa_sigma(vals8, **KAPPA), "winsorized": trace_winsorized(vals8, **WINSOR), "rcr": trace_rcr(vals8, RCR_LIMIT)}
+
+    # --- twenty-frame stacks, one per method (numbers only; the page shows the eight-frame tiles)
     s20 = np.stack([crops[f] for f in TWENTY])
     results = {"average": (s20.mean(axis=0), np.zeros(s20.shape, bool)), "median": (np.median(s20, axis=0), np.zeros(s20.shape, bool))}
     ks, ks_rej = kappa_sigma(s20, **KAPPA)
@@ -319,7 +420,6 @@ def main() -> None:
     results["rcr"] = (rc, rc_rej)
     stack20 = {}
     for name, (img, rej) in results.items():
-        save_gray(show(img), OUT / f"stack20_{name}.png")
         f03_rejected_on_trail = float(rej[TWENTY.index(REF)][trail].mean())
         stack20[name] = {
             "trail_excess_dn": trail_excess_dn(img),
@@ -347,6 +447,9 @@ def main() -> None:
             "noise_madn_dn": {"f03": noise_dn(crops[REF]), "average": noise_dn(avg4), "median": noise_dn(med4)},
         },
         "one_pixel": one_pixel,
+        "share_of_trail_pixels_where_f03_is_the_largest_of_four": f03_is_max4,
+        "eight_frames": {"frames": EIGHT, "methods": stack8, "one_pixel_traces": traces,
+                         "share_of_trail_pixels_where_f03_is_the_largest_of_eight": float((s8.argmax(axis=0) == EIGHT.index(REF))[on_trail].mean())},
         "twenty_frames": {"frames": TWENTY, "parameters": {"kappa_sigma": KAPPA, "winsorized": WINSOR, "rcr_limit": RCR_LIMIT}, "methods": stack20},
     }
     json.dump(stats, open(OUT / "stats.json", "w"), indent=1)
