@@ -289,3 +289,48 @@ Results:
   saturated at the sensor's full well, about 51k DN.
 
 Command: `uv run tools/precompute/flat_check.py`
+
+---
+
+# Stage-C precompute
+
+The runtime data directory the Fastify server streams (SPEC §4.2/§4.3,
+`docs/contracts.md`). Stages A and B must exist first. Run:
+
+```bash
+bash tools/precompute/run_stage_c.sh
+```
+
+About 4 GB in `data/derived/runtime/` (git-ignored, baked into the Docker
+image at `/data`). Wall time is I/O-bound: tens of seconds on a local SSD.
+
+## 9. `runtime.py` -> `runtime/manifest.json` + `runtime/pixels/*`
+
+- `pixels/<id>.b1.u16` for the 24 lights: raw u16 DN exactly as stored in
+  the XISF (the 4 synthetic FITS frames are `np.flipud`-ed to raw
+  orientation per `frames.json` `needs_flipud`).
+- `pixels/<id>.b1.f32` for the 14 masters (`bias`, `dark`, `darkflat_*`,
+  `flat_*`): float32 DN. The WBPP masters and the Stage-B FITS are both
+  stored in `[0,1]` and are multiplied by 65535.
+- `pixels/<id>.b{2,4,8}.f32`: float32 means of `b×b` blocks. The trailing
+  partial block is dropped, so a bin-`b` file is `floor(W/b) × floor(H/b)`
+  samples (6224×4168 → 3112×2084, 1556×1042, 778×521).
+- All files are little-endian, row-major, headerless. Each one is written to
+  `<name>.tmp` and renamed, so any file present under its final name is
+  complete.
+- `manifest.json` follows `docs/contracts.md` exactly: `reference`,
+  `pixel_scale_arcsec` and one `assets[<id>]` entry with `kind`, `width`,
+  `height`, `dtype`, per-bin `files`, and for lights `pier_side`, `defect`,
+  `relative_of`, `H` (= `alignment.matrix_ref_to_frame`), `header`
+  (`date_obs`, `exptime`, `ccd_temp`, `gain`, `offset`), `wbpp_weight`
+  (`null`: the registered XISF headers carry no weight keyword) and
+  `ecc_p90` (90th-percentile star eccentricity from `stars/<id>.csv`).
+- `frames.json`, `stars.json`, `histograms.json`, `normalization.json`,
+  `masters.json` and `flat_check.json` are copied verbatim.
+
+Lights are submitted to the worker pool before masters. `--only f03,bias`
+rebuilds a subset; existing pixel files are kept, so delete one to force a
+rewrite. `ASTRO_REPO=<checkout>` reads `source_images/` and `data/` from
+another checkout (useful from a git worktree).
+
+Command: `uv run tools/precompute/runtime.py`
