@@ -119,3 +119,7 @@ Figma file: https://www.figma.com/design/jtYi1LQf1fVyUAUfAgthP5/Astrophotography
 - Font style strings in this file: Jost "SemiBold"; Public Sans "SemiBold"; Inter "Semi Bold" (with a space).
 - Text nodes wired to a TEXT component property show the property default in instances; don't rely on per-variant characters for wired text.
 - Concurrent `use_figma` calls are fine on different pages; same-page writes are sequential.
+
+## 6. Brand mark (owner decision, 2026-09-24)
+
+The site mark is the "Registration" candidate: three copies of the NGC 7331 silhouette (an ellipse tilted 22°) offset like unaligned subs, with the cobalt copy on top and a cream core. Fills are red/400, ochre/300, cobalt/600 and cream/50. It lives in the library as `Logo/Mark` (64 px master, children scale) and `Logo/Favicon` (32 px) on "Library · Icons", with a 16/24/32 preview strip on cream and on the stage. Every TopBar variant now carries a 28 px instance in the brand slot in place of the earlier circle/square/triangle glyphs. The favicon is the same geometry: `assets/brand/favicon.svg`. The offsets blur at 16 px, so prefer 24 px or larger where possible.
