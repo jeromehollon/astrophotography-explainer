@@ -8,4 +8,10 @@ export type Section = {
   Component: ComponentType;
 };
 
-export const sections: Section[] = [];
+import LightFramesReview from '../sections/light-frames-review';
+import Workbench from '../sections/workbench';
+
+export const sections: Section[] = [
+  { path: '/light-frames/review', chapter: 'Light frames', page: 'Review the Exposures', Component: LightFramesReview },
+  { path: '/workbench', chapter: 'Workbench', page: '', Component: Workbench },
+];
