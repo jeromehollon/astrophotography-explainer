@@ -1,10 +1,22 @@
 // Full-stack export (SPEC §4.6): 8-bit PNG with the current stretch, and float32 FITS (BITPIX −32, linear [0,1]).
+// Both take an optional `crop` (output samples, from commonCrop() in stack.ts) so the download can be cut to the
+// region every frame covers; without it the whole result is written, edges and all.
 
 import { toImageData } from './display';
 import { calState, flatId, lightSub } from './calibrate';
 import { DEFAULT_PARAMS } from './integrate';
 import { DN_MAX } from './stf';
-import type { CalibrationChoice, DisplayStf, StackRequest, StackResult } from './types';
+import type { CalibrationChoice, DisplayStf, Rect, StackRequest, StackResult } from './types';
+
+/** A copy of `result` cut to `rect` (output samples; must lie inside the result). `noise` and `ms` are kept. */
+export function cropResult(result: StackResult, rect: Rect): StackResult {
+  const { x, y, w, h } = rect;
+  if (x < 0 || y < 0 || w <= 0 || h <= 0 || x + w > result.w || y + h > result.h) throw new Error(`crop ${JSON.stringify(rect)} outside ${result.w}×${result.h}`);
+  if (x === 0 && y === 0 && w === result.w && h === result.h) return result;
+  const data = new Float32Array(w * h);
+  for (let r = 0; r < h; r++) data.set(result.data.subarray((y + r) * result.w + x, (y + r) * result.w + x + w), r * w);
+  return { ...result, data, w, h };
+}
 
 export function calibTag(c: CalibrationChoice): string {
   return `${lightSub(c)}-${flatId(c) ?? 'noflat'}`;
@@ -15,8 +27,9 @@ export function exportFilename(req: StackRequest, ext: 'png' | 'fits'): string {
   return `ngc7331_stack_${n}f_${req.algorithm.name}_${calibTag(req.calibration)}.${ext}`;
 }
 
-/** 8-bit greyscale PNG through the given stretch (browser only: uses a canvas). */
-export function exportPng(result: StackResult, stf: DisplayStf, opts: { rotate180?: boolean } = {}): Promise<Blob> {
+/** 8-bit greyscale PNG through the given stretch (browser only: uses a canvas). `crop` is applied before the rotation. */
+export function exportPng(result: StackResult, stf: DisplayStf, opts: { rotate180?: boolean; crop?: Rect | null } = {}): Promise<Blob> {
+  if (opts.crop) result = cropResult(result, opts.crop);
   const canvas = document.createElement('canvas');
   canvas.width = result.w; canvas.height = result.h;
   canvas.getContext('2d')!.putImageData(toImageData(result.data, result.w, result.h, stf, { rotate180: opts.rotate180, nan: 'stage' }), 0, 0);
@@ -60,7 +73,8 @@ export function fitsHeaderFor(req: StackRequest, result: StackResult, exptimePer
  * Float32 FITS: BITPIX −32, data scaled to [0,1] (DN/65535), NaN → 0. Rows are written bottom-up, the FITS
  * convention, so viewers show the image the way the app does.
  */
-export function exportFits(result: StackResult, header: FitsHeader): Blob {
+export function exportFits(result: StackResult, header: FitsHeader, opts: { crop?: Rect | null } = {}): Blob {
+  if (opts.crop) result = cropResult(result, opts.crop);
   const { w, h, data } = result;
   const cards = [
     fitsCard('SIMPLE', true, 'conforms to FITS standard'),
