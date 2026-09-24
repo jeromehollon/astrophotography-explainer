@@ -4,6 +4,7 @@
  */
 import type { ReactNode } from 'react';
 import { Link } from 'react-router';
+import { Button, Chip as SharedChip, ProgressBar, ROITile } from '../../shared/ui';
 
 export const cx = (...a: Array<string | false | undefined | null>) => a.filter(Boolean).join(' ');
 
@@ -22,35 +23,19 @@ export const T = {
   monoSm: 'font-mono font-normal text-[12px] leading-4',
 };
 
-/* Button (9:86): Primary / Secondary / Ghost; Disabled = panel fill with disabled text */
+/* Button (9:86) from the shared library; hover handlers wrap it for the scenario description swap. */
 export function Btn({ variant = 'primary', disabled, onClick, children, className, onMouseEnter, onMouseLeave, ariaPressed }: {
   variant?: 'primary' | 'secondary' | 'ghost'; disabled?: boolean; onClick?: () => void; children: ReactNode; className?: string;
   onMouseEnter?: () => void; onMouseLeave?: () => void; ariaPressed?: boolean;
 }) {
-  const look = disabled
-    ? 'bg-surface-panel text-text-disabled cursor-not-allowed'
-    : variant === 'primary'
-      ? 'bg-accent-primary text-text-on-accent hover:bg-accent-primary-hover'
-      : variant === 'secondary'
-        ? 'bg-surface-card border-2 border-border-strong text-text-primary hover:bg-surface-panel'
-        : 'text-text-link hover:bg-surface-panel';
-  return (
-    <button type="button" disabled={disabled} onClick={onClick} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} aria-pressed={ariaPressed}
-      className={cx('inline-flex items-center justify-center gap-2 rounded-md px-6 py-3 whitespace-nowrap cursor-pointer focus-visible:outline-3 focus-visible:outline-border-strong focus-visible:outline-offset-2', T.labelMd, look, className)}>
-      {children}
-    </button>
-  );
+  const button = <Button variant={variant} disabled={disabled} onClick={onClick} className={className}>{children}</Button>;
+  if (!onMouseEnter && !onMouseLeave) return button;
+  return <span className="inline-flex" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} data-pressed={ariaPressed ? 'true' : undefined}>{button}</span>;
 }
 
-/* Chip (9:130) */
+/* Chip (9:130) from the shared library, cream variant */
 export function Chip({ selected, onClick, children, disabled }: { selected: boolean; onClick: () => void; children: ReactNode; disabled?: boolean }) {
-  return (
-    <button type="button" role="radio" aria-checked={selected} disabled={disabled} onClick={onClick}
-      className={cx('inline-flex items-center justify-center rounded-full border-[1.5px] px-4 py-2 whitespace-nowrap cursor-pointer focus-visible:outline-3 focus-visible:outline-border-strong focus-visible:outline-offset-2', T.labelMd,
-        selected ? 'bg-accent-primary border-accent-primary text-text-on-accent' : 'bg-surface-card border-border-strong text-text-primary hover:bg-surface-panel')}>
-      {children}
-    </button>
-  );
+  return <SharedChip selected={selected} onClick={onClick} disabled={disabled} onStage={false}>{children}</SharedChip>;
 }
 
 /* FrameCard checkbox (17:876 / 17:843): 18 px, 2 px ink border, cobalt fill with a check when on */
@@ -88,29 +73,11 @@ export function LessonLink({ to, children, className }: { to: string; children: 
   return <Link to={to} className={cx('text-text-link underline whitespace-nowrap', T.labelMd, className)}>{children}</Link>;
 }
 
-/* ROITile (9:337): dark raised box, 1 px on-stage border, head bar (12/10 padding), image well below */
+/* ROITile (9:337) from the shared library; height is the whole tile (head 40 + well + 2 px border) as in the frames */
 export function Tile({ title, state = 'default', progress, width, height, children }: {
   title: string; state?: 'default' | 'pending' | 'processing' | 'empty'; progress?: number; width: number; height: number; children?: ReactNode;
 }) {
-  const wellH = height - 2 - 40;
-  return (
-    <div className="flex flex-col overflow-hidden border border-border-on-stage bg-surface-stage-raised" style={{ width, height }}>
-      <div className="flex items-center px-3 py-[10px]">
-        <span className={cx('text-text-on-stage whitespace-nowrap', T.labelMd)}>{title}</span>
-      </div>
-      <div className="relative w-full overflow-hidden" style={{ height: wellH }}>
-        <div className="absolute inset-0 [&>img]:block [&>img]:h-full [&>img]:w-full [&>img]:object-cover [&>canvas]:block [&>canvas]:h-full [&>canvas]:w-full">{children}</div>
-        {state !== 'default' && (
-          <div className={cx('absolute inset-0', state === 'processing' ? 'bg-surface-stage' : 'bg-surface-stage/70')}>
-            <span className={cx('absolute left-0 right-0 text-center text-text-on-stage', T.labelMd)} style={{ top: Math.round(wellH / 2) - 10 }}>
-              {state === 'processing' ? `Stacking…${progress !== undefined ? ` ${Math.round(progress)}%` : ''}` : state === 'pending' ? 'Result pending' : 'No frames selected'}
-            </span>
-            {state === 'processing' && <div className="absolute bottom-0 left-0 h-1 bg-accent-focus-on-stage" style={{ width: `${Math.max(0, Math.min(100, progress ?? 0))}%` }} />}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  return <ROITile title={title} state={state} percent={progress} width={width} height={height - 42}>{children}</ROITile>;
 }
 
 /* Drawn full-range histogram (owner direction, design-notes item 37): ink bars over a 1 px axis. */
@@ -124,18 +91,7 @@ export function DrawnHistogram({ bars, width, height, barWidth, className }: { b
   );
 }
 
-/* ProgressBar (9:157): stage box, label + mono value, 8 px rail, ochre fill, Cancel link */
+/* ProgressBar (9:157) from the shared library */
 export function Progress({ label, value, percent, onCancel }: { label: string; value: string; percent: number; onCancel: () => void }) {
-  return (
-    <div className="flex w-[360px] flex-col gap-2 bg-surface-stage p-3" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(percent)} aria-label={label}>
-      <div className="flex items-center justify-between whitespace-nowrap">
-        <span className={cx('text-text-on-stage', T.labelMd)}>{label}</span>
-        <span className={cx('text-text-on-stage-muted', T.monoSm)}>{value}</span>
-      </div>
-      <div className="h-2 w-full overflow-hidden bg-text-on-stage-muted">
-        <div className="h-2 bg-accent-focus-on-stage" style={{ width: `${Math.max(0, Math.min(100, percent))}%` }} />
-      </div>
-      <button type="button" onClick={onCancel} className={cx('cursor-pointer self-start bg-transparent p-0 text-text-on-stage underline focus-visible:outline-3 focus-visible:outline-accent-focus-on-stage focus-visible:outline-offset-2', T.labelSm)}>Cancel</button>
-    </div>
-  );
+  return <ProgressBar label={label} value={value} percent={percent} onCancel={onCancel} />;
 }

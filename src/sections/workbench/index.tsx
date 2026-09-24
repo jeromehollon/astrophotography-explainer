@@ -71,7 +71,9 @@ export default function Workbench() {
   };
 
   const calibrationText = [calibration.bias && 'Bias', calibration.dark && 'Dark', calibration.darkFlat && 'Dark flat', calibration.flat && `Flat ${calibration.flat} %`].filter(Boolean).join(' · ') || 'None';
-  const percent = job ? (100 * job.done) / job.total : 0;
+  // stack() reports per-band jobs; the bar shows the equivalent number of frames (SPEC P9: "<percent>% · <n> of <N> frames").
+  const percent = job && job.total > 0 ? (100 * job.done) / job.total : 0;
+  const framesDone = Math.round((percent / 100) * frames.length);
 
   return (
     <LessonPage>
@@ -198,7 +200,7 @@ export default function Workbench() {
             ))}
             <div className="flex items-center gap-4 pt-3">
               <Btn disabled={job !== null || frames.length === 0} onClick={download}>Download PNG</Btn>
-              {job && <Progress label="Stacking the full image…" value={`${Math.round(percent)}% · ${job.done} of ${job.total} frames`} percent={percent} onCancel={() => job.controller.abort()} />}
+              {job && <Progress label="Stacking the full image…" value={`${Math.round(percent)}% · ${framesDone} of ${frames.length} frames`} percent={percent} onCancel={() => job.controller.abort()} />}
             </div>
           </div>
         </section>
