@@ -75,3 +75,16 @@ def test_winsorized_clip_average_rejects_injected_outliers():
     assert np.allclose(out, 100.0, atol=2.0)
     plain_mean = stack.mean(axis=0)
     assert np.all(plain_mean > 150.0)  # sanity: the outlier really does dominate a plain average
+
+
+def test_runtime_block_mean_drops_partial_blocks_and_averages():
+    import runtime
+
+    a = np.arange(7 * 9, dtype=np.uint16).reshape(7, 9)
+    m2 = runtime.block_mean(a, 2)
+    assert m2.dtype == np.float32 and m2.shape == (3, 4)
+    assert m2[0, 0] == pytest.approx(a[0:2, 0:2].mean())
+    assert m2[2, 3] == pytest.approx(a[4:6, 6:8].mean())
+    m8 = runtime.block_mean(np.ones((16, 17), dtype=np.float32) * 3.0, 8)
+    assert m8.shape == (2, 2) and np.all(m8 == 3.0)
+    assert runtime.block_mean(a, 1).dtype == np.float32
