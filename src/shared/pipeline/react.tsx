@@ -7,46 +7,55 @@ import type { Bin, CalibrationChoice, DisplayStf, Rect, StackRequest, StackResul
 
 export type UseStackState = { result: StackResult | null; pending: boolean; error?: string; progress: number };
 
-/** Runs stack(req) in the worker pool; re-runs when the canonical JSON of the request changes; aborts stale runs. */
+/**
+ * Runs stack(req) in the worker pool and re-runs when the canonical JSON of the request changes. Stale results
+ * are dropped by key rather than by aborting: fetches are shared between callers (fetchRoi), the result cache
+ * makes a repeated request free, and React StrictMode's double effect must not cancel the run it then reuses.
+ */
 export function useStack(req: StackRequest | null): UseStackState {
   const key = req ? canonicalKey(req) : null;
-  const [state, setState] = useState<UseStackState>({ result: null, pending: !!req, progress: 0 });
+  const [state, setState] = useState<{ key: string | null; result: StackResult | null; error?: string; progress: number }>({ key: null, result: null, progress: 0 });
+  const latest = useRef(key);
+  latest.current = key;
   const reqRef = useRef(req);
   reqRef.current = req;
   useEffect(() => {
-    if (!key || !reqRef.current) { setState({ result: null, pending: false, progress: 0 }); return; }
-    const ac = new AbortController();
-    setState((s) => ({ ...s, pending: true, error: undefined, progress: 0 }));
+    if (!key || !reqRef.current) return;
+    let on = true;
     stack(reqRef.current, {
-      signal: ac.signal,
-      onProgress: (d, t) => { if (!ac.signal.aborted) setState((s) => ({ ...s, progress: t ? d / t : 1 })); },
+      onProgress: (d, t) => { if (on && latest.current === key) setState((s) => (s.key === key ? s : { key, result: null, progress: t ? d / t : 1 })); },
     }).then(
-      (result) => { if (!ac.signal.aborted) setState({ result, pending: false, progress: 1 }); },
-      (err: Error) => { if (!ac.signal.aborted && err?.name !== 'AbortError') setState((s) => ({ ...s, pending: false, error: String(err?.message ?? err) })); },
+      (result) => { if (on && latest.current === key) setState({ key, result, progress: 1 }); },
+      (err: Error) => { if (on && latest.current === key) setState({ key, result: null, progress: 0, error: String(err?.message ?? err) }); },
     );
-    return () => ac.abort();
+    return () => { on = false; };
   }, [key]);
-  return state;
+  const fresh = key !== null && state.key === key;
+  const done = fresh && (state.result !== null || state.error !== undefined);
+  return { result: fresh ? state.result : null, pending: key !== null && !done, error: fresh ? state.error : undefined, progress: fresh ? state.progress : 0 };
 }
 
 export type UseRoiState = { data: Float32Array | null; w: number; h: number; rect: Rect | null; pending: boolean; error?: string };
 
-/** One calibrated single-frame crop (sensor space, no warp) for lesson tiles. */
+/** One calibrated single-frame crop (sensor space, no warp) for lesson tiles. Stale results are dropped by key. */
 export function useCalibratedRoi(id: string | null, rect: Rect | null, bin: Bin, calibration: CalibrationChoice): UseRoiState {
-  const key = JSON.stringify({ id, rect, bin, calibration });
-  const [state, setState] = useState<UseRoiState>({ data: null, w: 0, h: 0, rect: null, pending: !!id });
+  const key = id ? JSON.stringify({ id, rect, bin, calibration }) : null;
+  const [state, setState] = useState<{ key: string | null; data: Float32Array | null; w: number; h: number; rect: Rect | null; error?: string }>({ key: null, data: null, w: 0, h: 0, rect: null });
+  const latest = useRef(key);
+  latest.current = key;
   useEffect(() => {
-    if (!id) { setState({ data: null, w: 0, h: 0, rect: null, pending: false }); return; }
-    const ac = new AbortController();
+    if (!key || !id) return;
+    let on = true;
     const { rect: r, bin: b, calibration: c } = JSON.parse(key) as { rect: Rect | null; bin: Bin; calibration: CalibrationChoice };
-    setState((s) => ({ ...s, pending: true, error: undefined }));
-    calibrateRoi(id, r, b, c, { signal: ac.signal }).then(
-      (res) => { if (!ac.signal.aborted) setState({ data: res.data, w: res.w, h: res.h, rect: res.rect, pending: false }); },
-      (err: Error) => { if (!ac.signal.aborted && err?.name !== 'AbortError') setState((s) => ({ ...s, pending: false, error: String(err?.message ?? err) })); },
+    calibrateRoi(id, r, b, c).then(
+      (res) => { if (on && latest.current === key) setState({ key, data: res.data, w: res.w, h: res.h, rect: res.rect }); },
+      (err: Error) => { if (on && latest.current === key) setState({ key, data: null, w: 0, h: 0, rect: null, error: String(err?.message ?? err) }); },
     );
-    return () => ac.abort();
+    return () => { on = false; };
   }, [key, id]);
-  return state;
+  const fresh = key !== null && state.key === key;
+  const done = fresh && (state.data !== null || state.error !== undefined);
+  return { data: fresh ? state.data : null, w: fresh ? state.w : 0, h: fresh ? state.h : 0, rect: fresh ? state.rect : null, pending: key !== null && !done, error: fresh ? state.error : undefined };
 }
 
 export type RoiCanvasProps = {
