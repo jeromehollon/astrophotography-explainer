@@ -331,7 +331,7 @@
    "P5 Flats 2 D 85% flat": "71:554",
    "P6 Alignment A": "73:2",
    "P3 Darks A dark off": "78:2",
-   "P3 Darks B dark on": "78:2123",
+   "P3 Darks B dark on": "88:2220",
    "P7 Algorithms A average": "84:2",
    "P7 Algorithms B median": "87:2513",
    "P7 Algorithms C twenty frames, median enlarged": "87:2720"
@@ -409,13 +409,9 @@
    "P3 A section-problem": "78:2111",
    "P3 A problem-image": "78:2115",
    "P3 A section-temperature": "78:2116",
-   "P3 A section-ampglow": "78:28",
    "P3 A ampglow-image": "78:34",
-   "P3 A ampglow-box": "78:31",
    "P3 A toggle-dark": "78:52",
    "P3 A experiment-1": "78:49",
-   "P3 B toggle-dark": "78:2165",
-   "P3 B computed-image-well": "I78:2169;9:254",
    "P0 A triptych": "57:648",
    "P0 A section-observatory": "80:155",
    "P0 A hook side-panel": "80:156",
@@ -437,7 +433,13 @@
    "P7 A section-methods / table-methods": "87:2253 / 87:2256",
    "P7 A section-kappa-sigma / section-winsorized / section-rcr": "87:2287 / 87:2291 / 87:2295",
    "P7 A section-twenty / twenty-box / tiles": "87:2493 / 87:2496 / 87:2497",
-   "P7 C tile-enlarged image": "87:2922"
+   "P7 C tile-enlarged image": "87:2922",
+   "P3 A patch-column": "88:744",
+   "P3 A ampglow-column": "88:745",
+   "P3 A marker-hot-pixel raw": "88:748",
+   "P3 A marker-hot-pixel computed": "88:749",
+   "P3 B toggle-dark": "88:2259",
+   "P3 B computed-image-well": "I88:2263;9:254"
   }
  },
  "completedSteps": [
@@ -495,6 +497,6 @@
   "Noise & Defects N2 (2026-09-24): owner rewrote the prose in a tighter voice (their samples are now the 'problem' and 'calibration' sections verbatim) and asked for the tour as a table. The tour is now a 4-column table (Example thumb 120x80 | Badge/Source + cause | What you see | What deals with it) with hairline rules; the thumbnails reuse the original image wells (moved and resized, same image fills). Thumbnails open enlarged on click at runtime; the static design carries no affordance for it (design-notes section 3).",
   "Bias P2 R1 (2026-09-24): the owner rewrote the prose in frame A and dropped the 'What was removed' tile (the Computed tile visibly darkens, which is the point). Bias has two tiles, Raw / Computed. B (87:388) rebuilt as a clone of the edited A.",
   "Bias P2 R2 (2026-09-24): 'Taking the bias away' is two columns like Flats-1's section-map: prose (680) left, a cream side-panel (440) right holding the single-number example '1,233 − 161 = 1,073' with a one-line explanation. The paragraph that quoted those numbers moved into the box. B (87:2304) rebuilt as a clone of A.",
-  "Algorithms P7 (2026-09-24): built as a clone of Flats-1 frame A on page 8:10, restructured by owner direction: TopBar(Current=Algorithms) -> page head -> ink rule -> dark Try-it stage AT THE TOP (it replaces the illustration and the 440x330 problem slot; no illustration on this page) -> reading-2 (one-pixel box, five-method table, three in-depth prose sections, twenty-frame comparison in a dark box) -> BottomNav (Alignment / Light frames). Try it: two 576x576 ROITile instances (Raw = frame 3, Computed = the four-frame stack), a two-Chip group Average / Median in place of a Toggle, and a strip of four 132 px thumbnails of the input frames. ROITile image wells cannot be resized inside an instance (min-size and resize are ignored); set the well's layoutSizingVertical to FILL and resize the instance (576x676 gives a 574 px well with a two-line caption). The satellite ROI is a 2304 px crop at BIN 4 (assets/algorithms/, tools/assets/algorithms_page.py): the trail is ~28 DN over ~42 DN native noise, so at bin 1 or 2 the median only halves it; at bin 4 it removes it. B is a clone of A with the Median chip selected, the Computed image and caption changed. C is a clone of A with the Median twenty-frame tile enlarged to 576 px above the row of five (the 'click to enlarge' state)."
+  "Darks P3 (2026-09-24, revised after owner review): frame A cloned from Flats-1 A. Reading column: page head -> Darks illustration box (752 wide) with two paragraphs, and to its right a 376x252 native-pixel piece of the master dark stretched hard ('The dark recorded by the camera') -> section-problem: left column = 64x64 light-frame patch at 5x (320x320) + 'The problem you can see' prose (440 wide), right column = old-camera amp-glow dark binned 2x (712 wide) with a label and caption -> 'Matching the dark to the light'. Try it: one experiment, toggle 'Dark', two tiles Raw / Computed with square 318 px wells (instance override) and an ochre ring marker (absolute-positioned ellipse in the tiles frame) around the hot pixel from stats.json circled_hot_pixel; no 'What was removed' tile (owner). Assets from tools/assets/darks_page.py in assets/darks/ (region x 106, y 852 of f03, chosen for the clearest removal). B is a clone of A with only the toggle, the Computed image and its caption changed. Owner decisions: bias applied to every light image and never mentioned; master dark used as supplied; temperature difference not mentioned."
  ]
 }

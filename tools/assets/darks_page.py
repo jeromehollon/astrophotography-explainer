@@ -7,14 +7,16 @@ light frame, enlarged so single pixels are visible (nearest-neighbour, no binnin
 region of the master dark. The bias is applied to every light-frame image on this page because the
 Bias lesson already covered it; the Darks page never mentions it.
 
-Region choice: the 64×64 window with the most hot pixels shared by the light and the master dark,
-among windows that hold only sky background (no stars) and no pixel that is hotter in the dark than in
-the light (a few such defective pixels exist and would print as black dots). The master dark is used
-exactly as supplied (owner decision 2026-09-24: "trust the master dark").
+Region choice: the master dark is used exactly as supplied (owner decision 2026-09-24: "trust the
+master dark"). It cancels most hot pixels only partly, so the window is chosen for the clearest removal:
+among 64×64 sky-only windows (no stars, no pixel hotter in the dark than in the light) it holds the most
+"well removed" hot pixels (clearly visible before, within the noise after), then the most shared hot
+pixels. One well-removed pixel is circled on the page; its position is in stats.json.
 
 Reading column:
   grain_light.png     (L − B) on the region, one AutoSTF (target bg 0.30, clip −1.8 MADN), enlarged ×5
-  grain_dark.png      the master dark on the same region, its own AutoSTF, enlarged ×5
+  dark_piece.png      a 376×252 native-pixel piece of the master dark around the region, stretched hard
+                      (its own AutoSTF) so its grain and hot pixels show
   ampglow_full.png    the old-camera dark (ASI294MM Pro, 600 s), binned 2×2, AutoSTF (target bg 0.30,
                       clip −2.8 MADN). Display only: it shows amplifier glow; it is never applied.
 
@@ -22,9 +24,6 @@ Try it (same region, same enlargement, one STF shared by raw and computed):
   roi_raw.png                 L − B
   roi_computed_dark-off.png   identical to raw (nothing else happens with the dark off)
   roi_computed_dark-on.png    L − D   (the dark carries the bias, so B is not subtracted again)
-  roi_removed.png             computed − raw = B − D centred on mid grey (darker = brightness removed),
-                              shown in every toggle state; the span is ±2 MADN of the raw crop, so the
-                              learner's own noise level sets the scale and hot pixels print as black
 
   stats.json                  region position, hot-pixel counts and values, medians, every stretch used
 
@@ -51,7 +50,7 @@ FRAME = "f03"
 DN = 65535.0
 ROI = 64          # native pixels, square
 ZOOM = 5          # nearest-neighbour enlargement for the page (64 × 5 = 320 px)
-BORDER = 256      # keep the window away from the frame edge
+BORDER = 64       # keep the window away from the frame edge
 ROI_STF = dict(target_bg=0.30, shadows_clip=-1.8)
 FRAME_STF = dict(target_bg=0.30, shadows_clip=-2.8)
 HOT_DN = 200.0    # a hot pixel: dark − bias above this many pixel-brightness units (65535 = full scale)
@@ -101,31 +100,37 @@ def main() -> None:
     star = bright & (nb >= 4)
     dark_only = hot & ((lb - sky_med) < 0.5 * dark_excess)
     shared = hot & bright & ~star
-    score = np.where((box_sum(star, ROI) == 0) & (box_sum(dark_only, ROI) == 0), box_sum(shared, ROI), -1)
+    good = shared & (lb - sky_med > 12 * sky_madn) & (np.abs((L - D) - sky_med) < 2 * sky_madn)
+    ok = (box_sum(star, ROI) == 0) & (box_sum(dark_only, ROI) == 0)
+    score = np.where(ok, box_sum(good, ROI) * 1000 + box_sum(shared, ROI), -1)
     score[:BORDER] = -1
     score[-BORDER:] = -1
     score[:, :BORDER] = -1
     score[:, -BORDER:] = -1
-    y0, x0 = np.unravel_index(int(np.argmax(score)), score.shape)
+    # among the best windows, take the one whose centre is closest to a well-removed pixel
+    cands = np.argwhere(score == score.max())
+    gy, gx = np.where(good)
+    y0, x0 = min((tuple(c) for c in cands),
+                 key=lambda c: np.min((gy - (c[0] + ROI / 2)) ** 2 + (gx - (c[1] + ROI / 2)) ** 2))
     ys, xs = slice(y0, y0 + ROI), slice(x0, x0 + ROI)
 
     raw = lb[ys, xs]                     # L − B
     computed_on = (L - D)[ys, xs]        # L − D
-    removed = computed_on - raw          # = B − D  (≤ 0 at hot pixels)
     stf = astro.auto_stf(raw[None].astype(np.float32), **ROI_STF)
     show = lambda img: enlarge(astro.apply_stf(np.clip(img, 0, 1)[None].astype(np.float32), stf)[0], ZOOM)
 
     save_gray(show(raw), OUT / "roi_raw.png")
     save_gray(show(raw), OUT / "roi_computed_dark-off.png")
     save_gray(show(computed_on), OUT / "roi_computed_dark-on.png")
-    span = 2 * madn(raw)
-    save_gray(enlarge(np.clip(0.5 + removed / (2 * span), 0, 1), ZOOM), OUT / "roi_removed.png")
     save_gray(show(raw), OUT / "grain_light.png")
 
-    dark_roi = D[ys, xs]
-    stf_dark = astro.auto_stf(dark_roi[None].astype(np.float32), **ROI_STF)
-    save_gray(enlarge(astro.apply_stf(np.clip(dark_roi, 0, 1)[None].astype(np.float32), stf_dark)[0], ZOOM),
-              OUT / "grain_dark.png")
+    # a native-resolution piece of the master dark around the region, stretched on its own statistics
+    PW, PH = 376, 252
+    py0 = int(np.clip(y0 + ROI // 2 - PH // 2, 0, H - PH))
+    px0 = int(np.clip(x0 + ROI // 2 - PW // 2, 0, W - PW))
+    dark_piece = D[py0:py0 + PH, px0:px0 + PW]
+    stf_dark = astro.auto_stf(dark_piece[None].astype(np.float32), **ROI_STF)
+    save_gray(astro.apply_stf(np.clip(dark_piece, 0, 1)[None].astype(np.float32), stf_dark)[0], OUT / "dark_piece.png")
 
     # ---- the old-camera dark: amplifier glow, display only ----
     old, old_hdr = astro.load(CAL / "darkFromOlderCamera.fits")
@@ -142,22 +147,25 @@ def main() -> None:
 
     hot_roi = hot[ys, xs]
     shared_roi = shared[ys, xs]
-    brightest = np.unravel_index(int(np.argmax(np.where(shared_roi, raw, -1))), (ROI, ROI))
+    good_roi = good[ys, xs]
+    brightest = np.unravel_index(int(np.argmax(np.where(good_roi, raw, -1))), (ROI, ROI))
     ratio = dark_excess[shared] / (lb[shared] - sky_med)
     stats = {
         "frame": FRAME,
         "bias_applied_to_every_light_image": True,
         "region": {"x": int(x0), "y": int(y0), "w": ROI, "h": ROI, "zoom": ZOOM,
-                   "chosen_by": "most hot pixels shared by light and dark among 64×64 sky-only windows"},
+                   "chosen_by": "most well-removed, then most shared hot pixels among 64×64 sky-only windows; centred on a well-removed pixel"},
         "hot_pixel_definition": {"dark_minus_bias_above_dn": HOT_DN,
                                  "light_minus_bias_above_background_madn": 10},
-        "hot_pixels_in_region": {"in_dark": int(hot_roi.sum()), "shared_with_light": int(shared_roi.sum())},
+        "hot_pixels_in_region": {"in_dark": int(hot_roi.sum()), "shared_with_light": int(shared_roi.sum()),
+                                 "well_removed": int(good_roi.sum())},
+        "well_removed_definition": "light − bias above background by > 12 MADN, and light − dark within ±2 MADN of it",
         "hot_pixels_in_frame": {"in_dark": int(hot.sum()), "shared_with_light": int(shared.sum())},
         "dark_over_light_excess_ratio_percentiles": {
             "p10": float(np.percentile(ratio, 10)), "p50": float(np.percentile(ratio, 50)),
             "p90": float(np.percentile(ratio, 90))},
         "residual_after_dark_madn_median": float(np.median(((L - D)[shared] - sky_med)) / sky_madn),
-        "brightest_hot_pixel": {
+        "circled_hot_pixel": {
             "x_in_region": int(brightest[1]), "y_in_region": int(brightest[0]),
             "raw_dn": float(raw[brightest] * DN),
             "computed_dark_on_dn": float(computed_on[brightest] * DN),
@@ -176,8 +184,8 @@ def main() -> None:
         },
         "stretches": {
             "roi": {"c0": stf[0][0], "m": stf[0][1], **ROI_STF},
-            "grain_dark": {"c0": stf_dark[0][0], "m": stf_dark[0][1], **ROI_STF},
-            "removed_dn": {"grey": 0.0, "span": span * DN},
+            "dark_piece": {"c0": stf_dark[0][0], "m": stf_dark[0][1], **ROI_STF,
+                           "crop": {"x": int(px0), "y": int(py0), "w": PW, "h": PH}},
             "ampglow": {"c0": stf_old[0][0], "m": stf_old[0][1], **FRAME_STF, "binning": 2},
         },
         "old_camera_dark": {

@@ -2,21 +2,23 @@
  "frame": "f03",
  "bias_applied_to_every_light_image": true,
  "region": {
-  "x": 3377,
-  "y": 2679,
+  "x": 106,
+  "y": 852,
   "w": 64,
   "h": 64,
   "zoom": 5,
-  "chosen_by": "most hot pixels shared by light and dark among 64\u00d764 sky-only windows"
+  "chosen_by": "most well-removed, then most shared hot pixels among 64\u00d764 sky-only windows; centred on a well-removed pixel"
  },
  "hot_pixel_definition": {
   "dark_minus_bias_above_dn": 200.0,
   "light_minus_bias_above_background_madn": 10
  },
  "hot_pixels_in_region": {
-  "in_dark": 11,
-  "shared_with_light": 11
+  "in_dark": 9,
+  "shared_with_light": 7,
+  "well_removed": 1
  },
+ "well_removed_definition": "light \u2212 bias above background by > 12 MADN, and light \u2212 dark within \u00b12 MADN of it",
  "hot_pixels_in_frame": {
   "in_dark": 16761,
   "shared_with_light": 11162
@@ -27,19 +29,19 @@
   "p90": 0.42541170709789167
  },
  "residual_after_dark_madn_median": 11.355915784030348,
- "brightest_hot_pixel": {
-  "x_in_region": 4,
-  "y_in_region": 3,
-  "raw_dn": 22033.539232247276,
-  "computed_dark_on_dn": 16372.544604577124,
-  "dark_minus_bias_dn": 5660.994627670152,
-  "background_median_dn": 1001.624967342359
+ "circled_hot_pixel": {
+  "x_in_region": 8,
+  "y_in_region": 43,
+  "raw_dn": 2070.5298986588605,
+  "computed_dark_on_dn": 944.6362205408514,
+  "dark_minus_bias_dn": 1125.8936781180091,
+  "background_median_dn": 819.7500036237761
  },
  "region_background": {
-  "raw_median_dn": 1001.624967342359,
-  "raw_madn_dn": 46.08665164253418,
-  "computed_dark_on_median_dn": 1001.5454092301661,
-  "computed_dark_on_madn_dn": 46.027935370823485
+  "raw_median_dn": 819.7500036237761,
+  "raw_madn_dn": 40.30419040671678,
+  "computed_dark_on_median_dn": 819.2272760043852,
+  "computed_dark_on_madn_dn": 40.43454030369117
  },
  "masters": {
   "bias_median_dn": 160.49495700979605,
@@ -48,20 +50,22 @@
  },
  "stretches": {
   "roi": {
-   "c0": 0.01401799103891477,
-   "m": 0.0029486183165711075,
+   "c0": 0.011401577779985964,
+   "m": 0.0025792058486332633,
    "target_bg": 0.3,
    "shadows_clip": -1.8
   },
-  "grain_dark": {
-   "c0": 0.002429196230955422,
-   "m": 6.094241833965121e-05,
+  "dark_piece": {
+   "c0": 0.0024335628915391865,
+   "m": 6.046401165966898e-05,
    "target_bg": 0.3,
-   "shadows_clip": -1.8
-  },
-  "removed_dn": {
-   "grey": 0.0,
-   "span": 92.17330328506836
+   "shadows_clip": -1.8,
+   "crop": {
+    "x": 0,
+    "y": 758,
+    "w": 376,
+    "h": 252
+   }
   },
   "ampglow": {
    "c0": 0.005883566337227822,
