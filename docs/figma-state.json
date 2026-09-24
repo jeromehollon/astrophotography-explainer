@@ -156,6 +156,7 @@
    "P6 Alignment",
    "P7 Algorithms",
    "P8 Light Frames",
+   "P8 Light Frames 2",
    "P9 Workbench",
    "Prototype (consolidated flow at the end)"
   ]
@@ -279,7 +280,8 @@
    "Library · Controls": "9:49",
    "Library · Badges & Callouts": "9:158",
    "Library · Tiles & Data": "9:211",
-   "Library · Navigation & Templates": "11:2"
+   "Library · Navigation & Templates": "11:2",
+   "P8 Light Frames 2": "120:660"
   },
   "components": {
    "Icon/chevron-left": "9:5",
@@ -335,7 +337,11 @@
    "P3 Darks A dark off": "78:2",
    "P3 Darks B dark on": "88:2220",
    "P7 Algorithms A average": "84:2",
-   "P7 Algorithms B median": "114:242"
+   "P7 Algorithms B median": "114:242",
+   "P8 Light frames 2 A average": "121:2",
+   "P8 Light frames 2 B median": "129:6705",
+   "P9 Workbench A default scenario": "126:4081",
+   "P9 Workbench B stacking": "129:7680"
   },
   "nodes": {
    "P4 A flat-image": "44:612",
@@ -454,7 +460,24 @@
    "P1 A left-column": "110:111",
    "P7 A fifteen-box tiles grid (3 rows x 2)": "114:220",
    "P7 A fifteen-box image wells (frame3/average/median/kappa/winsorized/rcr)": "114:223 / 114:226 / 114:230 / 114:233 / 114:237 / 114:240",
-   "P7 A example legends (kappa/winsorized/rcr)": "113:220 / 113:227 / 113:234"
+   "P7 A example legends (kappa/winsorized/rcr)": "113:220 / 113:227 / 113:234",
+   "P8-2 A reading / page-head / TopBar / BottomNav": "121:4 / 121:5 / 121:3 / 121:143",
+   "P8-2 A section-stack / chips-method / chip-average / chip-median": "123:45 / 123:50 / 123:51 / 123:53",
+   "P8-2 A stack-box / stack-image / caption": "123:55 / 123:56 / 123:57",
+   "P8-2 A section-examine / frame-list (24 FrameCards framecard-<id>)": "125:52 / 125:56",
+   "P8-2 A frame-viewer / frame-number / frame-image / frame caption": "125:937 / 125:941 / 125:945 / 125:946",
+   "P8-2 A roi-trail / roi-galaxy / roi-group / roi-mote (ROITile instances; wells are I<id>;9:254)": "125:949 / 125:964 / 125:980 / 125:995",
+   "P8-2 A section-teaser": "125:1010",
+   "P8-2 B chips-method / stack-image / caption": "129:6716 / 129:6720 / 129:6721",
+   "P9 A reading / page-head / BottomNav": "126:4083 / 126:4084 / 126:4146",
+   "P9 A roi-strip / strip-trail / strip-galaxy / strip-group / strip-mote": "126:4224 / 126:4225 / 126:4240 / 126:4255 / 126:4270",
+   "P9 A section-scenarios / scenario buttons (default, naive, satellite, cloud, tracking) / scenario-description": "127:1055 / 127:1062, 127:1064, 127:1066, 127:1068, 127:1070 / 127:1072",
+   "P9 A section-calibration / table / master-image bias, dark, darkflat": "127:1073 / 127:1080 / 127:1095, 127:1173, 127:1251",
+   "P9 A section-flats / master-image flat_10, flat_50, flat_85": "128:1020 / 128:1047, 128:1122, 128:1197",
+   "P9 A section-lights (clone of P8-2 section-examine)": "126:4099",
+   "P9 A section-method": "128:1270",
+   "P9 A section-report / report-panel / actions / button-download": "128:1311 / 128:1316 / 128:1337 / 128:1338",
+   "P9 B roi-strip (Processing tiles) / actions / progress-full-stack": "129:7682 / 129:8296 / 129:8465"
   }
  },
  "completedSteps": [
@@ -492,7 +515,9 @@
   "A1.algorithms-page",
   "A2.algorithms-owner-review",
   "A3.algorithms-fifteen-frames",
-  "A4.algorithms-shading-and-grid"
+  "A4.algorithms-shading-and-grid",
+  "L2.light-frames-2-page",
+  "W1.workbench-page"
  ],
  "notes": [
   "Prototype connections cannot cross Figma pages; agents build per page, then frames are moved onto one Prototype page and wired at the end.",
@@ -520,6 +545,9 @@
   "Flats-2 owner prose pass (2026-09-24): the owner rewrote the lede and the full-well paragraph in frame A and edited the Note title and the three-flats heading in frame B. All were merged into A (A's rewritten paragraph kept; B had dropped it) and B, C, D were rebuilt as clones of A: 104:392 / 104:571 / 104:750.",
   "Noise & Defects N4 (2026-09-24): section-problem is a two-column layout: left-column (prose-problem + prose-why-stack, gap 32) and image-column (single-frame well, master well, captions). 'Why we stack' is no longer a separate section.",
   "Flats-2 second owner prose pass (2026-09-24): closing paragraph edited in frame A; removed tile in state A set to neutral grey; B, C, D rebuilt as clones of A: 112:2178 / 112:2357 / 112:2536.",
-  "Algorithms P7 (2026-09-24, third owner review): page 8:10, frame A 84:2, frame B 114:242 (Median chip, stack4_median image and caption). Frame C (enlarged tile) was removed: the closing tiles are now 564 px, so there is nothing to enlarge. Order: TopBar(Current=Algorithms) -> page head -> ink rule -> dark Try-it stage (stage-head, experiment-1 with two 576x576 ROITiles, Chip group Average / Median, four 132 px input thumbnails, Callout Kind=Why about the median remnant) -> reading-2: section-one-pixel, section-methods (table), section-kappa-sigma / section-winsorized / section-rcr each with a worked-example box (fifteen 69 px value cards for f00-f14; the median card is cream/300 with a 2 px border/strong outline, a value rejected in pass 1 is source/dark-soft, later passes would use the same colour at falling opacity; a legend row under the cards names Median and Rejected, or 'Rejected, first pass' / 'Rejected, pass N' when there is more than one pass), section-fifteen (dark box, 3 rows x 2 tiles at 564 px: Frame 0003 on its own, Average, Median, Kappa-sigma, Winsorized, Robust Chauvenet) -> BottomNav. No illustration. ROI: 2304 px crop at bin 4 (assets/algorithms/, tools/assets/algorithms_page.py). ROITile wells: set layoutSizingVertical FILL and resize the instance to 576x676. B is re-cloned from A after every owner edit."
+  "Algorithms P7 (2026-09-24, third owner review): page 8:10, frame A 84:2, frame B 114:242 (Median chip, stack4_median image and caption). Frame C (enlarged tile) was removed: the closing tiles are now 564 px, so there is nothing to enlarge. Order: TopBar(Current=Algorithms) -> page head -> ink rule -> dark Try-it stage (stage-head, experiment-1 with two 576x576 ROITiles, Chip group Average / Median, four 132 px input thumbnails, Callout Kind=Why about the median remnant) -> reading-2: section-one-pixel, section-methods (table), section-kappa-sigma / section-winsorized / section-rcr each with a worked-example box (fifteen 69 px value cards for f00-f14; the median card is cream/300 with a 2 px border/strong outline, a value rejected in pass 1 is source/dark-soft, later passes would use the same colour at falling opacity; a legend row under the cards names Median and Rejected, or 'Rejected, first pass' / 'Rejected, pass N' when there is more than one pass), section-fifteen (dark box, 3 rows x 2 tiles at 564 px: Frame 0003 on its own, Average, Median, Kappa-sigma, Winsorized, Robust Chauvenet) -> BottomNav. No illustration. ROI: 2304 px crop at bin 4 (assets/algorithms/, tools/assets/algorithms_page.py). ROITile wells: set layoutSizingVertical FILL and resize the instance to 576x676. B is re-cloned from A after every owner edit.",
+  "Light Frames 2 (Review the exposures) L2 (2026-09-24): own Figma page 120:660. Frame A 121:2 built from a clone of Light Frames page-1 frame A (TopBar Current=Light frames 2, page head, BottomNav ← Light frames / Workbench →). Reading column: page head -> section-stack (h2, p, 'Stack algorithm' + Chip group Average|Median, dark stack-box with a 1152x864 well and caption) -> section-examine (h2, p, columns: frame-list of 24 FrameCard instances at 560 wide with notes set to FILL, State=Selected for the 20 raw frames and Default for the 4 copies; frame-viewer 616 wide: Ghost buttons '← Previous frame' / 'Next frame →' around 'Frame 0003', dark frame-box with a 584x391 well + caption, roi-grid 2x2 of ROITile at 300 wide with 298x199 wells and Show caption=false) -> section-teaser -> BottomNav. No illustration, rule or Try-it stage (owner layout). Assets from tools/assets/light_frames_review_page.py in assets/light-frames-review/. B 126:962 is a clone of A with Median selected, the median stack image and caption.",
+  "Workbench W1 (2026-09-24): page 8:12, frame A 126:4081 cloned from Light Frames 2 frame A. TopBar Current=Workbench; 'roi-strip (fixed under the top bar)' inserted after the TopBar: dark bar with four ROITile at 282 wide (280x187 wells, captions 'Median of 20 photographs'). Reading: page head -> section-scenarios (five Button instances, Default=Primary, description text) -> section-calibration (4-column table 280/152/400/320 with hairline rows: drawn checkbox + title + note | lesson link | 376x252 master well | drawn 64-bar histogram) -> section-flats (same table, Chip selector) -> section-lights (the P8-2 examine block with a header row and lesson links) -> section-method (table 320/560/288: Chip | how it combines | suggested count) -> section-report (cream panel of label/value/link rows + Download PNG). BottomNav Next hidden. Calibration thumbnails from tools/assets/workbench_page.py in assets/workbench/.",
+  "Owner edits landed in P8-2 frame A and P9 frame A during the build (shorter lede, 'The shaded rows show…' paragraph, teaser sentence, 'Preconfigured Scenarios'); both B frames were re-cloned from the edited A frames. P9 B: strip tiles State=Processing with caption 'Stacking…', Download PNG disabled, ProgressBar '35% · 7 of 20 frames' (illustrative)."
  ]
 }
