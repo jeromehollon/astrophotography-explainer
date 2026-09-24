@@ -5,4 +5,6 @@ export type { ButtonProps } from './controls';
 export { Callout, Badge, Glyph, ROITile, FrameCard, Histogram, HistogramMini, HistogramBars, NoiseReadout } from './data';
 export type { BadgeProps } from './data';
 export { Icon, Logo } from './icons';
+export { Lightbox, LightboxOverlay, lightboxItemFor } from './lightbox';
+export type { LightboxItem } from './lightbox';
 export type { IconName } from './icons';
