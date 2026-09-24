@@ -7,7 +7,7 @@ import type { View } from './live';
  * RoiCanvas for live Float32 data through the reference STF. The wrapper is always rendered so its
  * size is known by the time live data arrives.
  */
-export function Render({ view, alt = '' }: { view: View | null; alt?: string; className?: string }) {
+export function Render({ view, alt = '', className }: { view: View | null; alt?: string; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [box, setBox] = useState<{ w: number; h: number } | null>(null);
   useLayoutEffect(() => {
@@ -29,7 +29,7 @@ export function Render({ view, alt = '' }: { view: View | null; alt?: string; cl
     canvas = <RoiCanvas data={view.data} w={view.w} h={view.h} stf={view.stf} rotate180={view.rotate180} width={width} height={height} style={{ position: 'absolute', left, top }} />;
   }
   return (
-    <div ref={ref} role="img" aria-label={alt} className="absolute inset-0 overflow-hidden">
+    <div ref={ref} role="img" aria-label={alt} className={`absolute inset-0 overflow-hidden ${className ?? ''}`}>
       {view?.kind === 'img' && (
         <img src={view.src} alt="" className="absolute inset-0 h-full w-full object-cover" style={view.rotate180 ? { transform: 'rotate(180deg)' } : undefined} draggable={false} />
       )}

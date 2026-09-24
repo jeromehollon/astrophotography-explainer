@@ -6,6 +6,7 @@ import { Render } from '../workbench/Render';
 import { LessonPage, PageHead, Reading } from '../workbench/shell';
 import { useAppStore, type CalibrationChoice } from '../workbench/store';
 import { Chip, cx, T } from '../workbench/ui';
+import { ChipGroup } from '../../shared/ui';
 
 const FULL_CALIBRATION: CalibrationChoice = { bias: true, dark: true, darkFlat: true, flat: 50 };
 
@@ -26,10 +27,10 @@ export default function LightFramesReview() {
           <h2 className={cx('m-0 w-[680px] text-text-primary', T.h2)}>Your selected stack</h2>
           <div className="flex items-center gap-6">
             <span className={cx('text-text-primary whitespace-nowrap', T.h3)}>Stack algorithm</span>
-            <div role="radiogroup" aria-label="Stack algorithm" className="flex gap-2">
+            <ChipGroup>
               <Chip selected={method === 'average'} onClick={() => set({ algorithm: { name: 'average', params: {} } })}>Average</Chip>
               <Chip selected={method === 'median'} onClick={() => set({ algorithm: { name: 'median', params: {} } })}>Median</Chip>
-            </div>
+            </ChipGroup>
           </div>
           <div className="flex w-[1200px] flex-col gap-3 bg-surface-stage p-6">
             <div className="relative h-[864px] w-[1152px] overflow-hidden bg-surface-stage-raised">

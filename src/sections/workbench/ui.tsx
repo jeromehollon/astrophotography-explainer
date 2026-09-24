@@ -2,7 +2,7 @@
  * Page-local primitives drawn exactly as the Figma frames (P8-2 121:2, P9 126:4081) show them.
  * They mirror the library components' props so they can be swapped for src/shared/ui later.
  */
-import type { ReactNode } from 'react';
+import type { KeyboardEvent, ReactNode } from 'react';
 import { Link } from 'react-router';
 import { Button, Chip as SharedChip, ProgressBar, ROITile } from '../../shared/ui';
 
@@ -77,6 +77,18 @@ export function LessonLink({ to, children, className }: { to: string; children: 
 export function Tile({ title, state = 'default', progress, width, height, children }: {
   title: string; state?: 'default' | 'pending' | 'processing' | 'empty'; progress?: number; width: number; height: number; children?: ReactNode;
 }) {
+  // The shared Pending copy says "— press Stack"; these pages have no Stack button (design-notes item 34).
+  if (state === 'pending') {
+    return (
+      <ROITile title={title} state="default" width={width} height={height - 42}>
+        <div className="relative h-full w-full">
+          {children}
+          <div className="absolute inset-0 bg-surface-stage/70" />
+          <p className={cx('absolute left-0 right-0 m-0 text-center text-text-on-stage', T.labelMd)} style={{ top: Math.round((height - 42) / 2) - 10 }}>Result pending</p>
+        </div>
+      </ROITile>
+    );
+  }
   return <ROITile title={title} state={state} percent={progress} width={width} height={height - 42}>{children}</ROITile>;
 }
 
@@ -94,4 +106,20 @@ export function DrawnHistogram({ bars, width, height, barWidth, className }: { b
 /* ProgressBar (9:157) from the shared library */
 export function Progress({ label, value, percent, onCancel }: { label: string; value: string; percent: number; onCancel: () => void }) {
   return <ProgressBar label={label} value={value} percent={percent} onCancel={onCancel} />;
+}
+
+/**
+ * Arrow-key roving for a radiogroup whose chips are not siblings (the Combination method table): handled in the
+ * capture phase so the shared Chip's sibling-based handler does not run as well.
+ */
+export function rovingKeyDown(e: KeyboardEvent<HTMLElement>) {
+  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' && e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+  const chips = [...e.currentTarget.querySelectorAll<HTMLButtonElement>('[role="radio"]:not(:disabled)')];
+  const i = chips.indexOf(e.target as HTMLButtonElement);
+  if (i < 0) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const next = chips[(i + (e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : chips.length - 1)) % chips.length];
+  next?.focus();
+  next?.click();
 }

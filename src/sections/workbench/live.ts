@@ -7,7 +7,7 @@
  * rotated 180° for display (design-notes item 27). The bundled PNGs remain only as a first paint
  * while normalization.json loads.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   calState, exportPng, loadReferenceStats, referenceStf, stack, useCalibratedRoi, useStack,
   type StackRequest, type StfParams,
@@ -23,7 +23,9 @@ export type View =
 
 export type StackInputs = { frames: string[]; calibration: CalibrationChoice; algorithm: AlgorithmName };
 
-/* normalization.json → reference STF per calibration state (SPEC §4.5) */
+/* normalization.json → reference STF per calibration state (SPEC §4.5). The design assets were rendered with
+ * target background 0.30 and shadows clip −1.8 (assets/light-frames-review/stats.json), so every live view uses it. */
+export const DISPLAY_STF = { targetBg: 0.3, clip: -1.8 };
 let statsReady = false;
 const statsPromise = loadReferenceStats().then(() => { statsReady = true; }, (e) => console.error('normalization.json', e));
 function useStatsReady(): boolean {
@@ -38,7 +40,7 @@ export function useReferenceStf(calibration: CalibrationChoice): StfParams {
   const state = calState(calibration);
   return useMemo(() => {
     if (!ready) return FALLBACK;
-    try { return referenceStf(REFERENCE, state); } catch { return FALLBACK; }
+    try { return referenceStf(REFERENCE, state, DISPLAY_STF); } catch { return FALLBACK; }
   }, [ready, state]);
 }
 
@@ -53,12 +55,14 @@ export function useRegionStack(region: RoiKey | 'wide', inputs: StackInputs): { 
     grid: grid(regionRect(region), 2), frames: inputs.frames, calibration: inputs.calibration, algorithm: { name: inputs.algorithm },
   }), [region, inputs.frames, inputs.calibration, inputs.algorithm]);
   const { result, pending } = useStack(req);
+  const last = useRef<View | null>(null);
   const view = useMemo<View | null>(() => {
     if (result) return { kind: 'raw', data: result.data, w: result.w, h: result.h, stf, rotate180: true };
     if (inputs.frames.length === 0) return null;
-    // first paint before the first result: the bundled average/median of the default stack
-    return { kind: 'img', src: stackSrc(region, inputs.algorithm === 'average' ? 'average' : 'median') };
+    // while a new result is pending keep the last live canvas; before the very first result show the bundled default stack
+    return last.current ?? { kind: 'img', src: stackSrc(region, inputs.algorithm === 'average' ? 'average' : 'median') };
   }, [result, stf, region, inputs.algorithm, inputs.frames.length]);
+  if (view?.kind === 'raw') last.current = view;
   return { view, pending, empty: inputs.frames.length === 0 };
 }
 
@@ -73,12 +77,15 @@ export function useFrameView(id: string, calibration: CalibrationChoice): { full
   const group = useStack(useMemo(() => roiReq('group'), [id, calibration]));
   const mote = useStack(useMemo(() => roiReq('mote'), [id, calibration]));
   const rois = { trail, galaxy, group, mote };
+  const last = useRef<Partial<Record<RoiKey | 'full', View>>>({});
   const toView = (k: RoiKey): View | null => {
     const r = rois[k].result;
-    return r ? { kind: 'raw', data: r.data, w: r.w, h: r.h, stf, rotate180: true } : { kind: 'img', src: roiSrc(id, k) };
+    if (r) { last.current[k] = { kind: 'raw', data: r.data, w: r.w, h: r.h, stf, rotate180: true }; return last.current[k]!; }
+    return last.current[k] ?? { kind: 'img', src: roiSrc(id, k) };
   };
+  if (whole.data) last.current.full = { kind: 'raw', data: whole.data, w: whole.w, h: whole.h, stf, rotate180: west };
   return {
-    full: whole.data ? { kind: 'raw', data: whole.data, w: whole.w, h: whole.h, stf, rotate180: west } : { kind: 'img', src: fullSrc(id) },
+    full: whole.data ? last.current.full! : last.current.full ?? { kind: 'img', src: fullSrc(id) },
     rois: { trail: toView('trail'), galaxy: toView('galaxy'), group: toView('group'), mote: toView('mote') },
     pending: whole.pending || trail.pending || galaxy.pending || group.pending || mote.pending,
   };
@@ -89,7 +96,7 @@ export async function stackFullPng(inputs: StackInputs, onProgress: (done: numbe
   const req: StackRequest = { grid: grid({ x: 0, y: 0, w: SENSOR.w, h: SENSOR.h }, 1), frames: inputs.frames, calibration: inputs.calibration, algorithm: { name: inputs.algorithm } };
   const result = await stack(req, { signal, onProgress });
   await statsPromise;
-  const stf = referenceStf(REFERENCE, calState(inputs.calibration));
+  const stf = referenceStf(REFERENCE, calState(inputs.calibration), DISPLAY_STF);
   return exportPng(result, stf, { rotate180: true });
 }
 

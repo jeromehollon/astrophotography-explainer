@@ -7,7 +7,7 @@ import { Render } from './Render';
 import { matchScenario, SCENARIOS, type Scenario } from './scenarios';
 import { LessonPage, PageHead, Reading } from './shell';
 import { useAppStore, type AlgorithmName, type FlatLevel } from './store';
-import { Btn, Check, Chip, cx, DrawnHistogram, LessonLink, Progress, SectionHeader, T, Tile } from './ui';
+import { Btn, Check, Chip, cx, DrawnHistogram, LessonLink, Progress, rovingKeyDown, SectionHeader, T, Tile } from './ui';
 
 const TOPBAR_HEIGHT = 104;
 
@@ -48,7 +48,17 @@ export default function Workbench() {
 
   const [job, setJob] = useState<Job | null>(null);
   const jobRef = useRef<Job | null>(null);
+  const actionsRef = useRef<HTMLDivElement>(null);
   useEffect(() => () => jobRef.current?.controller.abort(), []);
+  // Focus follows the job: Cancel while it runs (design-notes §3 "Cancel keeps focus"), the button when it ends.
+  const hadJob = useRef(false);
+  useEffect(() => {
+    const root = actionsRef.current;
+    if (!root || (!job && !hadJob.current)) return;
+    hadJob.current = job !== null;
+    const target = job ? root.querySelector<HTMLElement>('[role="progressbar"] button') : root.querySelector<HTMLElement>('button');
+    target?.focus();
+  }, [job !== null]);
   const download = async () => {
     const controller = new AbortController();
     const j: Job = { done: 0, total: frames.length, controller };
@@ -107,17 +117,15 @@ export default function Workbench() {
               <span className="w-[280px]">Calibration frame</span><span className="w-[152px]">Lesson</span><span className="w-[400px]">Master frame</span><span className="w-[320px]">Histogram</span>
             </div>
             {([
-              { key: 'bias', title: 'Bias', link: 'Bias →', to: '/calibration/bias', img: 'bias', checked: calibration.bias, onChange: (v: boolean) => setCal({ bias: v }),
-                note: calibration.dark ? (calibration.darkFlat ? 'Already inside the dark; not applied on its own.' : 'Already inside the dark; used for the flats only.') : '' },
-              { key: 'dark', title: 'Dark', link: 'Darks →', to: '/calibration/darks', img: 'dark', checked: calibration.dark, onChange: (v: boolean) => setCal({ dark: v }), note: '' },
-              { key: 'darkflat', title: 'Dark flat', link: 'Flats →', to: '/calibration/flats', img: 'darkflat', checked: calibration.darkFlat, onChange: (v: boolean) => setCal({ darkFlat: v }), note: '' },
+              { key: 'bias', title: 'Bias', link: 'Bias →', to: '/calibration/bias', img: 'bias', checked: calibration.bias, onChange: (v: boolean) => setCal({ bias: v }) },
+              { key: 'dark', title: 'Dark', link: 'Darks →', to: '/calibration/darks', img: 'dark', checked: calibration.dark, onChange: (v: boolean) => setCal({ dark: v }) },
+              { key: 'darkflat', title: 'Dark flat', link: 'Flats →', to: '/calibration/flats', img: 'darkflat', checked: calibration.darkFlat, onChange: (v: boolean) => setCal({ darkFlat: v }) },
             ] as const).map((r) => (
               <div key={r.key} className="flex w-[1200px] items-start gap-4 border-b border-border-default py-4">
                 <div className="flex w-[280px] items-start gap-3">
                   <span className="pt-[5px]"><Check checked={r.checked} onChange={r.onChange} label={r.title} /></span>
                   <div className="flex min-w-px flex-1 flex-col">
                     <span className={cx('w-[250px] text-text-primary', T.h3)}>{r.title}</span>
-                    {r.note && <span className={cx('w-[250px] text-text-secondary', T.bodySm)}>{r.note}</span>}
                   </div>
                 </div>
                 <LessonLink to={r.to} className="w-[152px] whitespace-normal">{r.link}</LessonLink>
@@ -165,7 +173,7 @@ export default function Workbench() {
 
         <section className="flex flex-col gap-6">
           <SectionHeader title="Combination method" links={[{ label: 'Lesson: Algorithms →', to: '/algorithms' }]} />
-          <div className="flex w-[1200px] flex-col" role="radiogroup" aria-label="Combination method">
+          <div className="flex w-[1200px] flex-col" role="radiogroup" aria-label="Combination method" onKeyDownCapture={rovingKeyDown}>
             <div className={cx('flex w-[1200px] gap-4 border-b-2 border-border-strong py-3 text-text-secondary', T.labelMd)}>
               <span className="w-[320px]">Method</span><span className="w-[560px]">How it combines the pixel values</span><span className="w-[288px]">Suggested number of photographs</span>
             </div>
@@ -198,7 +206,7 @@ export default function Workbench() {
                 <span className="w-[320px]">{link}</span>
               </div>
             ))}
-            <div className="flex items-center gap-4 pt-3">
+            <div ref={actionsRef} className="flex items-center gap-4 pt-3">
               <Btn disabled={job !== null || frames.length === 0} onClick={download}>Download PNG</Btn>
               {job && <Progress label="Stacking the full image…" value={`${Math.round(percent)}% · ${framesDone} of ${frames.length} frames`} percent={percent} onCancel={() => job.controller.abort()} />}
             </div>
