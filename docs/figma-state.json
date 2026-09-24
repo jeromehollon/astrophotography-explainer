@@ -331,7 +331,10 @@
    "P5 Flats 2 D 85% flat": "71:554",
    "P6 Alignment A": "73:2",
    "P3 Darks A dark off": "78:2",
-   "P3 Darks B dark on": "78:2123"
+   "P3 Darks B dark on": "78:2123",
+   "P7 Algorithms A average": "84:2",
+   "P7 Algorithms B median": "87:2513",
+   "P7 Algorithms C twenty frames, median enlarged": "87:2720"
   },
   "nodes": {
    "P4 A flat-image": "44:612",
@@ -422,7 +425,19 @@
    "P1 A tour table": "83:109",
    "P1 A tour table rows": "83:116, 83:125, 83:134, 83:143, 83:152, 83:161, 83:170, 83:179 (thumb wells 61:1465, 61:1476, 61:1487, 61:1498, 61:1509, 61:1520, 61:1531, 61:1533)",
    "P2 A section-subtract": "87:2299",
-   "P2 A side-panel": "87:2300"
+   "P2 A side-panel": "87:2300",
+   "P7 A reading (page head only)": "84:4",
+   "P7 A try-it stage": "84:44",
+   "P7 A experiment-1": "84:49",
+   "P7 A chips-method / chip-average / chip-median": "86:2207 / 86:2208 / 86:2210",
+   "P7 A tile-raw / tile-corrected": "84:55 / 84:56",
+   "P7 A stack-inputs (four thumbnails)": "86:2212",
+   "P7 A reading-2": "87:72",
+   "P7 A section-one-pixel / one-pixel-box": "87:73 / 87:76",
+   "P7 A section-methods / table-methods": "87:2253 / 87:2256",
+   "P7 A section-kappa-sigma / section-winsorized / section-rcr": "87:2287 / 87:2291 / 87:2295",
+   "P7 A section-twenty / twenty-box / tiles": "87:2493 / 87:2496 / 87:2497",
+   "P7 C tile-enlarged image": "87:2922"
   }
  },
  "completedSteps": [
@@ -456,7 +471,8 @@
   "N1.noise-defects-page",
   "S2.flats2-page",
   "A1.alignment-page",
-  "D1.darks-page"
+  "D1.darks-page",
+  "A1.algorithms-page"
  ],
  "notes": [
   "Prototype connections cannot cross Figma pages; agents build per page, then frames are moved onto one Prototype page and wired at the end.",
@@ -478,6 +494,7 @@
   "P0 Welcome (2026-09-24): single frame A, no Try-it stage and no ROI tiles by owner direction; full-field images are allowed on Welcome. The drawn illustration was replaced by the real triptych (sub, master, colour) in the illustration slot; the page uses two-column rows. Assets from tools/assets/welcome_page.py in assets/welcome/.",
   "Noise & Defects N2 (2026-09-24): owner rewrote the prose in a tighter voice (their samples are now the 'problem' and 'calibration' sections verbatim) and asked for the tour as a table. The tour is now a 4-column table (Example thumb 120x80 | Badge/Source + cause | What you see | What deals with it) with hairline rules; the thumbnails reuse the original image wells (moved and resized, same image fills). Thumbnails open enlarged on click at runtime; the static design carries no affordance for it (design-notes section 3).",
   "Bias P2 R1 (2026-09-24): the owner rewrote the prose in frame A and dropped the 'What was removed' tile (the Computed tile visibly darkens, which is the point). Bias has two tiles, Raw / Computed. B (87:388) rebuilt as a clone of the edited A.",
-  "Bias P2 R2 (2026-09-24): 'Taking the bias away' is two columns like Flats-1's section-map: prose (680) left, a cream side-panel (440) right holding the single-number example '1,233 − 161 = 1,073' with a one-line explanation. The paragraph that quoted those numbers moved into the box. B (87:2304) rebuilt as a clone of A."
+  "Bias P2 R2 (2026-09-24): 'Taking the bias away' is two columns like Flats-1's section-map: prose (680) left, a cream side-panel (440) right holding the single-number example '1,233 − 161 = 1,073' with a one-line explanation. The paragraph that quoted those numbers moved into the box. B (87:2304) rebuilt as a clone of A.",
+  "Algorithms P7 (2026-09-24): built as a clone of Flats-1 frame A on page 8:10, restructured by owner direction: TopBar(Current=Algorithms) -> page head -> ink rule -> dark Try-it stage AT THE TOP (it replaces the illustration and the 440x330 problem slot; no illustration on this page) -> reading-2 (one-pixel box, five-method table, three in-depth prose sections, twenty-frame comparison in a dark box) -> BottomNav (Alignment / Light frames). Try it: two 576x576 ROITile instances (Raw = frame 3, Computed = the four-frame stack), a two-Chip group Average / Median in place of a Toggle, and a strip of four 132 px thumbnails of the input frames. ROITile image wells cannot be resized inside an instance (min-size and resize are ignored); set the well's layoutSizingVertical to FILL and resize the instance (576x676 gives a 574 px well with a two-line caption). The satellite ROI is a 2304 px crop at BIN 4 (assets/algorithms/, tools/assets/algorithms_page.py): the trail is ~28 DN over ~42 DN native noise, so at bin 1 or 2 the median only halves it; at bin 4 it removes it. B is a clone of A with the Median chip selected, the Computed image and caption changed. C is a clone of A with the Median twenty-frame tile enlarged to 576 px above the row of five (the 'click to enlarge' state)."
  ]
 }

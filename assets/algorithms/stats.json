@@ -1,0 +1,142 @@
+{
+ "reference_frame": "f03",
+ "calibration": "dark|flat_50_darkflat",
+ "crop": {
+  "x": 3608,
+  "y": 1698,
+  "size_native": 2304,
+  "bin": 4,
+  "tile": 576,
+  "centre": [
+   4760,
+   2850
+  ]
+ },
+ "stf": {
+  "c0": 0.013573457033187152,
+  "m": 0.0007567095112001185,
+  "target_bg": 0.3,
+  "shadows_clip": -1.8
+ },
+ "warp": "scipy map_coordinates cubic (design-time stand-in for Lanczos-3)",
+ "trail_line": {
+  "direction_xy": [
+   0.7245616499893843,
+   -0.6892099936627885
+  ],
+  "offset_px": 12,
+  "on_trail_pixels": 2265,
+  "measure": "mean within 1.5 px of the line minus mean 4-20 px away, star-free pixels only; noise is MADN off the trail"
+ },
+ "four_frames": {
+  "frames": [
+   "f03",
+   "f02",
+   "f04",
+   "f05"
+  ],
+  "trail_excess_dn": {
+   "f03": 27.606637120503446,
+   "average": 6.568957488887359,
+   "median": 3.2126596231573687,
+   "kappa_sigma": 6.568957488887359,
+   "winsorized": 5.720029915394419,
+   "rcr": 2.3628864250891
+  },
+  "share_of_trail_pixels_where_f03_was_rejected": {
+   "kappa_sigma": 0.0,
+   "winsorized": 0.07770419426048565,
+   "rcr": 0.4803532008830022
+  },
+  "noise_madn_dn": {
+   "f03": 11.70002997718619,
+   "average": 6.663490483470883,
+   "median": 7.063442469586506
+  }
+ },
+ "one_pixel": {
+  "crop_xy": [
+   363,
+   233
+  ],
+  "frames": [
+   "f03",
+   "f02",
+   "f04",
+   "f05"
+  ],
+  "brightness_dn": [
+   985.0,
+   908.0,
+   903.0,
+   909.0
+  ],
+  "average_dn": 926.25,
+  "median_dn": 908.5,
+  "background_median_dn": 910.2818078736227,
+  "how_chosen": "on the fitted trail line within 96 px of the crop centre, the pixel where frame 3 exceeds the other three by the most, those three within 2 noise widths of the background"
+ },
+ "twenty_frames": {
+  "frames": [
+   "f00",
+   "f01",
+   "f02",
+   "f03",
+   "f04",
+   "f05",
+   "f06",
+   "f07",
+   "f08",
+   "f09",
+   "f10",
+   "f11",
+   "f12",
+   "f13",
+   "f14",
+   "f15",
+   "f16",
+   "f17",
+   "f18",
+   "f19"
+  ],
+  "parameters": {
+   "kappa_sigma": {
+    "sigma_low": 4.0,
+    "sigma_high": 3.0
+   },
+   "winsorized": {
+    "sigma_low": 4.0,
+    "sigma_high": 3.0,
+    "cutoff": 5.0
+   },
+   "rcr_limit": 0.1
+  },
+  "methods": {
+   "average": {
+    "trail_excess_dn": 1.147192621329998,
+    "noise_madn_dn": 3.2313737373981297,
+    "share_of_trail_pixels_where_f03_was_rejected": 0.0
+   },
+   "median": {
+    "trail_excess_dn": 0.5441579180210416,
+    "noise_madn_dn": 3.441257914251684,
+    "share_of_trail_pixels_where_f03_was_rejected": 0.0
+   },
+   "kappa_sigma": {
+    "trail_excess_dn": 0.7133465716911945,
+    "noise_madn_dn": 3.0650576989268763,
+    "share_of_trail_pixels_where_f03_was_rejected": 0.23620309050772628
+   },
+   "winsorized": {
+    "trail_excess_dn": 0.5453172527381266,
+    "noise_madn_dn": 3.0553276952917923,
+    "share_of_trail_pixels_where_f03_was_rejected": 0.34922737306843266
+   },
+   "rcr": {
+    "trail_excess_dn": 0.3402450259429568,
+    "noise_madn_dn": 3.1557129862029365,
+    "share_of_trail_pixels_where_f03_was_rejected": 0.48300220750551875
+   }
+  }
+ }
+}
