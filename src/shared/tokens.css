@@ -72,39 +72,44 @@
 html { background: var(--color-surface-page); color: var(--color-text-primary); font-family: var(--font-body); }
 body { margin: 0; min-width: 1440px; }
 
-/* Text styles from the Figma library (docs/figma-state.json → textStyles). */
+/* Text styles from the Figma library (docs/figma-state.json → textStyles; mono/md and mono/sm are Regular). */
 @utility t-display-hero { font-family: var(--font-heading); font-weight: 600; font-size: 56px; line-height: 60px; }
-@utility t-h1 { font-family: var(--font-heading); font-weight: 600; font-size: 40px; line-height: 46px; }
+@utility t-h1 { font-family: var(--font-heading); font-weight: 600; font-size: 40px; line-height: 46px; letter-spacing: -0.5px; }
 @utility t-h2 { font-family: var(--font-heading); font-weight: 600; font-size: 28px; line-height: 34px; }
 @utility t-h3 { font-family: var(--font-heading); font-weight: 500; font-size: 22px; line-height: 28px; }
 @utility t-subtitle { font-family: var(--font-heading); font-weight: 500; font-size: 24px; line-height: 32px; }
 @utility t-brand { font-family: var(--font-heading); font-weight: 500; font-size: 20px; line-height: 22px; }
+@utility t-brand-sub { font-family: var(--font-body); font-weight: 400; font-size: 12px; line-height: 14px; }
 @utility t-eyebrow { font-family: var(--font-heading); font-weight: 500; font-size: 13px; line-height: 16px; letter-spacing: 1.5px; text-transform: uppercase; }
 @utility t-body-lg { font-family: var(--font-body); font-weight: 400; font-size: 18px; line-height: 28px; }
 @utility t-body-md { font-family: var(--font-body); font-weight: 400; font-size: 16px; line-height: 24px; }
 @utility t-body-sm { font-family: var(--font-body); font-weight: 400; font-size: 14px; line-height: 20px; }
 @utility t-label-md { font-family: var(--font-body); font-weight: 500; font-size: 14px; line-height: 20px; }
-@utility t-label-sm { font-family: var(--font-body); font-weight: 500; font-size: 12px; line-height: 16px; }
+@utility t-label-sm { font-family: var(--font-body); font-weight: 500; font-size: 12px; line-height: 16px; letter-spacing: 0.2px; }
 @utility t-mono-lg { font-family: var(--font-mono); font-weight: 500; font-size: 22px; line-height: 28px; }
-@utility t-mono-md { font-family: var(--font-mono); font-weight: 500; font-size: 14px; line-height: 20px; }
-@utility t-mono-sm { font-family: var(--font-mono); font-weight: 500; font-size: 12px; line-height: 16px; }
+@utility t-mono-md { font-family: var(--font-mono); font-weight: 400; font-size: 14px; line-height: 20px; }
+@utility t-mono-sm { font-family: var(--font-mono); font-weight: 400; font-size: 12px; line-height: 16px; }
 
 /* Focus rings: 3 px border/strong outside on cream; 3 px ochre on the stage (design-notes §3). */
 @utility focus-cream { &:focus-visible { outline: 3px solid var(--color-border-strong); outline-offset: 2px; } }
 @utility focus-stage { &:focus-visible { outline: 3px solid var(--color-accent-focus-on-stage); outline-offset: 2px; } }
 
-/* Prose defaults inside <Prose> */
-.prose-astro h2 { margin: 16px 0 0; font-family: var(--font-heading); font-weight: 600; font-size: 28px; line-height: 34px; }
-.prose-astro h3 { margin: 8px 0 0; font-family: var(--font-heading); font-weight: 500; font-size: 22px; line-height: 28px; }
+/* Prose defaults inside <Prose> (680 column, 24 px stack; h2 heading/h2, h3 heading/h3, p body/md) */
+.prose-astro h2 { margin: 0; font-family: var(--font-heading); font-weight: 600; font-size: 28px; line-height: 34px; }
+.prose-astro h3 { margin: 0; font-family: var(--font-heading); font-weight: 500; font-size: 22px; line-height: 28px; }
 .prose-astro p { margin: 0; }
 .prose-astro a { color: var(--color-text-link); }
 .prose-astro ul, .prose-astro ol { margin: 0; padding-left: 24px; }
 
-/* Range input */
-.astro-slider { appearance: none; background: transparent; }
-.astro-slider::-webkit-slider-runnable-track { height: 4px; background: var(--color-border-strong); }
-.astro-slider::-webkit-slider-thumb { appearance: none; width: 16px; height: 16px; margin-top: -6px; border-radius: 999px; background: var(--color-accent-primary); border: 2px solid var(--color-surface-card); }
-.astro-slider::-moz-range-track { height: 4px; background: var(--color-border-strong); }
-.astro-slider::-moz-range-thumb { width: 12px; height: 12px; border-radius: 999px; background: var(--color-accent-primary); border: 2px solid var(--color-surface-card); }
-.astro-slider-stage::-webkit-slider-runnable-track { background: var(--color-border-on-stage); }
-.astro-slider-stage::-moz-range-track { background: var(--color-border-on-stage); }
+/* Range input (Slider 9:149): 4 px track source/noise-soft, cobalt fill, 18 px cobalt knob with a 2 px cream ring */
+.astro-slider { appearance: none; background: transparent; margin: 0; height: 20px; }
+.astro-slider::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(var(--color-accent-primary), var(--color-accent-primary)) 0 0 / var(--fill, 0%) 100% no-repeat, var(--color-source-noise-soft); }
+.astro-slider::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; margin-top: -7px; border-radius: 999px; background: var(--color-accent-primary); border: 2px solid var(--color-surface-card); box-sizing: border-box; }
+.astro-slider::-moz-range-track { height: 4px; border-radius: 2px; background: var(--color-source-noise-soft); }
+.astro-slider::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--color-accent-primary); }
+.astro-slider::-moz-range-thumb { width: 18px; height: 18px; border-radius: 999px; background: var(--color-accent-primary); border: 2px solid var(--color-surface-card); box-sizing: border-box; }
+.astro-slider:focus-visible { outline: none; }
+.astro-slider:focus-visible::-webkit-slider-thumb { outline: 3px solid var(--color-border-strong); outline-offset: 0; }
+.astro-slider:focus-visible::-moz-range-thumb { outline: 3px solid var(--color-border-strong); outline-offset: 0; }
+.astro-slider-stage:focus-visible::-webkit-slider-thumb { outline-color: var(--color-accent-focus-on-stage); }
+.astro-slider-stage:focus-visible::-moz-range-thumb { outline-color: var(--color-accent-focus-on-stage); }
