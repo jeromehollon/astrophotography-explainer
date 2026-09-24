@@ -2,8 +2,10 @@
 // "P7 · Algorithms — A · average" (84:2) and "B · median" (114:242) on page 8:10.
 // The only interaction is the Average / Median chip group, which swaps the
 // Computed image and its caption and records the choice in the shared store.
-import { LessonPage, Chip, ChipGroup, ROITile, Callout } from './shim/ui';
-import { useAppStore } from './shim/store';
+import { useState } from 'react';
+import { LessonPage } from '../../shared/ui';
+import { useAppStore } from '../../shared/store';
+import { Chip, ChipGroup, ROITile, Callout } from './local';
 import roiF02 from './assets/roi_f02.png';
 import roiF03 from './assets/roi_f03.png';
 import roiF04 from './assets/roi_f04.png';
@@ -157,11 +159,14 @@ function WorkedExample({ steps, explanation }: { steps: string[]; explanation: s
 }
 
 export default function AlgorithmsPage() {
-  const name = useAppStore((s) => s.algorithm.name);
-  const params = useAppStore((s) => s.algorithm.params);
+  // The page opens on Average (Figma frame A) whatever the store holds, and
+  // records each choice in the shared store without touching other fields.
+  const [method, setMethod] = useState<Method>('average');
   const set = useAppStore((s) => s.set);
-  const method: Method = name === 'median' ? 'median' : 'average';
-  const choose = (m: Method) => set({ algorithm: { name: m, params } });
+  const choose = (m: Method) => {
+    setMethod(m);
+    set({ algorithm: { name: m, params: useAppStore.getState().algorithm.params } });
+  };
 
   return (
     <LessonPage>

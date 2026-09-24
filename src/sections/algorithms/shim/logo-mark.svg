@@ -1,8 +1,0 @@
-<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="Logo/Mark">
-<ellipse id="sub-red" cx="26" cy="27" rx="24" ry="8.5" transform="rotate(-22 26 27)" fill="#E0604B"/>
-<ellipse id="sub-ochre" cx="38" cy="37" rx="24" ry="8.5" transform="rotate(-22 38 37)" fill="#F2CE6B"/>
-<ellipse id="sub-cobalt" cx="32" cy="32" rx="24" ry="8.5" transform="rotate(-22 32 32)" fill="#1F4AA8"/>
-<circle id="core" cx="32" cy="32" r="4.5" fill="#F7F2EA"/>
-</g>
-</svg>
