@@ -3,7 +3,8 @@
 
 Reproduces the app's calibration path for this page (SPEC.md §6.2: dark on, bias inside the
 dark, flat variants from Stage B) and writes PNGs for the Figma frames plus the numbers the
-page quotes. Everything is derived from frame f03 and the level-50 master flats.
+page quotes. Everything is derived from frame f03 and the level-50 master flats, except
+experiment 2, which uses the level-10 master flats (see below).
 
 Reading column (full field, binned to the page width):
   flat_full.png            master flat (dark-flat calibrated), linear stretch between percentiles,
@@ -21,10 +22,16 @@ Try it, experiment 1 (light-frame ROI around the left-side dust mote, native pix
   All light ROIs share one AutoSTF computed on the raw crop, stronger than the default
   (target bg 0.30, shadows clip -1.8 MADN) so the ring reads at tile size.
 
-Try it, experiment 2 (the same light-frame ROI; the flat is on in both tiles):
-  Raw      = roi_computed_flat-as-shot.png   (flat without dark-flat calibration)
-  Computed = roi_computed_flat-darkflat.png  (flat with dark flats subtracted)
-  roi_exp2_removed.png         computed - raw on its own symmetric stretch (the difference is tiny)
+Try it, experiment 2 (the same light-frame ROI; the flat is on in both tiles). It uses the 10 %
+flat, not the 50 % one: the dark flat's pedestal (about 160 DN) is 2.5 % of the 10 % flat's level
+against 0.5 % of the 50 % flat's, so what the dark flats change is five times larger there
+(SPEC §7 P4). Even so it is a few DN under a pixel noise of about 87 DN, which is why the
+difference tile, where the shared noise cancels, is the one that shows the structure.
+  roi_exp2_raw.png             (L - D) / (flat_10_none / f_v)      flat without dark-flat calibration
+  roi_exp2_computed.png        (L - D) / (flat_10_darkflat / f_v)  flat with dark flats subtracted
+  roi_exp2_removed.png         computed - raw, centred on mid grey, on its own symmetric stretch
+                               (span = the 98th percentile of |difference|, so the donut and the
+                               vignetting gradient read plainly at tile size)
   roi_removed_none.png         dark flats off: nothing removed
 
   stats.json                   per-tile numbers (DN and relative response at the mote core),
@@ -56,6 +63,8 @@ DN = 65535.0
 CROP_W, CROP_H = 720, 480
 CENTER_SHIFT = (40, 60)  # (dx, dy) from flat_check's darkest dip to the visual centre of the donut pair
 CORE_R = 25  # px, same as flat_check.json
+EXP2_LEVEL = "10"  # flat level for experiment 2; the dark-flat effect is ~5x larger than at 50
+EXP2_SPAN_PERCENTILE = 98.0  # of |computed - raw|; tighter than experiment 1's 99.5 so the donut is plain
 
 FULL_W = 1200  # page column width; the full-field images are binned to this
 ROI_STF = dict(target_bg=0.30, shadows_clip=-1.8)
@@ -168,19 +177,47 @@ def main() -> None:
     save_gray(np.full_like(raw, 0.5), OUT / "roi_removed_none.png")  # nothing removed: neutral grey
 
     # ---- Try it, experiment 2: the same light-frame ROI, flat as shot vs dark-flat-calibrated flat ----
-    # Raw = computed with flat_50_none, Computed = computed with flat_50_darkflat (both saved above);
-    # what was removed is their difference, on its own symmetric stretch because it is tiny.
-    d2 = computed["flat_50_darkflat"] - computed["flat_50_none"]
-    span2 = float(np.percentile(np.abs(d2), 99.5))
+    # Uses the EXP2_LEVEL flats. Raw = divided by the flat as shot, Computed = divided by the
+    # dark-flat-calibrated flat, both on experiment 1's STF so the tiles match; what was removed is
+    # their difference on its own symmetric stretch (the raw noise cancels because both divide the
+    # same frame, so the pedestal's imprint, the donut and the vignetting gradient, is clean).
+    flats2 = {}
+    for tag in ("none", "darkflat"):
+        vid = f"flat_{EXP2_LEVEL}_{tag}"
+        f, _ = astro.load(PRE / "masters" / f"{vid}.fits")
+        flats2[tag] = f[0].astype(np.float64) / masters[vid]["scale_f_v"]["unit_0_1"]
+    exp2_raw = raw / flats2["none"][ys, xs]
+    exp2_computed = raw / flats2["darkflat"][ys, xs]
+    d2 = exp2_computed - exp2_raw
+    span2 = float(np.percentile(np.abs(d2), EXP2_SPAN_PERCENTILE))
+    save_gray(show_roi(exp2_raw), OUT / "roi_exp2_raw.png")
+    save_gray(show_roi(exp2_computed), OUT / "roi_exp2_computed.png")
     save_gray(diff_show(d2, span2), OUT / "roi_exp2_removed.png")
     stats["experiment_2"] = {
+        "flat_level_percent": int(EXP2_LEVEL),
         "crop": stats["experiment_1"]["crop"],
-        "removed_stretch_dn": {"grey": 0.0, "span": span2 * DN},
+        "stf": stats["experiment_1"]["stf"],
+        "removed_stretch_dn": {"grey": 0.0, "span": span2 * DN, "span_percentile": EXP2_SPAN_PERCENTILE},
         "median_difference_dn": float(np.median(d2) * DN),
+        "difference_dn_p1_p99": [float(v) for v in np.percentile(d2, [1, 99]) * DN],
+        "core_dn": {
+            "flat_as_shot": core_mean(exp2_raw, lcx, lcy, CORE_R) * DN,
+            "flat_darkflat": core_mean(exp2_computed, lcx, lcy, CORE_R) * DN,
+        },
         "core_difference_dn": float(core_mean(d2, lcx, lcy, CORE_R) * DN),
+        "crop_background_dn": float(np.median(raw) * DN),
         "crop_background_madn_dn": float(1.4826 * np.median(np.abs(raw - np.median(raw))) * DN),
-        "darkflat_master_median_dn": masters["darkflat_50"]["median_dn"],
-        "flat_median_dn": masters["flat_50_none"]["median_dn"],
+        "vignetting_corner_over_centre": {
+            "flat_as_shot": check["variants"][f"flat_{EXP2_LEVEL}_none"]["vignetting_residual"],
+            "flat_darkflat": check["variants"][f"flat_{EXP2_LEVEL}_darkflat"]["vignetting_residual"],
+        },
+        "mote_contrast": {
+            "flat_as_shot": check["variants"][f"flat_{EXP2_LEVEL}_none"]["mote_contrast"],
+            "flat_darkflat": check["variants"][f"flat_{EXP2_LEVEL}_darkflat"]["mote_contrast"],
+        },
+        "darkflat_master_median_dn": masters[f"darkflat_{EXP2_LEVEL}"]["median_dn"],
+        "flat_median_dn": masters[f"flat_{EXP2_LEVEL}_none"]["median_dn"],
+        "pedestal_fraction_of_flat": masters[f"darkflat_{EXP2_LEVEL}"]["median_dn"] / masters[f"flat_{EXP2_LEVEL}_none"]["median_dn"],
     }
 
     json.dump(stats, open(OUT / "stats.json", "w"), indent=1)
