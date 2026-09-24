@@ -341,7 +341,8 @@
    "P8 Light frames 2 A average": "121:2",
    "P8 Light frames 2 B median": "133:7083",
    "P9 Workbench A default scenario": "126:4081",
-   "P9 Workbench B stacking": "133:4088"
+   "P9 Workbench B stacking": "133:4088",
+   "P8 Light frames A": "94:46"
   },
   "nodes": {
    "P4 A flat-image": "44:612",
@@ -477,7 +478,21 @@
    "P9 A section-lights (clone of P8-2 section-examine)": "126:4099",
    "P9 A section-method": "128:1270",
    "P9 A section-report / report-panel / actions / button-download": "128:1311 / 128:1316 / 128:1337 / 128:1338",
-   "P9 B roi-strip (Processing tiles) / actions / progress-full-stack": "133:4090 / 133:4437 / 133:4602"
+   "P9 B roi-strip (Processing tiles) / actions / progress-full-stack": "133:4090 / 133:4437 / 133:4602",
+   "P8 A reading": "94:48",
+   "P8 A page-head": "94:49",
+   "P8 A section-clouds": "95:45",
+   "P8 A clouds-box": "95:49",
+   "P8 A cloud-f14/f15/f16 image": "95:51 / 95:54 / 95:57",
+   "P8 A section-tracking": "95:60",
+   "P8 A tracking-box": "95:65",
+   "P8 A tracking-f11 / f11_tracking image": "95:67 / 95:70",
+   "P8 A section-fwhm": "96:45",
+   "P8 A illustration-fwhm": "96:50",
+   "P8 A fwhm panel-round / panel-trailed": "98:45 / 98:90",
+   "P8 A star-box": "96:51",
+   "P8 A star-f11 / f11_tracking image": "96:53 / 96:56",
+   "P8 A section-teaser": "96:58"
   }
  },
  "completedSteps": [
@@ -517,7 +532,8 @@
   "A3.algorithms-fifteen-frames",
   "A4.algorithms-shading-and-grid",
   "L2.light-frames-2-page",
-  "W1.workbench-page"
+  "W1.workbench-page",
+  "L1.light-frames-page"
  ],
  "notes": [
   "Prototype connections cannot cross Figma pages; agents build per page, then frames are moved onto one Prototype page and wired at the end.",
@@ -550,6 +566,7 @@
   "Workbench W1 (2026-09-24): page 8:12, frame A 126:4081 cloned from Light Frames 2 frame A. TopBar Current=Workbench; 'roi-strip (fixed under the top bar)' inserted after the TopBar: dark bar with four ROITile at 282 wide (280x187 wells, captions 'Median of 20 photographs'). Reading: page head -> section-scenarios (five Button instances, Default=Primary, description text) -> section-calibration (4-column table 280/152/400/320 with hairline rows: drawn checkbox + title + note | lesson link | 376x252 master well | drawn 64-bar histogram) -> section-flats (same table, Chip selector) -> section-lights (the P8-2 examine block with a header row and lesson links) -> section-method (table 320/560/288: Chip | how it combines | suggested count) -> section-report (cream panel of label/value/link rows + Download PNG). BottomNav Next hidden. Calibration thumbnails from tools/assets/workbench_page.py in assets/workbench/.",
   "Owner edits landed in P8-2 frame A and P9 frame A during the build (shorter lede, 'The shaded rows show…' paragraph, teaser sentence, 'Preconfigured Scenarios'); both B frames were re-cloned from the edited A frames. P9 B: strip tiles State=Processing with caption 'Stacking…', Download PNG disabled, ProgressBar '35% · 7 of 20 frames' (illustrative).",
   "Owner review 2 (2026-09-24, workbench): calibration and flat tables use clones of the FrameCard checkbox; flat table lost its chips, note text and lesson column; all histograms (tables and FrameCard overlays) are drawn over the full 0-65,535 range; flats shown with no stretch. Hidden nested Histogram/Mini instances disappear from a card's children and layout, so the drawn card histograms sit at x 452. Both B frames re-cloned from A: P8-2 B 133:7083, P9 B 133:4088.",
-  "Owner review 3 (2026-09-24): every image on P8-2 and P9 is oriented like the final master (West-side whole frames and every ROI crop and stack rotated 180 degrees; tools/assets/light_frames_review_page.py). The light-frame list has a drawn header row (row-header: Frame, Image, FWHM, Note, Histogram) in all four frames; table histograms carry no axis label. Rotated images were applied to A and B directly (same hashes), no re-clone."
+  "Owner review 3 (2026-09-24): every image on P8-2 and P9 is oriented like the final master (West-side whole frames and every ROI crop and stack rotated 180 degrees; tools/assets/light_frames_review_page.py). The light-frame list has a drawn header row (row-header: Frame, Image, FWHM, Note, Histogram) in all four frames; table histograms carry no axis label. Rotated images were applied to A and B directly (same hashes), no re-clone.",
+  "Light frames P8 (2026-09-24): reading-only page, no Try-it stage, no rule, single frame A (owner direction: the stage goes on the second Light-frames page). Built as a clone of Alignment frame A on page 8:11 with the illustration, problem, why-stack and callout sections removed. Structure: TopBar(Current=Light frames) -> page-head -> section-clouds (h2, p, dark box with three 368x246 whole-field wells + captions, p) -> section-tracking (h2, 2 p, dark box with two 564x376 galaxy wells, p) -> section-fwhm (h2, 2 p, inline 1200x360 drawing 'illustration-fwhm' with two panels of 33 brightness bars each from assets/light-frames/stats.json, dotted peak line, dashed ochre half-peak line, full-height source/flat-soft band behind the bars at or above half the peak, labels Round star / Trailed star / Brightness / Pixels across the star / Peak / Half of the peak / Width at half the peak; then a dark box with the two 288x288 star cutouts) -> section-teaser (h2, p) -> BottomNav (Algorithms / Light frames, continued). Images are plain FRAME wells with image fills uploaded straight from assets/light-frames/ (tools/assets/light_frames_page.py)."
  ]
 }
