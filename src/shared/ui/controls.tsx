@@ -16,7 +16,7 @@ export type ButtonProps = {
 
 export function Button({ variant = 'primary', onStage, disabled, onClick, children, className, type = 'button', ...rest }: ButtonProps) {
   // Figma: px 24, py 12, gap 8, radius/md 6, label/md. Focus = 3 px ink outline outside (ochre on the stage).
-  const base = 'inline-flex items-center justify-center gap-2 rounded-md px-6 py-3 t-label-md whitespace-nowrap select-none border-2 border-solid';
+  const base = cx('inline-flex items-center justify-center gap-2 rounded-md px-6 t-label-md whitespace-nowrap select-none border-2 border-solid', variant === 'secondary' ? 'py-3' : 'py-[10px]'); // Figma: Secondary is 48 tall (2 px ink border); Primary/Ghost are 44 tall
   const focus = onStage ? 'focus-stage' : 'focus-cream';
   const look = {
     primary: disabled

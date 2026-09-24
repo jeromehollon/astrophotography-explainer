@@ -129,8 +129,8 @@ export function BottomNav() {
   const isWelcome = index === 0;
   return (
     <nav className="box-border flex h-[88px] w-full items-center justify-between border-t border-solid border-border-default bg-surface-page px-[120px]" aria-label="Pages">
-      <div>{prev && !isWelcome && <Button variant="secondary" onClick={() => navigate(prev.path)}>← {prev.title}</Button>}</div>
-      <div>{next && <Button variant="primary" onClick={() => navigate(next.path)}>{isWelcome ? `Start: ${next.title} →` : `${next.title} →`}</Button>}</div>
+      <div>{prev && !isWelcome && <Button variant="secondary" onClick={() => navigate(prev.path)}>← {prev.asPrev ?? prev.title}</Button>}</div>
+      <div>{next && <Button variant="primary" onClick={() => navigate(next.path)}>{isWelcome ? `Start: ${next.asNext ?? next.title} →` : `${next.asNext ?? next.title} →`}</Button>}</div>
     </nav>
   );
 }

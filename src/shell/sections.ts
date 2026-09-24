@@ -15,6 +15,8 @@ export type Section = {
   chapter: string;   // TopBar row 1: 'Welcome' | 'Noise & Defects' | 'Calibration' | 'Alignment' | 'Algorithms' | 'Light frames' | 'Workbench'
   page: string;      // TopBar row 2 label; '' for single-page chapters
   title: string;     // BottomNav label, e.g. 'Noise & Defects'
+  asNext?: string;   // BottomNav label when this page is the Next target, if it differs from title (Figma 94:152)
+  asPrev?: string;   // BottomNav label when this page is the Previous target (Figma 126:4146)
   Component: ComponentType;
 };
 
@@ -31,6 +33,6 @@ export const sections: Section[] = [
   { path: '/alignment', chapter: 'Alignment', page: '', title: 'Alignment', Component: Alignment },
   { path: '/algorithms', chapter: 'Algorithms', page: '', title: 'Algorithms', Component: Algorithms },
   { path: '/light-frames', chapter: 'Light frames', page: 'Image Worthiness', title: 'Light frames', Component: LightFrames },
-  { path: '/light-frames/review', chapter: 'Light frames', page: 'Review the Exposures', title: 'Review the exposures', Component: LightFramesReview },
+  { path: '/light-frames/review', chapter: 'Light frames', page: 'Review the Exposures', title: 'Review the exposures', asNext: 'Light frames, continued', asPrev: 'Light frames', Component: LightFramesReview },
   { path: '/workbench', chapter: 'Workbench', page: '', title: 'Workbench', Component: Workbench },
 ];
