@@ -1,0 +1,91 @@
+{
+ "frame": "f03",
+ "bias_applied_to_every_light_image": true,
+ "region": {
+  "x": 3377,
+  "y": 2679,
+  "w": 64,
+  "h": 64,
+  "zoom": 5,
+  "chosen_by": "most hot pixels shared by light and dark among 64\u00d764 sky-only windows"
+ },
+ "hot_pixel_definition": {
+  "dark_minus_bias_above_dn": 200.0,
+  "light_minus_bias_above_background_madn": 10
+ },
+ "hot_pixels_in_region": {
+  "in_dark": 11,
+  "shared_with_light": 11
+ },
+ "hot_pixels_in_frame": {
+  "in_dark": 16761,
+  "shared_with_light": 11162
+ },
+ "dark_over_light_excess_ratio_percentiles": {
+  "p10": 0.3047675406134604,
+  "p50": 0.36968798747091053,
+  "p90": 0.42541170709789167
+ },
+ "residual_after_dark_madn_median": 11.355915784030348,
+ "brightest_hot_pixel": {
+  "x_in_region": 4,
+  "y_in_region": 3,
+  "raw_dn": 22033.539232247276,
+  "computed_dark_on_dn": 16372.544604577124,
+  "dark_minus_bias_dn": 5660.994627670152,
+  "background_median_dn": 1001.624967342359
+ },
+ "region_background": {
+  "raw_median_dn": 1001.624967342359,
+  "raw_madn_dn": 46.08665164253418,
+  "computed_dark_on_median_dn": 1001.5454092301661,
+  "computed_dark_on_madn_dn": 46.027935370823485
+ },
+ "masters": {
+  "bias_median_dn": 160.49495700979605,
+  "dark_median_dn": 160.99999996251427,
+  "dark_minus_bias_median_dn": 0.4610372765455395
+ },
+ "stretches": {
+  "roi": {
+   "c0": 0.01401799103891477,
+   "m": 0.0029486183165711075,
+   "target_bg": 0.3,
+   "shadows_clip": -1.8
+  },
+  "grain_dark": {
+   "c0": 0.002429196230955422,
+   "m": 6.094241833965121e-05,
+   "target_bg": 0.3,
+   "shadows_clip": -1.8
+  },
+  "removed_dn": {
+   "grey": 0.0,
+   "span": 92.17330328506836
+  },
+  "ampglow": {
+   "c0": 0.005883566337227822,
+   "m": 0.0023616688648481765,
+   "target_bg": 0.3,
+   "shadows_clip": -2.8,
+   "binning": 2
+  }
+ },
+ "old_camera_dark": {
+  "camera": "ZWO ASI294MM Pro",
+  "exposure_s": 600.0,
+  "ccd_temp_c": -8.4,
+  "size_px": [
+   8288,
+   5644
+  ],
+  "median_dn": 451.99999989476055,
+  "centre_median_dn": 451.99999989476055,
+  "edge_median_dn": {
+   "left": 447.9999998956919,
+   "right": 459.9999998928979,
+   "top": 451.99999989476055,
+   "bottom": 451.99999989476055
+  }
+ }
+}

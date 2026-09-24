@@ -329,7 +329,10 @@
    "P5 Flats 2 A no flat": "66:2",
    "P5 Flats 2 B 10% flat": "71:206",
    "P5 Flats 2 C 50% flat": "71:380",
-   "P5 Flats 2 D 85% flat": "71:554"
+   "P5 Flats 2 D 85% flat": "71:554",
+   "P6 Alignment A": "73:2",
+   "P3 Darks A dark off": "78:2",
+   "P3 Darks B dark on": "78:2123"
   },
   "nodes": {
    "P4 A flat-image": "44:612",
@@ -392,7 +395,37 @@
    "P5 A experiment-1": "66:49",
    "P5 A chips-flat-level": "68:1584",
    "P5 A chip-none/10/50/85": "68:1585 / 68:1587 / 68:1589 / 68:1591",
-   "P5 A tile-raw / tile-corrected / tile-what-was-removed": "66:55 / 66:56 / 66:57"
+   "P5 A tile-raw / tile-corrected / tile-what-was-removed": "66:55 / 66:56 / 66:57",
+   "P6 A reading": "73:4",
+   "P6 A page-head": "73:5",
+   "P6 A illustration (SNR chart)": "75:91",
+   "P6 A chart panel-noise": "75:92",
+   "P6 A chart panel-snr": "75:118",
+   "P6 A section-problem": "73:10",
+   "P6 A problem-image": "73:16",
+   "P6 A prose-why-stack": "73:19",
+   "P6 A callout-square-root": "76:42",
+   "P6 A section-naive": "76:47",
+   "P6 A naive-frame05 image": "76:53",
+   "P6 A naive-frame14 image": "76:56",
+   "P6 A naive-average image": "76:59",
+   "P6 A section-aligned": "76:61",
+   "P6 A aligned-frame05 image": "76:68",
+   "P6 A aligned-frame14 image": "76:71",
+   "P6 A aligned-average image": "76:74",
+   "P6 A BottomNav": "73:98",
+   "P3 A illustration (Darks instance)": "78:11",
+   "P3 A dark-image": "78:16",
+   "P3 A section-problem": "78:2111",
+   "P3 A problem-image": "78:2115",
+   "P3 A section-temperature": "78:2116",
+   "P3 A section-ampglow": "78:28",
+   "P3 A ampglow-image": "78:34",
+   "P3 A ampglow-box": "78:31",
+   "P3 A toggle-dark": "78:52",
+   "P3 A experiment-1": "78:49",
+   "P3 B toggle-dark": "78:2165",
+   "P3 B computed-image-well": "I78:2169;9:254"
   }
  },
  "completedSteps": [
@@ -424,7 +457,9 @@
   "P0.welcome-page",
   "S1.bias-page",
   "N1.noise-defects-page",
-  "S2.flats2-page"
+  "S2.flats2-page",
+  "A1.alignment-page",
+  "D1.darks-page"
  ],
  "notes": [
   "Prototype connections cannot cross Figma pages; agents build per page, then frames are moved onto one Prototype page and wired at the end.",
@@ -441,6 +476,8 @@
   "P0 Welcome (2026-09-24): single frame A, no Try-it stage and no ROI tiles by owner direction; full-field images are allowed on Welcome. Assets from tools/assets/welcome_page.py in assets/welcome/.",
   "Bias P2 (2026-09-24): built as a clone of Flats-1 frame A on page 8:5, then cut to intro (Bias illustration in a full-width cream box + two paragraphs) -> whole master bias in a dark box (subsampled every 5th pixel so grain survives) -> 'Taking the bias away' prose -> Try it. One experiment, Bias toggle; tiles Raw / Computed / What was removed, the removed tile shows -bias on its own 2 DN stretch in both states. Under the tiles an 'average-brightness' panel draws two horizontal bars (Raw 1,233 / Computed 1,233 or 1,073 with the 161 DN bias share as a cobalt segment, circle marker in the legend). B is a clone of A with toggle On, computed image swapped to roi_computed_bias.png, caption 'With the bias removed - Bias toggled on', and the computed bar shortened. BottomNav labels edited in the nested text ('← Noise & Defects', 'Darks →').",
   "Noise & Defects N1 (2026-09-24): reading-only introduction page, no Try-it stage, no rule, no state variants (owner direction). Structure: TopBar(Current=Noise & Defects) -> page-head -> illustration 35:2 (unchanged) -> section-problem (prose 680 + 440x330 image + caption) -> prose-why-stack -> section-tour (7 rows: 360x240 image column + caption | Badge/Source + h3 + p + 'fix' line in label/md) -> section-calibration (prose 680 + Callout Note 'Calibration frames are stacked too', 440 wide) -> BottomNav (Welcome / Bias). Images are plain FRAME wells with image fills from assets/noise/ (tools/assets/noise_page.py); upload_assets targets them directly. The owner may remove the tour crops entirely.",
-  "Flats-2 P5 (2026-09-24): built as a clone of Flats-1 frame A on page 8:8. Reading column: page head -> cream box holding a drawn histogram chart (three raw flats, equal-height peaks on one 0..max brightness axis, grey 'Pixels are full' band from the 85 % curve to the right edge; vectors drawn from assets/flats-2/histograms.json, series colours cobalt/ochre/red with a text label at every peak) plus two paragraphs -> 'The problem you can see' with a Note callout (full well aside) and a 440x330 ROI slot (85 % result) -> dark box with the three master flats full field on one shared stretch -> 'So which flat should you take?' prose -> Try it. Stage: one experiment, four Chip instances (No flat / 10 % / 50 % / 85 %) in an auto-layout row replacing the toggle; tiles Raw / Computed / What was removed. B, C, D are clones of A with only the selected chip, the Computed and removed images, and the Computed caption changed. In state A (no flat) the removed tile shows the 50 % difference so it is never empty (owner to confirm). Non-breaking spaces are used before every % so '10 %' never wraps. Assets from tools/assets/flats_page2.py in assets/flats-2/."
+  "Flats-2 P5 (2026-09-24): built as a clone of Flats-1 frame A on page 8:8. Reading column: page head -> cream box holding a drawn histogram chart (three raw flats, equal-height peaks on one 0..max brightness axis, grey 'Pixels are full' band from the 85 % curve to the right edge; vectors drawn from assets/flats-2/histograms.json, series colours cobalt/ochre/red with a text label at every peak) plus two paragraphs -> 'The problem you can see' with a Note callout (full well aside) and a 440x330 ROI slot (85 % result) -> dark box with the three master flats full field on one shared stretch -> 'So which flat should you take?' prose -> Try it. Stage: one experiment, four Chip instances (No flat / 10 % / 50 % / 85 %) in an auto-layout row replacing the toggle; tiles Raw / Computed / What was removed. B, C, D are clones of A with only the selected chip, the Computed and removed images, and the Computed caption changed. In state A (no flat) the removed tile shows the 50 % difference so it is never empty (owner to confirm). Non-breaking spaces are used before every % so '10 %' never wraps. Assets from tools/assets/flats_page2.py in assets/flats-2/.",
+  "Alignment P6 (2026-09-24): reading-only page, no Try-it stage, no rule, single frame A (owner direction). Built as a clone of Noise & Defects frame A on page 8:9. Structure: TopBar(Current=Alignment) -> page-head -> illustration slot holds a drawn two-panel chart (random noise 1/sqrt(N) in source/noise, SNR sqrt(N) in accent/primary, marks at 1/4/16/64 exposures; vectors and text, no image) -> section-problem (prose 680 + 440x330 well showing the middle of the naive average) -> prose-why-stack -> Callout Kind=Why 'Where the square root comes from' at 680 wide -> section-naive (h2, p, dark box: Frame 5 | Frame 14 at 564x376, average at 1152x768) -> section-aligned (same layout; red/600 ellipses inside the two input wells mark the three alignment stars from assets/alignment/stats.json, positions scaled by 564/1200) -> BottomNav (Flats, continued / Algorithms). Frames f05 and f14 by owner direction (SPEC P6 said f02+f05); the meridian flip is never mentioned. Images are plain FRAME wells with image fills from assets/alignment/ (tools/assets/alignment_page.py).",
+  "Darks P3 (2026-09-24): frame A cloned from Flats-1 A (structure, styles, TopBar/BottomNav), then section-map, prose-darkflats and experiment-2 removed. Reading column: page head -> Darks illustration box (752 wide) with two paragraphs + master-dark 64x64 patch at 5x (320x320) to its right -> 'The problem you can see' (prose 680 + light-frame patch 320x320) -> 'Matching the dark to the light' -> 'Amplifier glow on older cameras' with the ASI294MM Pro dark binned 2x in a dark box (1152 wide). Try it: one experiment, toggle 'Dark', tiles Raw / Computed / What was removed with square 318 px wells (instance override). Assets from tools/assets/darks_page.py in assets/darks/. B is a clone of A with only the toggle, the Computed image and its caption changed. Owner decisions: bias is applied to every light image and never mentioned; the master dark is used as supplied ('trust the master dark') although it removes only ~37% of each hot pixel's excess; the temperature difference between darks and lights is not mentioned."
  ]
 }

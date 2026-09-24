@@ -1,0 +1,196 @@
+#!/usr/bin/env python3
+"""Real image assets for the Darks lesson (P3).
+
+Reproduces the app's calibration path for this page (SPEC.md §6.1–6.2) and writes PNGs for the
+Figma frames plus the numbers the page quotes. The page shows a 64×64 native-pixel region of one
+light frame, enlarged so single pixels are visible (nearest-neighbour, no binning), and the same
+region of the master dark. The bias is applied to every light-frame image on this page because the
+Bias lesson already covered it; the Darks page never mentions it.
+
+Region choice: the 64×64 window with the most hot pixels shared by the light and the master dark,
+among windows that hold only sky background (no stars) and no pixel that is hotter in the dark than in
+the light (a few such defective pixels exist and would print as black dots). The master dark is used
+exactly as supplied (owner decision 2026-09-24: "trust the master dark").
+
+Reading column:
+  grain_light.png     (L − B) on the region, one AutoSTF (target bg 0.30, clip −1.8 MADN), enlarged ×5
+  grain_dark.png      the master dark on the same region, its own AutoSTF, enlarged ×5
+  ampglow_full.png    the old-camera dark (ASI294MM Pro, 600 s), binned 2×2, AutoSTF (target bg 0.30,
+                      clip −2.8 MADN). Display only: it shows amplifier glow; it is never applied.
+
+Try it (same region, same enlargement, one STF shared by raw and computed):
+  roi_raw.png                 L − B
+  roi_computed_dark-off.png   identical to raw (nothing else happens with the dark off)
+  roi_computed_dark-on.png    L − D   (the dark carries the bias, so B is not subtracted again)
+  roi_removed.png             computed − raw = B − D centred on mid grey (darker = brightness removed),
+                              shown in every toggle state; the span is ±2 MADN of the raw crop, so the
+                              learner's own noise level sets the scale and hot pixels print as black
+
+  stats.json                  region position, hot-pixel counts and values, medians, every stretch used
+
+Usage:
+  uv run tools/assets/darks_page.py            # writes assets/darks/
+"""
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+import numpy as np
+
+REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO / "tools"))
+import astro  # noqa: E402
+
+PRE = REPO / "data" / "derived" / "precompute"
+CAL = REPO / "source_images" / "calibration"
+OUT = REPO / "assets" / "darks"
+
+FRAME = "f03"
+DN = 65535.0
+ROI = 64          # native pixels, square
+ZOOM = 5          # nearest-neighbour enlargement for the page (64 × 5 = 320 px)
+BORDER = 256      # keep the window away from the frame edge
+ROI_STF = dict(target_bg=0.30, shadows_clip=-1.8)
+FRAME_STF = dict(target_bg=0.30, shadows_clip=-2.8)
+HOT_DN = 200.0    # a hot pixel: dark − bias above this many pixel-brightness units (65535 = full scale)
+
+
+def enlarge(img: np.ndarray, k: int) -> np.ndarray:
+    return np.repeat(np.repeat(img, k, axis=0), k, axis=1)
+
+
+def bin2(img: np.ndarray) -> np.ndarray:
+    h, w = (img.shape[0] // 2) * 2, (img.shape[1] // 2) * 2
+    return img[:h, :w].reshape(h // 2, 2, w // 2, 2).mean(axis=(1, 3))
+
+
+def save_gray(img: np.ndarray, path: Path, **kw) -> None:
+    astro.save(np.clip(img, 0, 1)[None].astype(np.float32), path, bits=8, **kw)
+
+
+def madn(x: np.ndarray) -> float:
+    return float(1.4826 * np.median(np.abs(x - np.median(x))))
+
+
+def box_sum(mask: np.ndarray, k: int) -> np.ndarray:
+    """Sum of `mask` over every k×k window (top-left indexed), via a 2-D cumulative sum."""
+    c = np.pad(mask.astype(np.int64), ((1, 0), (1, 0))).cumsum(0).cumsum(1)
+    return c[k:, k:] - c[:-k, k:] - c[k:, :-k] + c[:-k, :-k]
+
+
+def main() -> None:
+    OUT.mkdir(parents=True, exist_ok=True)
+    frames = {f["id"]: f for f in json.load(open(PRE / "frames.json"))["frames"]}
+
+    light, _ = astro.load(REPO / frames[FRAME]["source"])
+    bias, _ = astro.load(next(CAL.glob("masterBias*.xisf")))
+    dark, _ = astro.load(next(CAL.glob("masterDark*.xisf")))
+    L, B, D = (a[0].astype(np.float64) for a in (light, bias, dark))
+    H, W = L.shape
+
+    # ---- pick the region: most hot pixels shared by light and dark, only sky, no dark-only pixels ----
+    dark_excess = D - B
+    hot = dark_excess > HOT_DN / DN
+    lb = L - B
+    sky_med, sky_madn = float(np.median(lb)), madn(lb)
+    bright = lb > sky_med + 10 * sky_madn
+    # stars are extended: a bright pixel with at least 4 bright neighbours in its 3×3 block
+    nb = sum(np.roll(np.roll(bright, dy, 0), dx, 1) for dy in (-1, 0, 1) for dx in (-1, 0, 1)) - bright
+    star = bright & (nb >= 4)
+    dark_only = hot & ((lb - sky_med) < 0.5 * dark_excess)
+    shared = hot & bright & ~star
+    score = np.where((box_sum(star, ROI) == 0) & (box_sum(dark_only, ROI) == 0), box_sum(shared, ROI), -1)
+    score[:BORDER] = -1
+    score[-BORDER:] = -1
+    score[:, :BORDER] = -1
+    score[:, -BORDER:] = -1
+    y0, x0 = np.unravel_index(int(np.argmax(score)), score.shape)
+    ys, xs = slice(y0, y0 + ROI), slice(x0, x0 + ROI)
+
+    raw = lb[ys, xs]                     # L − B
+    computed_on = (L - D)[ys, xs]        # L − D
+    removed = computed_on - raw          # = B − D  (≤ 0 at hot pixels)
+    stf = astro.auto_stf(raw[None].astype(np.float32), **ROI_STF)
+    show = lambda img: enlarge(astro.apply_stf(np.clip(img, 0, 1)[None].astype(np.float32), stf)[0], ZOOM)
+
+    save_gray(show(raw), OUT / "roi_raw.png")
+    save_gray(show(raw), OUT / "roi_computed_dark-off.png")
+    save_gray(show(computed_on), OUT / "roi_computed_dark-on.png")
+    span = 2 * madn(raw)
+    save_gray(enlarge(np.clip(0.5 + removed / (2 * span), 0, 1), ZOOM), OUT / "roi_removed.png")
+    save_gray(show(raw), OUT / "grain_light.png")
+
+    dark_roi = D[ys, xs]
+    stf_dark = astro.auto_stf(dark_roi[None].astype(np.float32), **ROI_STF)
+    save_gray(enlarge(astro.apply_stf(np.clip(dark_roi, 0, 1)[None].astype(np.float32), stf_dark)[0], ZOOM),
+              OUT / "grain_dark.png")
+
+    # ---- the old-camera dark: amplifier glow, display only ----
+    old, old_hdr = astro.load(CAL / "darkFromOlderCamera.fits")
+    old2 = bin2(old[0].astype(np.float64))
+    stf_old = astro.auto_stf(old2[None].astype(np.float32), **FRAME_STF)
+    save_gray(astro.apply_stf(old2[None].astype(np.float32), stf_old)[0], OUT / "ampglow_full.png")
+    oh, ow = old2.shape
+    centre = old2[oh // 2 - oh // 8: oh // 2 + oh // 8, ow // 2 - ow // 8: ow // 2 + ow // 8]
+    edge_w = ow // 8
+    edges = {
+        "left": old2[:, :edge_w], "right": old2[:, -edge_w:],
+        "top": old2[: oh // 8, :], "bottom": old2[-(oh // 8):, :],
+    }
+
+    hot_roi = hot[ys, xs]
+    shared_roi = shared[ys, xs]
+    brightest = np.unravel_index(int(np.argmax(np.where(shared_roi, raw, -1))), (ROI, ROI))
+    ratio = dark_excess[shared] / (lb[shared] - sky_med)
+    stats = {
+        "frame": FRAME,
+        "bias_applied_to_every_light_image": True,
+        "region": {"x": int(x0), "y": int(y0), "w": ROI, "h": ROI, "zoom": ZOOM,
+                   "chosen_by": "most hot pixels shared by light and dark among 64×64 sky-only windows"},
+        "hot_pixel_definition": {"dark_minus_bias_above_dn": HOT_DN,
+                                 "light_minus_bias_above_background_madn": 10},
+        "hot_pixels_in_region": {"in_dark": int(hot_roi.sum()), "shared_with_light": int(shared_roi.sum())},
+        "hot_pixels_in_frame": {"in_dark": int(hot.sum()), "shared_with_light": int(shared.sum())},
+        "dark_over_light_excess_ratio_percentiles": {
+            "p10": float(np.percentile(ratio, 10)), "p50": float(np.percentile(ratio, 50)),
+            "p90": float(np.percentile(ratio, 90))},
+        "residual_after_dark_madn_median": float(np.median(((L - D)[shared] - sky_med)) / sky_madn),
+        "brightest_hot_pixel": {
+            "x_in_region": int(brightest[1]), "y_in_region": int(brightest[0]),
+            "raw_dn": float(raw[brightest] * DN),
+            "computed_dark_on_dn": float(computed_on[brightest] * DN),
+            "dark_minus_bias_dn": float(dark_excess[ys, xs][brightest] * DN),
+            "background_median_dn": float(np.median(raw) * DN),
+        },
+        "region_background": {
+            "raw_median_dn": float(np.median(raw) * DN), "raw_madn_dn": madn(raw) * DN,
+            "computed_dark_on_median_dn": float(np.median(computed_on) * DN),
+            "computed_dark_on_madn_dn": madn(computed_on) * DN,
+        },
+        "masters": {
+            "bias_median_dn": float(np.median(B) * DN),
+            "dark_median_dn": float(np.median(D) * DN),
+            "dark_minus_bias_median_dn": float(np.median(dark_excess) * DN),
+        },
+        "stretches": {
+            "roi": {"c0": stf[0][0], "m": stf[0][1], **ROI_STF},
+            "grain_dark": {"c0": stf_dark[0][0], "m": stf_dark[0][1], **ROI_STF},
+            "removed_dn": {"grey": 0.0, "span": span * DN},
+            "ampglow": {"c0": stf_old[0][0], "m": stf_old[0][1], **FRAME_STF, "binning": 2},
+        },
+        "old_camera_dark": {
+            "camera": old_hdr.get("INSTRUME"), "exposure_s": old_hdr.get("EXPTIME"),
+            "ccd_temp_c": old_hdr.get("CCD-TEMP"), "size_px": [int(old.shape[2]), int(old.shape[1])],
+            "median_dn": float(np.median(old2) * DN),
+            "centre_median_dn": float(np.median(centre) * DN),
+            "edge_median_dn": {k: float(np.median(v) * DN) for k, v in edges.items()},
+        },
+    }
+    json.dump(stats, open(OUT / "stats.json", "w"), indent=1)
+    print(json.dumps(stats, indent=1))
+
+
+if __name__ == "__main__":
+    main()
