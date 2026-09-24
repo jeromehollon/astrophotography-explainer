@@ -1,9 +1,10 @@
 /** P9 Workbench (Figma 126:4081 / 133:4088). */
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { calSrc, masterHistogram, METHOD_LABEL, ROIS, ROI_KEYS, SENSOR } from './data';
 import { LightFramesBlock } from './LightFramesBlock';
 import { pngFilename, stackFullPng, useRegionStack, type StackInputs } from './live';
 import { Render } from './Render';
+import { claimThanks, ThanksModal } from './ThanksModal';
 import { matchScenario, SCENARIOS, type Scenario } from './scenarios';
 import { LessonPage, PageHead, Reading } from './shell';
 import { useAppStore, type AlgorithmName, type FlatLevel } from './store';
@@ -104,6 +105,9 @@ export default function Workbench() {
 
   const [job, setJob] = useState<Job | null>(null);
   const [output, setOutput] = useState<{ w: number; h: number; cropped: boolean } | null>(null);
+  const [thanks, setThanks] = useState(false);
+  const closeThanks = useCallback(() => setThanks(false), []);
+  const downloadButton = useCallback(() => actionsRef.current?.querySelector<HTMLElement>('button') ?? null, []);
   const jobRef = useRef<Job | null>(null);
   const actionsRef = useRef<HTMLDivElement>(null);
   useEffect(() => () => jobRef.current?.controller.abort(), []);
@@ -130,6 +134,9 @@ export default function Workbench() {
       a.download = pngFilename(inputs);
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 10_000);
+      // The download has started. The first time in this tab session, thank the learner: opened on the next tick so
+      // the job-end focus effect below runs before the dialog takes focus (it returns focus to the button on close).
+      if (claimThanks()) setTimeout(() => setThanks(true), 0);
     } catch (e) {
       if (!(e instanceof DOMException && e.name === 'AbortError')) console.error(e);
     } finally {
@@ -274,6 +281,7 @@ export default function Workbench() {
             </div>
           </div>
         </Band>
+      {thanks && <ThanksModal onClose={closeThanks} returnFocusTo={downloadButton} />}
     </LessonPage>
   );
 }
