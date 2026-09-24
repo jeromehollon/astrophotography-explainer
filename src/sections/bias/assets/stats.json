@@ -1,0 +1,35 @@
+{
+ "frame": "f03",
+ "camera_offset_setting": 160,
+ "bias_full": {
+  "source": "masterBias_BIN-1_6224x4168.xisf, every 5th pixel, no averaging",
+  "stretch": {
+   "linear_lo_dn": 158.40999736916274,
+   "linear_hi_dn": 164.05000225058757
+  },
+  "median_dn": 160.49495700979605,
+  "mean_dn": 160.53352158088944,
+  "madn_dn": 0.43731236695800907,
+  "min_dn": 146.9545447267592,
+  "max_dn": 183.05999660049565
+ },
+ "experiment_1": {
+  "crop": {
+   "x": 2760,
+   "y": 1856,
+   "w": 720,
+   "h": 480
+  },
+  "stf": {
+   "c0": 0.01456471702631563,
+   "m": 0.0035114101293450203,
+   "target_bg": 0.3,
+   "shadows_clip": -1.8
+  },
+  "roi_mean_raw_dn": 1233.3250304148607,
+  "roi_mean_computed_dn": 1072.791802872973,
+  "roi_mean_bias_dn": 160.5332275418876,
+  "roi_median_raw_dn": 1214.000030234456,
+  "roi_median_computed_dn": 1053.3200327132363
+ }
+}
