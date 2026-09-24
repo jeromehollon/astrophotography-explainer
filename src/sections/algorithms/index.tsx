@@ -4,8 +4,8 @@
 // Computed image and its caption and records the choice in the shared store.
 import { useState } from 'react';
 import { LessonPage } from '../../shared/ui';
-import { useAppStore } from '../../shared/store';
 import { Chip, ChipGroup, ROITile, Callout } from './local';
+import { recordMethod, type Method } from './methods';
 import roiF02 from './assets/roi_f02.png';
 import roiF03 from './assets/roi_f03.png';
 import roiF04 from './assets/roi_f04.png';
@@ -17,8 +17,6 @@ import stack15Median from './assets/stack15_median.png';
 import stack15Kappa from './assets/stack15_kappa_sigma.png';
 import stack15Winsorized from './assets/stack15_winsorized.png';
 import stack15Rcr from './assets/stack15_rcr.png';
-
-type Method = 'average' | 'median';
 
 const computed: Record<Method, { src: string; caption: string }> = {
   average: {
@@ -162,10 +160,9 @@ export default function AlgorithmsPage() {
   // The page opens on Average (Figma frame A) whatever the store holds, and
   // records each choice in the shared store without touching other fields.
   const [method, setMethod] = useState<Method>('average');
-  const set = useAppStore((s) => s.set);
   const choose = (m: Method) => {
     setMethod(m);
-    set({ algorithm: { name: m, params: useAppStore.getState().algorithm.params } });
+    recordMethod(m);
   };
 
   return (
