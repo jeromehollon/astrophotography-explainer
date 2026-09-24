@@ -69,14 +69,21 @@ function crop(src: { data: Float32Array; rect: Rect; w: number; h: number }, rec
   return out;
 }
 
-/** Robust noise readout: MADN of the background after clipping stars (> median + 3·MADN), in DN. */
-export function backgroundNoise(data: Float32Array): number {
-  const first = medianMadn(data);
+/**
+ * Robust noise readout: MADN of the background after clipping stars (> median + 3·MADN), in DN. Estimated on a
+ * strided subsample of at most `maxSamples` values: the estimate's own error (~1/√n) is far below what the
+ * readout shows, and sorting the full 4-ROI set would cost ~0.5 s on the main thread.
+ */
+export function backgroundNoise(data: Float32Array, maxSamples = 50_000): number {
+  const stride = Math.max(1, Math.floor(data.length / maxSamples));
+  const sub = stride === 1 ? data : new Float32Array(Math.ceil(data.length / stride));
+  if (stride > 1) for (let i = 0, k = 0; i < data.length; i += stride) sub[k++] = data[i];
+  const first = medianMadn(sub);
   if (!first.n) return NaN;
   const hi = first.median + 3 * first.madn;
   const bg = new Float32Array(first.n);
   let n = 0;
-  for (let i = 0; i < data.length; i++) { const x = data[i]; if (x === x && x <= hi) bg[n++] = x; }
+  for (let i = 0; i < sub.length; i++) { const x = sub[i]; if (x === x && x <= hi) bg[n++] = x; }
   return medianMadn(bg.subarray(0, n)).madn;
 }
 

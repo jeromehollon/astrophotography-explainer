@@ -16,7 +16,7 @@ export { integrateFrames, integrate1d, DEFAULT_PARAMS, erf, erfinv } from './int
 export { useStack, useCalibratedRoi, RoiCanvas } from './react';
 export type { RoiCanvasProps, UseStackState, UseRoiState } from './react';
 export { exportPng, exportFits, exportFilename, fitsHeaderFor, calibTag } from './export';
-export { getExecutor, setExecutor } from './pool';
+export { getExecutor, setExecutor, poolStats } from './pool';
 export { inlineExecutor } from './jobs';
 
 import { fetchNormalization } from '../data/json';

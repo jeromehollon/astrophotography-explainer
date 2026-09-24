@@ -103,18 +103,28 @@ function sortNumeric(a: Float64Array): void {
   a.sort();
 }
 
-/** Rousseeuw–Croux Sn = lomed_i himed_j |x_i − x_j| (no constant). O(n² log n), fine for n ≤ 24. */
+/**
+ * Rousseeuw–Croux Sn = lomed_i himed_j |x_i − x_j| (no constant) on the sorted slice v[i..j). For each i the
+ * distances to the left (x_i − x_j, j < i) and to the right (x_j − x_i, j > i) are both sorted, so the k-th
+ * smallest comes from a two-pointer merge: O(n) per i, O(n²) in all, no sorting.
+ */
 export function snEstimator(v: Float64Array, i: number, j: number, scratchA: Float64Array, scratchB: Float64Array): number {
   const n = j - i;
   const hiIdx = Math.floor(n / 2);          // (floor(n/2)+1)-th smallest, 0-based
   const loIdx = Math.floor((n + 1) / 2) - 1; // floor((n+1)/2)-th smallest, 0-based
   const inner = scratchB.subarray(0, n);
-  const d = scratchA.subarray(0, n);
+  void scratchA;
   for (let a = 0; a < n; a++) {
     const xa = v[i + a];
-    for (let b = 0; b < n; b++) d[b] = Math.abs(xa - v[i + b]);
-    sortNumeric(d);
-    inner[a] = d[hiIdx];
+    // k-th smallest (k = hiIdx, 0-based) among {0} ∪ left distances ∪ right distances
+    let l = a - 1, r = a + 1, count = 0, val = 0; // distance 0 (j = a) is the smallest
+    while (count < hiIdx) {
+      const dl = l >= 0 ? xa - v[i + l] : Infinity;
+      const dr = r < n ? v[i + r] - xa : Infinity;
+      if (dl <= dr) { val = dl; l--; } else { val = dr; r++; }
+      count++;
+    }
+    inner[a] = val;
   }
   sortNumeric(inner);
   return inner[loIdx];
@@ -189,6 +199,19 @@ function sampleDeviation(v: Float64Array, i: number, j: number, m: number, d: Fl
   return fnCorrection(n) * dd[k];
 }
 
+const erfinvAbscissae = new Map<string, Float64Array>();
+/** x_k = √2·erfinv((k+1−0.317)/n), k = 0..n1−1: depends only on (n, n1), so cache it. */
+function abscissae(n: number, n1: number): Float64Array {
+  const key = `${n}|${n1}`;
+  let t = erfinvAbscissae.get(key);
+  if (!t) {
+    t = new Float64Array(n1);
+    for (let k = 0; k < n1; k++) t[k] = Math.SQRT2 * erfinv((k + 1 - 0.317) / n);
+    erfinvAbscissae.set(key, t);
+  }
+  return t;
+}
+
 function lineFitDeviation(v: Float64Array, i: number, j: number, m: number, d: Float64Array): number {
   const n = j - i;
   const n1 = Math.trunc(0.683 * n + 0.317);
@@ -196,10 +219,11 @@ function lineFitDeviation(v: Float64Array, i: number, j: number, m: number, d: F
   const dd = d.subarray(0, n);
   for (let k = 0; k < n; k++) dd[k] = Math.abs(v[i + k] - m);
   sortNumeric(dd);
-  // least-squares line y ≈ a + b·x through (x_k, y_k), x_k = √2·erfinv((k+1−0.317)/n)
+  // least-squares line y ≈ a + b·x through (x_k, y_k)
+  const xs = abscissae(n, n1);
   let sx = 0, sy = 0, sxx = 0, sxy = 0;
   for (let k = 0; k < n1; k++) {
-    const x = Math.SQRT2 * erfinv((k + 1 - 0.317) / n);
+    const x = xs[k];
     const y = dd[k];
     sx += x; sy += y; sxx += x * x; sxy += x * y;
   }
