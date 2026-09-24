@@ -11,7 +11,8 @@ export const ROI_KEYS: RoiKey[] = ['trail', 'galaxy', 'group', 'mote'];
 export type Rect = { x: number; y: number; w: number; h: number };
 
 /** design-notes §5 item 29: reference-frame (f03) sensor coordinates, 1440×960 native, shown at bin 2. */
-const centred = (cx: number, cy: number, w: number, h: number): Rect => ({ x: cx - w / 2, y: cy - h / 2, w, h });
+/** Snapped to even x, y so the rect is a multiple of bin 2 (the mote's 2397 − 480 = 1917 would be odd). */
+const centred = (cx: number, cy: number, w: number, h: number): Rect => ({ x: 2 * Math.floor((cx - w / 2) / 2), y: 2 * Math.floor((cy - h / 2) / 2), w, h });
 export const ROIS: Record<RoiKey, { title: string; rect: Rect }> = {
   trail: { title: 'Satellite trail', rect: centred(4760, 2850, 1440, 960) },
   galaxy: { title: 'Central galaxy', rect: centred(3246, 2100, 1440, 960) },
