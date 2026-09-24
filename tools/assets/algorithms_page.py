@@ -20,11 +20,11 @@ The crop centre is the spot the Noise & Defects page used):
 One pixel (the numbers in the "What happens to one pixel" box):
   stats.json  ->  "one_pixel"     the four brightnesses of one trail pixel, their average and median
 
-Closing comparison (the same crop, the eight West-side frames f00-f07, one tile per method):
-  stack8_average.png, stack8_median.png, stack8_kappa_sigma.png,
-  stack8_winsorized.png, stack8_rcr.png
+Closing comparison (the same crop, the first fifteen raw frames f00-f14, one tile per method):
+  stack15_average.png, stack15_median.png, stack15_kappa_sigma.png,
+  stack15_winsorized.png, stack15_rcr.png
 
-Worked examples (stats.json -> "eight_frames" -> "one_pixel_traces"): the eight brightnesses of one
+Worked examples (stats.json -> "fifteen_frames" -> "one_pixel_traces"): the fifteen brightnesses of one
 trail pixel and, for each rejection method, every quantity the method computes on them (middle,
 spread, limits, what it rejects, the result), from scalar versions of the same algorithms.
   The rejection methods follow docs/knowledge/wbpp.md §4.6 with WBPP's constants: kappa-sigma
@@ -59,7 +59,7 @@ OUT = REPO / "assets" / "algorithms"
 REF = "f03"
 FOUR = ["f03", "f02", "f04", "f05"]  # SPEC's Satellite Trail Challenge minus f07 (owner: 4 frames)
 TWENTY = [f"f{i:02d}" for i in range(20)]  # the raw frames; synthetic variants excluded
-EIGHT = [f"f{i:02d}" for i in range(8)]  # the West-side frames (before the meridian flip), f03 among them
+FIFTEEN = [f"f{i:02d}" for i in range(15)]  # the first fifteen raw frames, f03 among them
 CAL_STATE = "dark|flat_50_darkflat"
 FLAT_ID = "flat_50_darkflat"
 DN = 65535.0
@@ -388,28 +388,28 @@ def main() -> None:
         "how_chosen": "on the fitted trail line within 96 px of the crop centre, the pixel where frame 3 exceeds the other three by the most, those three within 2 noise widths of the background",
     }
 
-    # --- eight-frame stacks, one per method (the closing comparison)
-    s8 = np.stack([crops[f] for f in EIGHT])
-    r8 = {"average": (s8.mean(axis=0), np.zeros(s8.shape, bool)), "median": (np.median(s8, axis=0), np.zeros(s8.shape, bool))}
-    r8["kappa_sigma"] = kappa_sigma(s8, **KAPPA)
-    r8["winsorized"] = winsorized(s8, **WINSOR)
-    r8["rcr"] = rcr(s8, RCR_LIMIT)
-    stack8 = {}
-    for name, (img, rej) in r8.items():
-        save_gray(show(img), OUT / f"stack8_{name}.png")
-        stack8[name] = {"trail_excess_dn": trail_excess_dn(img), "noise_madn_dn": noise_dn(img),
-                        "share_of_trail_pixels_where_f03_was_rejected": float(rej[EIGHT.index(REF)][trail].mean())}
-    # one trail pixel across the eight frames, same choice rule as the four-frame example
-    others8 = np.stack([crops[f] for f in EIGHT if f != REF])
-    quiet8 = (np.abs(others8 - bg_level) < 2 * bg_noise).all(axis=0)
-    score8 = np.where(on_trail & quiet8 & near, crops[REF] - others8.max(axis=0), -np.inf)
-    p8y, p8x = np.unravel_index(np.argmax(score8), score8.shape)
-    vals8 = [float(round(crops[f][p8y, p8x] * DN)) for f in EIGHT]
-    traces = {"crop_xy": [int(p8x), int(p8y)], "frames": EIGHT, "brightness_dn": vals8,
-              "average_dn": float(np.mean(vals8)), "median_dn": float(np.median(vals8)),
-              "kappa_sigma": trace_kappa_sigma(vals8, **KAPPA), "winsorized": trace_winsorized(vals8, **WINSOR), "rcr": trace_rcr(vals8, RCR_LIMIT)}
+    # --- fifteen-frame stacks, one per method (the closing comparison)
+    s15 = np.stack([crops[f] for f in FIFTEEN])
+    r15 = {"average": (s15.mean(axis=0), np.zeros(s15.shape, bool)), "median": (np.median(s15, axis=0), np.zeros(s15.shape, bool))}
+    r15["kappa_sigma"] = kappa_sigma(s15, **KAPPA)
+    r15["winsorized"] = winsorized(s15, **WINSOR)
+    r15["rcr"] = rcr(s15, RCR_LIMIT)
+    stack15 = {}
+    for name, (img, rej) in r15.items():
+        save_gray(show(img), OUT / f"stack15_{name}.png")
+        stack15[name] = {"trail_excess_dn": trail_excess_dn(img), "noise_madn_dn": noise_dn(img),
+                        "share_of_trail_pixels_where_f03_was_rejected": float(rej[FIFTEEN.index(REF)][trail].mean())}
+    # one trail pixel across the fifteen frames, same choice rule as the four-frame example
+    others15 = np.stack([crops[f] for f in FIFTEEN if f != REF])
+    quiet15 = (np.abs(others15 - bg_level) < 2 * bg_noise).all(axis=0)
+    score15 = np.where(on_trail & quiet15 & near, crops[REF] - others15.max(axis=0), -np.inf)
+    p15y, p15x = np.unravel_index(np.argmax(score15), score15.shape)
+    vals15 = [float(round(crops[f][p15y, p15x] * DN)) for f in FIFTEEN]
+    traces = {"crop_xy": [int(p15x), int(p15y)], "frames": FIFTEEN, "brightness_dn": vals15,
+              "average_dn": float(np.mean(vals15)), "median_dn": float(np.median(vals15)),
+              "kappa_sigma": trace_kappa_sigma(vals15, **KAPPA), "winsorized": trace_winsorized(vals15, **WINSOR), "rcr": trace_rcr(vals15, RCR_LIMIT)}
 
-    # --- twenty-frame stacks, one per method (numbers only; the page shows the eight-frame tiles)
+    # --- twenty-frame stacks, one per method (numbers only; the page shows the fifteen-frame tiles)
     s20 = np.stack([crops[f] for f in TWENTY])
     results = {"average": (s20.mean(axis=0), np.zeros(s20.shape, bool)), "median": (np.median(s20, axis=0), np.zeros(s20.shape, bool))}
     ks, ks_rej = kappa_sigma(s20, **KAPPA)
@@ -448,8 +448,8 @@ def main() -> None:
         },
         "one_pixel": one_pixel,
         "share_of_trail_pixels_where_f03_is_the_largest_of_four": f03_is_max4,
-        "eight_frames": {"frames": EIGHT, "methods": stack8, "one_pixel_traces": traces,
-                         "share_of_trail_pixels_where_f03_is_the_largest_of_eight": float((s8.argmax(axis=0) == EIGHT.index(REF))[on_trail].mean())},
+        "fifteen_frames": {"frames": FIFTEEN, "methods": stack15, "one_pixel_traces": traces,
+                         "share_of_trail_pixels_where_f03_is_the_largest_of_fifteen": float((s15.argmax(axis=0) == FIFTEEN.index(REF))[on_trail].mean())},
         "twenty_frames": {"frames": TWENTY, "parameters": {"kappa_sigma": KAPPA, "winsorized": WINSOR, "rcr_limit": RCR_LIMIT}, "methods": stack20},
     }
     json.dump(stats, open(OUT / "stats.json", "w"), indent=1)

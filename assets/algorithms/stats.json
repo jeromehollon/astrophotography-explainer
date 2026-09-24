@@ -77,7 +77,7 @@
   "how_chosen": "on the fitted trail line within 96 px of the crop centre, the pixel where frame 3 exceeds the other three by the most, those three within 2 noise widths of the background"
  },
  "share_of_trail_pixels_where_f03_is_the_largest_of_four": 0.8600441501103753,
- "eight_frames": {
+ "fifteen_frames": {
   "frames": [
    "f00",
    "f01",
@@ -86,33 +86,40 @@
    "f04",
    "f05",
    "f06",
-   "f07"
+   "f07",
+   "f08",
+   "f09",
+   "f10",
+   "f11",
+   "f12",
+   "f13",
+   "f14"
   ],
   "methods": {
    "average": {
-    "trail_excess_dn": 3.022809277589747,
-    "noise_madn_dn": 5.493033791203142,
+    "trail_excess_dn": 1.533883082656665,
+    "noise_madn_dn": 3.5470032858339477,
     "share_of_trail_pixels_where_f03_was_rejected": 0.0
    },
    "median": {
-    "trail_excess_dn": 1.4266689256418579,
-    "noise_madn_dn": 5.827019498539194,
+    "trail_excess_dn": 0.769294316189664,
+    "noise_madn_dn": 4.047517525285166,
     "share_of_trail_pixels_where_f03_was_rejected": 0.0
    },
    "kappa_sigma": {
-    "trail_excess_dn": 3.013880749539773,
-    "noise_madn_dn": 5.4922149578470965,
-    "share_of_trail_pixels_where_f03_was_rejected": 0.0
+    "trail_excess_dn": 1.1034498190511415,
+    "noise_madn_dn": 3.4684259120492245,
+    "share_of_trail_pixels_where_f03_was_rejected": 0.17218543046357615
    },
    "winsorized": {
-    "trail_excess_dn": 1.6082003451934788,
-    "noise_madn_dn": 5.5077725976033625,
-    "share_of_trail_pixels_where_f03_was_rejected": 0.29713024282560707
+    "trail_excess_dn": 0.8111594837376706,
+    "noise_madn_dn": 3.4141848333445872,
+    "share_of_trail_pixels_where_f03_was_rejected": 0.3271523178807947
    },
    "rcr": {
-    "trail_excess_dn": 1.1184312324119763,
-    "noise_madn_dn": 5.809250251553562,
-    "share_of_trail_pixels_where_f03_was_rejected": 0.47328918322295804
+    "trail_excess_dn": 0.5062118402065816,
+    "noise_madn_dn": 3.5785958261101993,
+    "share_of_trail_pixels_where_f03_was_rejected": 0.46004415011037525
    }
   },
   "one_pixel_traces": {
@@ -128,7 +135,14 @@
     "f04",
     "f05",
     "f06",
-    "f07"
+    "f07",
+    "f08",
+    "f09",
+    "f10",
+    "f11",
+    "f12",
+    "f13",
+    "f14"
    ],
    "brightness_dn": [
     903.0,
@@ -138,10 +152,17 @@
     903.0,
     909.0,
     901.0,
-    918.0
+    918.0,
+    904.0,
+    916.0,
+    905.0,
+    905.0,
+    915.0,
+    920.0,
+    907.0
    ],
-   "average_dn": 917.5,
-   "median_dn": 908.5,
+   "average_dn": 914.1333333333333,
+   "median_dn": 908.0,
    "kappa_sigma": {
     "steps": [
      {
@@ -153,25 +174,63 @@
        903.0,
        909.0,
        901.0,
-       918.0
+       918.0,
+       904.0,
+       916.0,
+       905.0,
+       905.0,
+       915.0,
+       920.0,
+       907.0
       ],
-      "middle": 908.5,
-      "standard_deviation": 26.057628441590765,
-      "limit_low": 804.2694862336369,
-      "limit_high": 986.6728853247723,
+      "middle": 908.0,
+      "standard_deviation": 19.80190787665561,
+      "limit_low": 828.7923684933776,
+      "limit_high": 967.4057236299668,
+      "rejected": [
+       985.0
+      ]
+     },
+     {
+      "values": [
+       903.0,
+       913.0,
+       908.0,
+       903.0,
+       909.0,
+       901.0,
+       918.0,
+       904.0,
+       916.0,
+       905.0,
+       905.0,
+       915.0,
+       920.0,
+       907.0
+      ],
+      "middle": 907.5,
+      "standard_deviation": 5.981689748298382,
+      "limit_low": 883.5732410068065,
+      "limit_high": 925.4450692448952,
       "rejected": []
      }
     ],
-    "result": 917.5,
+    "result": 909.0714285714286,
     "survivors": [
      903.0,
      913.0,
      908.0,
-     985.0,
      903.0,
      909.0,
      901.0,
-     918.0
+     918.0,
+     904.0,
+     916.0,
+     905.0,
+     905.0,
+     915.0,
+     920.0,
+     907.0
     ]
    },
    "winsorized": {
@@ -185,26 +244,40 @@
        903.0,
        909.0,
        901.0,
-       918.0
+       918.0,
+       904.0,
+       916.0,
+       905.0,
+       905.0,
+       915.0,
+       920.0,
+       907.0
       ],
       "start": {
-       "middle": 908.5,
-       "spread": 8.1543
+       "middle": 908.0,
+       "spread": 7.412999999999999
       },
       "pulled_in_values": [
        903.0,
        913.0,
        908.0,
-       921.2987380690982,
+       920.891937919696,
        903.0,
        909.0,
        901.0,
-       918.0
+       918.0,
+       904.0,
+       916.0,
+       905.0,
+       905.0,
+       915.0,
+       920.0,
+       907.0
       ],
-      "middle": 909.5373422586373,
-      "spread": 7.845824105441611,
-      "limit_low": 878.1540458368709,
-      "limit_high": 933.0748145749621,
+      "middle": 909.8594625279798,
+      "spread": 7.356960211649557,
+      "limit_low": 880.4316216813816,
+      "limit_high": 931.9303431629285,
       "rejected": [
        985.0
       ]
@@ -217,11 +290,18 @@
        903.0,
        909.0,
        901.0,
-       918.0
+       918.0,
+       904.0,
+       916.0,
+       905.0,
+       905.0,
+       915.0,
+       920.0,
+       907.0
       ],
       "start": {
-       "middle": 908.0,
-       "spread": 7.412999999999999
+       "middle": 907.5,
+       "spread": 6.6716999999999995
       },
       "pulled_in_values": [
        903.0,
@@ -230,16 +310,23 @@
        903.0,
        909.0,
        901.0,
-       916.8507485540473
+       918.0,
+       904.0,
+       916.0,
+       905.0,
+       905.0,
+       915.0,
+       918.9416000741983,
+       907.0
       ],
-      "middle": 907.6929640791496,
-      "spread": 6.1018993374155395,
-      "limit_low": 883.2853667294875,
-      "limit_high": 925.9986620913962,
+      "middle": 908.9958285767285,
+      "spread": 6.6319624215207265,
+      "limit_low": 882.4679788906456,
+      "limit_high": 928.8917158412906,
       "rejected": []
      }
     ],
-    "result": 907.8571428571429,
+    "result": 909.0714285714286,
     "survivors": [
      903.0,
      913.0,
@@ -247,7 +334,14 @@
      903.0,
      909.0,
      901.0,
-     918.0
+     918.0,
+     904.0,
+     916.0,
+     905.0,
+     905.0,
+     915.0,
+     920.0,
+     907.0
     ]
    },
    "rcr": {
@@ -258,18 +352,25 @@
        901.0,
        903.0,
        903.0,
+       904.0,
+       905.0,
+       905.0,
+       907.0,
        908.0,
        909.0,
        913.0,
+       915.0,
+       916.0,
        918.0,
+       920.0,
        985.0
       ],
-      "middle": 908.5,
-      "spread": 8.043200901755375,
+      "middle": 908.0,
+      "spread": 8.810800517440684,
       "darkest": 901.0,
       "brightest": 985.0,
-      "expected_count_darkest": 1.4043859210759058,
-      "expected_count_brightest": 7.543464478955035e-21,
+      "expected_count_darkest": 3.201872732564886,
+      "expected_count_brightest": 1.7595989307604996e-17,
       "limit": 0.1,
       "action": "reject the brightest, 985.0"
      },
@@ -279,17 +380,24 @@
        901.0,
        903.0,
        903.0,
+       904.0,
+       905.0,
+       905.0,
+       907.0,
        908.0,
        909.0,
        913.0,
-       918.0
+       915.0,
+       916.0,
+       918.0,
+       920.0
       ],
-      "middle": 908.0,
-      "spread": 7.8728097709122755,
+      "middle": 907.5,
+      "spread": 7.714776186352826,
       "darkest": 901.0,
-      "brightest": 918.0,
-      "expected_count_darkest": 1.3087546396344982,
-      "expected_count_brightest": 0.7140536949381202,
+      "brightest": 920.0,
+      "expected_count_darkest": 2.796404139477172,
+      "expected_count_brightest": 0.7362240088401085,
       "limit": 0.1,
       "action": "both extremes are plausible: next round"
      },
@@ -299,17 +407,24 @@
        901.0,
        903.0,
        903.0,
+       904.0,
+       905.0,
+       905.0,
+       907.0,
        908.0,
        909.0,
        913.0,
-       918.0
+       915.0,
+       916.0,
+       918.0,
+       920.0
       ],
-      "middle": 908.0,
-      "spread": 7.8728097709122755,
+      "middle": 907.5,
+      "spread": 6.654157256166173,
       "darkest": 901.0,
-      "brightest": 918.0,
-      "expected_count_darkest": 1.3087546396344982,
-      "expected_count_brightest": 0.7140536949381202,
+      "brightest": 920.0,
+      "expected_count_darkest": 2.3005630565200628,
+      "expected_count_brightest": 0.4221657716361388,
       "limit": 0.1,
       "action": "both extremes are plausible: next round"
      },
@@ -319,34 +434,48 @@
        901.0,
        903.0,
        903.0,
+       904.0,
+       905.0,
+       905.0,
+       907.0,
        908.0,
        909.0,
        913.0,
-       918.0
+       915.0,
+       916.0,
+       918.0,
+       920.0
       ],
-      "middle": 907.8571428571429,
-      "spread": 5.667666978536393,
+      "middle": 909.0714285714286,
+      "spread": 5.981689748298382,
       "darkest": 901.0,
-      "brightest": 918.0,
-      "expected_count_darkest": 0.7921501130553348,
-      "expected_count_brightest": 0.25731380318366476,
+      "brightest": 920.0,
+      "expected_count_darkest": 1.24055866785075,
+      "expected_count_brightest": 0.47389411748088506,
       "limit": 0.1,
       "action": "both extremes are plausible: next round"
      }
     ],
-    "result": 907.8571428571429,
+    "result": 909.0714285714286,
     "survivors": [
      901.0,
      903.0,
      903.0,
+     904.0,
+     905.0,
+     905.0,
+     907.0,
      908.0,
      909.0,
      913.0,
-     918.0
+     915.0,
+     916.0,
+     918.0,
+     920.0
     ]
    }
   },
-  "share_of_trail_pixels_where_f03_is_the_largest_of_eight": 0.7713024282560706
+  "share_of_trail_pixels_where_f03_is_the_largest_of_fifteen": 0.6609271523178808
  },
  "twenty_frames": {
   "frames": [
