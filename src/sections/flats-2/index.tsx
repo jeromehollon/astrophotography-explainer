@@ -1,7 +1,7 @@
 // Calibration > Flats, continued. Layout, sizes and every line of prose follow
 // the Figma frames "P5 · Flats 2" A (66:2), B (112:2178), C (112:2357) and
 // D (112:2536) on page 8:8.
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LessonPage } from '../../shared/ui';
 import { useAppStore } from '../../shared/store';
 import {
@@ -78,6 +78,11 @@ export default function Flats2() {
   const calibration = useAppStore((s) => s.calibration);
   const set = useAppStore((s) => s.set);
   const setLevel = (v: FlatLevel) => { setLevelState(v); set({ calibration: { ...calibration, flat: v } }); };
+  // On mount, put the store where frame A is (No flat) so it never disagrees with the chips.
+  useEffect(() => {
+    const s = useAppStore.getState();
+    s.set({ calibration: { ...s.calibration, flat: null } });
+  }, []);
   const current = levels.find((l) => l.level === level) ?? levels[0];
 
   return (

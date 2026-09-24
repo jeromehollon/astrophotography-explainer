@@ -1,6 +1,6 @@
 // Calibration > Flats. Layout, sizes and every line of prose follow the Figma
 // frames "P4 · Flats 1" A (14:2), B (49:835) and C (49:1060) on page 8:7.
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LessonPage } from '../../shared/ui';
 import { useAppStore } from '../../shared/store';
 import {
@@ -28,6 +28,11 @@ export default function Flats() {
   const set = useAppStore((s) => s.set);
   const setFlat = (v: boolean) => { setFlatState(v); set({ calibration: { ...calibration, flat: v ? 50 : null } }); };
   const setDarkFlat = (v: boolean) => { setDarkFlatState(v); set({ calibration: { ...calibration, darkFlat: v } }); };
+  // On mount, put the store where frame A is so it never disagrees with the toggles.
+  useEffect(() => {
+    const s = useAppStore.getState();
+    s.set({ calibration: { ...s.calibration, flat: null, darkFlat: false } });
+  }, []);
 
   return (
     <LessonPage>
@@ -150,7 +155,7 @@ export default function Flats() {
           />
           <ROITile
             title="What was removed"
-            caption={flat ? 'This may appear identical to the earlier example but there are subtle differences' : removedCaption}
+            caption={darkFlat ? 'This may appear identical to the earlier example but there are subtle differences' : removedCaption}
             src={roiExp2Removed}
             alt="Difference between the two corrections: a faint ring at the dust shadow"
           />
