@@ -3,16 +3,27 @@
 // stubs in src/shared/ui draw these differently from the lesson frames; see TODO.md.
 import type { ReactNode } from 'react';
 
-export function ROITile({ title, caption, well, children }: { title: string; caption: string; well?: { w: number; h: number }; children: ReactNode }) {
+/**
+ * `reserve` lists every caption the tile can show; they are all laid out in the same grid cell
+ * (the inactive ones invisible) so the caption strip is always as tall as the tallest state and
+ * the page below the tile does not move when the caption changes.
+ */
+export function ROITile({ title, caption, reserve, well, children }: { title: string; caption: string; reserve?: string[]; well?: { w: number; h: number }; children: ReactNode }) {
   const size = well ?? { w: 318, h: 240 };
+  const captions = reserve && reserve.length > 0 ? reserve : [caption];
   return (
-    <figure className="m-0 flex w-[320px] flex-col border border-border-on-stage bg-surface-stage-raised">
+    <figure className="m-0 flex flex-col border border-border-on-stage bg-surface-stage-raised" style={{ width: size.w + 2 }}>
       <figcaption className="flex w-full items-center px-[12px] py-[10px]">
         <span className="t-label-md whitespace-nowrap text-text-on-stage">{title}</span>
       </figcaption>
       <div className="relative overflow-hidden" style={{ width: size.w, height: size.h }}>{children}</div>
-      <div className="flex w-full flex-col px-[12px] py-[10px]">
-        <p className="m-0 w-full t-body-sm text-text-on-stage-muted">{caption}</p>
+      <div className="grid w-full px-[12px] py-[10px]">
+        {captions.map((c) => (
+          <p key={c} className={`m-0 w-full t-body-sm text-text-on-stage-muted [grid-area:1/1] ${c === caption ? '' : 'invisible'}`} aria-hidden={c === caption ? undefined : true}>
+            {c}
+          </p>
+        ))}
+        {!captions.includes(caption) && <p className="m-0 w-full t-body-sm text-text-on-stage-muted [grid-area:1/1]">{caption}</p>}
       </div>
     </figure>
   );

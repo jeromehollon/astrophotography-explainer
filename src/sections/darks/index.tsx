@@ -12,22 +12,30 @@ import darkPiece from './assets/dark_piece.png';
 import ampglow from './assets/ampglow_full.png';
 import stats from './assets/stats.json';
 
-const WELL = 318; // ROITile wells overridden to 318 px square (design-notes §5 item 12)
-const REGION = stats.region.w; // 64 native pixels shown at 5x
+const REGION = stats.region.w; // 64 native pixels
+const SCALE = 9; // each native pixel is drawn 9 px wide; two 578 px tiles and the 24 px gap fill the 1200 px stage column
+const WELL = REGION * SCALE; // 576 px square wells (the Figma 318 px wells made the Computed caption wrap to a different
+// number of lines in each toggle state, which moved everything below the tiles)
+const RING = 40 * (SCALE / 5); // the Figma ring (88:748) was drawn for the 5x patch; keep it the same size in native pixels
 const HOT = stats.circled_hot_pixel;
 
 /** Ochre ring (Figma 88:748) centred on the circled hot pixel; coordinates from stats.json. */
 function HotPixelMarker() {
-  const cx = ((HOT.x_in_region + 0.5) * WELL) / REGION;
-  const cy = ((HOT.y_in_region + 0.5) * WELL) / REGION;
+  const cx = (HOT.x_in_region + 0.5) * SCALE;
+  const cy = (HOT.y_in_region + 0.5) * SCALE;
   return (
-    <svg className="pointer-events-none absolute" style={{ left: cx - 20, top: cy - 20 }} width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-      <circle cx="20" cy="20" r="18.5" stroke="#E3A81E" strokeWidth="3" />
+    <svg className="pointer-events-none absolute" style={{ left: cx - RING / 2, top: cy - RING / 2 }} width={RING} height={RING} viewBox="0 0 40 40" fill="none" aria-hidden="true">
+      <circle cx="20" cy="20" r="18.5" stroke="#E3A81E" strokeWidth={3 * (5 / SCALE)} />
     </svg>
   );
 }
 
 const pixelated = { imageRendering: 'pixelated' as const };
+
+const COMPUTED_CAPTION = {
+  off: 'The light frame · Dark toggled off',
+  on: 'Light frame minus the master dark. The circled hot pixel now reads 761 against a background of 607, and blends into the grain. The other hot pixels are dimmer but still there.',
+};
 
 export default function DarksPage() {
   const dark = useAppStore((s) => s.calibration.dark);
@@ -128,15 +136,7 @@ export default function DarksPage() {
               <img src={roiRaw} alt="" width={WELL} height={WELL} className="absolute inset-0 h-full w-full" style={pixelated} />
               <HotPixelMarker />
             </ROITile>
-            <ROITile
-              title="Computed"
-              well={{ w: WELL, h: WELL }}
-              caption={
-                dark
-                  ? 'Light frame minus the master dark. The circled hot pixel now reads 761 against a background of 607, and blends into the grain. The other hot pixels are dimmer but still there.'
-                  : 'The light frame · Dark toggled off'
-              }
-            >
+            <ROITile title="Computed" well={{ w: WELL, h: WELL }} caption={dark ? COMPUTED_CAPTION.on : COMPUTED_CAPTION.off} reserve={[COMPUTED_CAPTION.off, COMPUTED_CAPTION.on]}>
               <img src={dark ? roiDarkOn : roiDarkOff} alt="" width={WELL} height={WELL} className="absolute inset-0 h-full w-full" style={pixelated} />
               <HotPixelMarker />
             </ROITile>
