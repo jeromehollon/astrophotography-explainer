@@ -19,9 +19,11 @@ light image, so frames can be compared with each other.
 
 Outputs (assets/light-frames-review/, 8-bit PNG):
   frames/<id>_full.png        the whole frame binned 4x (1556x1042), calibrated and normalized
-                              but not registered; East-side frames are rotated 180 degrees so
-                              every frame is shown the same way up (the display rotation of
-                              SPEC §6.4). Synthetic FITS copies are flipped once at load (§3).
+                              but not registered. Every image on these pages is shown the way
+                              the final master is oriented (an East-side reference, SPEC §6.4's
+                              display rotation): West-side frames, and every ROI and stack
+                              (registered onto the West-side frame f03), are rotated 180
+                              degrees. Synthetic FITS copies are flipped once at load (§3).
   frames/<id>_thumb.png       the same, binned 8x (778x521), for the FrameCard thumbnail
   frames/<id>_roi_<roi>.png   the four ROIs of that frame, registered onto f03, binned 2x
                               (720x480 from a 1440x960 native region)
@@ -72,8 +74,10 @@ BIG = dict(title="Galaxy and its surroundings", centre=(3246, 2100), size=(2400,
 FULL_BIN, THUMB_BIN = 4, 8
 
 
-def save_gray(img: np.ndarray, path: Path) -> None:
+def save_gray(img: np.ndarray, path: Path, rotate: bool = False) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    if rotate:
+        img = img[::-1, ::-1]
     astro.save(np.clip(img, 0, 1)[None].astype(np.float32), path, bits=8)
 
 
@@ -131,8 +135,8 @@ def main() -> None:
         n_f = norm[fid]["states"][CAL_STATE]
         normalize = lambda x: (x - n_f["median_dn"] / DN) * (s_r / (n_f["bwmv_dn"] / DN)) + m_r
         shown = normalize(img)
-        if frames[fid]["pier_side"] == "East":
-            shown = shown[::-1, ::-1]
+        if frames[fid]["pier_side"] == "West":
+            shown = shown[::-1, ::-1]  # show every frame the way the master is oriented
         fulls[fid] = binned(shown, FULL_BIN)
         if fid == REF:
             for k, (ys, xs) in regions.items():
@@ -154,7 +158,8 @@ def main() -> None:
         "calibration": CAL_STATE,
         "stf": {"c0": stf[0][0], "m": stf[0][1], **STF, "computed_on": "reference frame, large galaxy ROI, bin 2"},
         "warp": "scipy map_coordinates cubic (design-time stand-in for Lanczos-3)",
-        "full_frame": {"bin": FULL_BIN, "thumb_bin": THUMB_BIN, "east_side_rotated_180": True, "registered": False},
+        "orientation": "as the final master (East-side reference): West-side whole frames, and every ROI crop and stack, are rotated 180 degrees",
+        "full_frame": {"bin": FULL_BIN, "thumb_bin": THUMB_BIN, "west_side_rotated_180": True, "registered": False},
         "rois": {k: {**v, "bin2_size": [v["size"][0] // 2, v["size"][1] // 2]} for k, v in ROIS.items()},
         "big_roi": {**BIG, "bin2_size": [BIG["size"][0] // 2, BIG["size"][1] // 2]},
         "stack": {"scenario": "Default", "frames": RAW, "methods": ["average", "median"]},
@@ -166,7 +171,7 @@ def main() -> None:
         save_gray(show(fulls[fid]), OUT / "frames" / f"{fid}_full.png")
         save_gray(show(binned(fulls[fid], THUMB_BIN // FULL_BIN)), OUT / "frames" / f"{fid}_thumb.png")
         for k in ROIS:
-            save_gray(show(crops[k][fid]), OUT / "frames" / f"{fid}_roi_{k}.png")
+            save_gray(show(crops[k][fid]), OUT / "frames" / f"{fid}_roi_{k}.png", rotate=True)
         st, hs = stars[fid], hists[fid]
         stats["frames"][fid] = {
             "frame_index": f["frame_index"],
@@ -189,7 +194,7 @@ def main() -> None:
         prefix = f"stack_{name}"
         for method, fn in (("average", np.mean), ("median", np.median)):
             result = fn(cube, axis=0)
-            save_gray(show(result), OUT / f"{prefix}_{method}.png")
+            save_gray(show(result), OUT / f"{prefix}_{method}.png", rotate=True)
         madn = lambda x: float(1.4826 * np.median(np.abs(x - np.median(x))) * DN)
         stats.setdefault("stack_noise_madn_dn", {})[name] = {
             "single_frame_f03": madn(crops[k][REF]),

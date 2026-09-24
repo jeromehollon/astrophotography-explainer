@@ -9,10 +9,11 @@
   "computed_on": "reference frame, large galaxy ROI, bin 2"
  },
  "warp": "scipy map_coordinates cubic (design-time stand-in for Lanczos-3)",
+ "orientation": "as the final master (East-side reference): West-side whole frames, and every ROI crop and stack, are rotated 180 degrees",
  "full_frame": {
   "bin": 4,
   "thumb_bin": 8,
-  "east_side_rotated_180": true,
+  "west_side_rotated_180": true,
   "registered": false
  },
  "rois": {
@@ -2967,6 +2968,6 @@
   "lo_dn": 0,
   "hi_dn": 65535,
   "bins": 96,
-  "source": "histograms.json histogram_full (512 bins over 0-65536) resampled onto 96 bins of 683 DN (one bar per pixel at 96 px); heights scaled per frame to 34 px; drawn as bars over each FrameCard because Histogram/Mini bars cannot move inside an instance"
+  "source": "histograms.json histogram_full (512 bins over 0-65536) resampled onto 96 bins (one bar per pixel at 96 px); heights scaled per frame to 34 px; drawn as bars over each FrameCard because Histogram/Mini bars cannot move inside an instance"
  }
 }
