@@ -323,7 +323,7 @@
    "P4 Flats 1 C flat on darkflats": "49:1060",
    "P0 Welcome A": "57:619",
    "P2 Bias A bias off": "60:1200",
-   "P2 Bias B bias on": "87:388",
+   "P2 Bias B bias on": "87:2304",
    "P1 Noise & Defects A": "61:1149",
    "P5 Flats 2 A no flat": "66:2",
    "P5 Flats 2 B 10% flat": "71:206",
@@ -420,7 +420,9 @@
    "P0 A photo": "59:332",
    "P0 A photo-image": "59:333",
    "P1 A tour table": "83:109",
-   "P1 A tour table rows": "83:116, 83:125, 83:134, 83:143, 83:152, 83:161, 83:170, 83:179 (thumb wells 61:1465, 61:1476, 61:1487, 61:1498, 61:1509, 61:1520, 61:1531, 61:1533)"
+   "P1 A tour table rows": "83:116, 83:125, 83:134, 83:143, 83:152, 83:161, 83:170, 83:179 (thumb wells 61:1465, 61:1476, 61:1487, 61:1498, 61:1509, 61:1520, 61:1531, 61:1533)",
+   "P2 A section-subtract": "87:2299",
+   "P2 A side-panel": "87:2300"
   }
  },
  "completedSteps": [
@@ -475,6 +477,7 @@
   "Alignment P6 (2026-09-24): reading-only page, no Try-it stage, no rule, single frame A (owner direction). Built as a clone of Noise & Defects frame A on page 8:9. Structure: TopBar(Current=Alignment) -> page-head -> illustration slot holds a drawn two-panel chart (random noise 1/sqrt(N) in source/noise, SNR sqrt(N) in accent/primary, marks at 1/4/16/64 exposures; vectors and text, no image) -> section-problem (prose 680 + 440x330 well showing the middle of the naive average) -> prose-why-stack -> Callout Kind=Why 'Where the square root comes from' at 680 wide -> section-naive (h2, p, dark box: Frame 5 | Frame 14 at 564x376, average at 1152x768) -> section-aligned (same layout; red/600 ellipses inside the two input wells mark the three alignment stars from assets/alignment/stats.json, positions scaled by 564/1200) -> BottomNav (Flats, continued / Algorithms). Frames f05 and f14 by owner direction (SPEC P6 said f02+f05); the meridian flip is never mentioned. Images are plain FRAME wells with image fills from assets/alignment/ (tools/assets/alignment_page.py).",
   "P0 Welcome (2026-09-24): single frame A, no Try-it stage and no ROI tiles by owner direction; full-field images are allowed on Welcome. The drawn illustration was replaced by the real triptych (sub, master, colour) in the illustration slot; the page uses two-column rows. Assets from tools/assets/welcome_page.py in assets/welcome/.",
   "Noise & Defects N2 (2026-09-24): owner rewrote the prose in a tighter voice (their samples are now the 'problem' and 'calibration' sections verbatim) and asked for the tour as a table. The tour is now a 4-column table (Example thumb 120x80 | Badge/Source + cause | What you see | What deals with it) with hairline rules; the thumbnails reuse the original image wells (moved and resized, same image fills). Thumbnails open enlarged on click at runtime; the static design carries no affordance for it (design-notes section 3).",
-  "Bias P2 R1 (2026-09-24): the owner rewrote the prose in frame A and dropped the 'What was removed' tile (the Computed tile visibly darkens, which is the point). Bias has two tiles, Raw / Computed. B (87:388) rebuilt as a clone of the edited A."
+  "Bias P2 R1 (2026-09-24): the owner rewrote the prose in frame A and dropped the 'What was removed' tile (the Computed tile visibly darkens, which is the point). Bias has two tiles, Raw / Computed. B (87:388) rebuilt as a clone of the edited A.",
+  "Bias P2 R2 (2026-09-24): 'Taking the bias away' is two columns like Flats-1's section-map: prose (680) left, a cream side-panel (440) right holding the single-number example '1,233 − 161 = 1,073' with a one-line explanation. The paragraph that quoted those numbers moved into the box. B (87:2304) rebuilt as a clone of A."
  ]
 }
