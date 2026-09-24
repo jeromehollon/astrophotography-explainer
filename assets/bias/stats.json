@@ -26,10 +26,6 @@
    "target_bg": 0.3,
    "shadows_clip": -1.8
   },
-  "removed_stretch_dn": {
-   "grey": -160.4899979790207,
-   "span": 2.0299983210861683
-  },
   "roi_mean_raw_dn": 1233.3250304148607,
   "roi_mean_computed_dn": 1072.791802872973,
   "roi_mean_bias_dn": 160.5332275418876,

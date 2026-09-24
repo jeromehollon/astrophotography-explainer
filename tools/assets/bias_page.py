@@ -14,9 +14,8 @@ Try it (light-frame ROI on the galaxy, native pixels, 3:2):
   roi_computed_bias.png        L - MB. One AutoSTF for both tiles, computed on THIS crop (target bg
                                0.30, clip -1.8 MADN): the raw tile then shows as uniformly brighter,
                                instead of the corrected one clipping to black
-  roi_removed_bias.png         computed - raw = -MB, centred on mid grey on its own symmetric
-                               stretch (darker = brightness taken away), so the bias pattern shows
-  roi_removed_none.png         bias off: nothing removed (uniform neutral grey)
+  (No "What was removed" tile on this page, by owner direction: the darkening of the
+  Computed tile is the visible change.)
 
   stats.json                   average pixel brightness in the ROI before and after, the bias
                                average in the same ROI, master-bias statistics and every stretch
@@ -106,18 +105,9 @@ def main() -> None:
     save_gray(show_roi(raw), OUT / "roi_raw.png")
     save_gray(show_roi(computed), OUT / "roi_computed_bias.png")
 
-    # "What was removed": computed - raw = -bias, centred on mid grey. Its own symmetric stretch
-    # around the bias median, otherwise a 160 DN pedestal on a 0.4 DN grain is a flat dark tile.
-    diff = computed - raw
-    centre = float(np.median(diff))
-    span = float(np.percentile(np.abs(diff - centre), 99.5))
-    save_gray(np.clip(0.5 + (diff - centre) / (2 * span), 0, 1), OUT / "roi_removed_bias.png")
-    save_gray(np.full_like(raw, 0.5), OUT / "roi_removed_none.png")
-
     stats["experiment_1"] = {
         "crop": {"x": xs.start, "y": ys.start, "w": CROP_W, "h": CROP_H},
         "stf": {"c0": stf_roi[0][0], "m": stf_roi[0][1], **ROI_STF},
-        "removed_stretch_dn": {"grey": centre * DN, "span": span * DN},
         "roi_mean_raw_dn": float(raw.mean() * DN),
         "roi_mean_computed_dn": float(computed.mean() * DN),
         "roi_mean_bias_dn": float(b_roi.mean() * DN),

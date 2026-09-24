@@ -323,7 +323,7 @@
    "P4 Flats 1 C flat on darkflats": "49:1060",
    "P0 Welcome A": "57:619",
    "P2 Bias A bias off": "60:1200",
-   "P2 Bias B bias on": "61:1259",
+   "P2 Bias B bias on": "87:388",
    "P1 Noise & Defects A": "61:1149",
    "P5 Flats 2 A no flat": "66:2",
    "P5 Flats 2 B 10% flat": "71:206",
@@ -357,7 +357,6 @@
    "P2 A toggle-bias": "60:1250",
    "P2 A tile-raw": "60:1253",
    "P2 A tile-corrected": "60:1254",
-   "P2 A tile-what-was-removed": "60:1255",
    "P2 A average-brightness": "61:771",
    "P1 A reading": "61:1185",
    "P1 A page-head": "61:1186",
@@ -475,6 +474,7 @@
   "Flats-2 P5 (2026-09-24): built as a clone of Flats-1 frame A on page 8:8. Reading column: page head -> cream box holding a drawn histogram chart (three raw flats, equal-height peaks on one 0..max brightness axis, grey 'Pixels are full' band from the 85 % curve to the right edge; vectors drawn from assets/flats-2/histograms.json, series colours cobalt/ochre/red with a text label at every peak) plus two paragraphs -> 'The problem you can see' with a Note callout (full well aside) and a 440x330 ROI slot (85 % result) -> dark box with the three master flats full field on one shared stretch -> 'So which flat should you take?' prose -> Try it. Stage: one experiment, four Chip instances (No flat / 10 % / 50 % / 85 %) in an auto-layout row replacing the toggle; tiles Raw / Computed / What was removed. B, C, D are clones of A with only the selected chip, the Computed and removed images, and the Computed caption changed. In state A (no flat) the removed tile shows the 50 % difference so it is never empty (owner to confirm). Non-breaking spaces are used before every % so '10 %' never wraps. Assets from tools/assets/flats_page2.py in assets/flats-2/.",
   "Alignment P6 (2026-09-24): reading-only page, no Try-it stage, no rule, single frame A (owner direction). Built as a clone of Noise & Defects frame A on page 8:9. Structure: TopBar(Current=Alignment) -> page-head -> illustration slot holds a drawn two-panel chart (random noise 1/sqrt(N) in source/noise, SNR sqrt(N) in accent/primary, marks at 1/4/16/64 exposures; vectors and text, no image) -> section-problem (prose 680 + 440x330 well showing the middle of the naive average) -> prose-why-stack -> Callout Kind=Why 'Where the square root comes from' at 680 wide -> section-naive (h2, p, dark box: Frame 5 | Frame 14 at 564x376, average at 1152x768) -> section-aligned (same layout; red/600 ellipses inside the two input wells mark the three alignment stars from assets/alignment/stats.json, positions scaled by 564/1200) -> BottomNav (Flats, continued / Algorithms). Frames f05 and f14 by owner direction (SPEC P6 said f02+f05); the meridian flip is never mentioned. Images are plain FRAME wells with image fills from assets/alignment/ (tools/assets/alignment_page.py).",
   "P0 Welcome (2026-09-24): single frame A, no Try-it stage and no ROI tiles by owner direction; full-field images are allowed on Welcome. The drawn illustration was replaced by the real triptych (sub, master, colour) in the illustration slot; the page uses two-column rows. Assets from tools/assets/welcome_page.py in assets/welcome/.",
-  "Noise & Defects N2 (2026-09-24): owner rewrote the prose in a tighter voice (their samples are now the 'problem' and 'calibration' sections verbatim) and asked for the tour as a table. The tour is now a 4-column table (Example thumb 120x80 | Badge/Source + cause | What you see | What deals with it) with hairline rules; the thumbnails reuse the original image wells (moved and resized, same image fills). Thumbnails open enlarged on click at runtime; the static design carries no affordance for it (design-notes section 3)."
+  "Noise & Defects N2 (2026-09-24): owner rewrote the prose in a tighter voice (their samples are now the 'problem' and 'calibration' sections verbatim) and asked for the tour as a table. The tour is now a 4-column table (Example thumb 120x80 | Badge/Source + cause | What you see | What deals with it) with hairline rules; the thumbnails reuse the original image wells (moved and resized, same image fills). Thumbnails open enlarged on click at runtime; the static design carries no affordance for it (design-notes section 3).",
+  "Bias P2 R1 (2026-09-24): the owner rewrote the prose in frame A and dropped the 'What was removed' tile (the Computed tile visibly darkens, which is the point). Bias has two tiles, Raw / Computed. B (87:388) rebuilt as a clone of the edited A."
  ]
 }
