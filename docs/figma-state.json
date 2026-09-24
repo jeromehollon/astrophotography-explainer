@@ -320,7 +320,8 @@
   "frames": {
    "P4 Flats 1 A flat off": "14:2",
    "P4 Flats 1 B flat on nothing": "49:835",
-   "P4 Flats 1 C flat on darkflats": "49:1060"
+   "P4 Flats 1 C flat on darkflats": "49:1060",
+   "P8 Light frames A": "94:46"
   },
   "nodes": {
    "P4 A flat-image": "44:612",
@@ -330,7 +331,21 @@
    "P4 A section-light-path": "49:622",
    "P4 A light-path-box": "49:619",
    "P4 A flat-column": "49:620",
-   "P4 A before-after-box": "49:623"
+   "P4 A before-after-box": "49:623",
+   "P8 A reading": "94:48",
+   "P8 A page-head": "94:49",
+   "P8 A section-clouds": "95:45",
+   "P8 A clouds-box": "95:49",
+   "P8 A cloud-f14/f15/f16 image": "95:51 / 95:54 / 95:57",
+   "P8 A section-tracking": "95:60",
+   "P8 A tracking-box": "95:65",
+   "P8 A tracking-f11 / f11_tracking image": "95:67 / 95:70",
+   "P8 A section-fwhm": "96:45",
+   "P8 A illustration-fwhm": "96:50",
+   "P8 A fwhm panel-round / panel-trailed": "98:45 / 98:90",
+   "P8 A star-box": "96:51",
+   "P8 A star-f11 / f11_tracking image": "96:53 / 96:56",
+   "P8 A section-teaser": "96:58"
   }
  },
  "completedSteps": [
@@ -358,7 +373,8 @@
   "I2.illustrations-simplified",
   "I3.illustrations-optical-path",
   "R6.flats1-optical-path-and-real-flat",
-  "R7.flats1-boxes-and-exp2-light-frame"
+  "R7.flats1-boxes-and-exp2-light-frame",
+  "L1.light-frames-page"
  ],
  "notes": [
   "Prototype connections cannot cross Figma pages; agents build per page, then frames are moved onto one Prototype page and wired at the end.",
@@ -371,6 +387,7 @@
   "Illustration components carry no eyebrow, title or caption text (owner direction 2026-09-24): the lesson page owns all prose around an illustration. The 'For lesson: X' notes on the Illustrations canvas are organisational only. Bias/Darks/Flats components have full-height 'highlight-*' bars (source soft colours) behind the relevant parts.",
   "Illustrations page holds only the four optical-path components (Noise & Defects, Bias, Darks, Flats). The Flats-continued, Alignment and Algorithms illustrations were removed on 2026-09-24; section agents decide whether their pages need one.",
   "Flats-1 R7 (2026-09-24): the optical-path SVG sits in a cream bounding box (800 wide, instance rescaled to 752) with its two paragraphs; the real flat sits to its right (376 wide) with the caption 'The flat recorded by the camera'. Before/after is wrapped in a dark (surface/stage) box. Experiment 2 tiles are the LIGHT-FRAME ROI: Raw = frame divided by the flat as shot, Computed = divided by the dark-flat-calibrated flat, removed = their difference. 'What was removed' tiles are computed - raw centred on mid grey (lighter = added). The owner rewrote all Try-it prose and tile captions in frame A; B and C are clones of A with only toggle states, tile images and the two state-dependent captions changed.",
-  "Flats-1 R8 (2026-09-24): 'What was removed' is populated with the real difference in EVERY toggle state (exp1: with flat minus without; exp2: dark-flat-calibrated flat minus flat as shot). Only the Computed tile follows the switch. The exp2 difference is ~0.4 DN but clean (the raw noise cancels because both tiles divide the same frame), so on its own symmetric stretch it shows the same donut as exp1, slightly different."
+  "Flats-1 R8 (2026-09-24): 'What was removed' is populated with the real difference in EVERY toggle state (exp1: with flat minus without; exp2: dark-flat-calibrated flat minus flat as shot). Only the Computed tile follows the switch. The exp2 difference is ~0.4 DN but clean (the raw noise cancels because both tiles divide the same frame), so on its own symmetric stretch it shows the same donut as exp1, slightly different.",
+  "Light frames P8 (2026-09-24): reading-only page, no Try-it stage, no rule, single frame A (owner direction: the stage goes on the second Light-frames page). Built as a clone of Alignment frame A on page 8:11 with the illustration, problem, why-stack and callout sections removed. Structure: TopBar(Current=Light frames) -> page-head -> section-clouds (h2, p, dark box with three 368x246 whole-field wells + captions, p) -> section-tracking (h2, 2 p, dark box with two 564x376 galaxy wells, p) -> section-fwhm (h2, 2 p, inline 1200x360 drawing 'illustration-fwhm' with two panels of 33 brightness bars each from assets/light-frames/stats.json, dotted peak line, dashed ochre half-peak line, full-height source/flat-soft band behind the bars at or above half the peak, labels Round star / Trailed star / Brightness / Pixels across the star / Peak / Half of the peak / Width at half the peak; then a dark box with the two 288x288 star cutouts) -> section-teaser (h2, p) -> BottomNav (Algorithms / Light frames, continued). Images are plain FRAME wells with image fills uploaded straight from assets/light-frames/ (tools/assets/light_frames_page.py)."
  ]
 }
