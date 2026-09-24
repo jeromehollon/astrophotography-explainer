@@ -3,13 +3,15 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
+const api = `http://localhost:${process.env.VITE_API_PORT ?? '8080'}`;
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     port: 5173,
     proxy: {
-      '/api': 'http://localhost:8080',
-      '/data': 'http://localhost:8080',
+      '/api': api,
+      '/data': api,
     },
   },
   build: { outDir: 'dist', sourcemap: false },
