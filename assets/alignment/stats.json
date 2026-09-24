@@ -1,0 +1,110 @@
+{
+ "reference_frame": "f05",
+ "other_frame": "f02",
+ "calibration": "dark|flat_50_darkflat",
+ "crop": {
+  "x": 2588,
+  "y": 1716,
+  "w": 1200,
+  "h": 800,
+  "galaxy_centre_px": [
+   3188,
+   2116
+  ]
+ },
+ "problem_crop": {
+  "x": 2748,
+  "y": 1786,
+  "w": 880,
+  "h": 660
+ },
+ "stf": {
+  "c0": 0.01056659931898117,
+  "m": 0.002566652625132309,
+  "target_bg": 0.3,
+  "shadows_clip": -1.8
+ },
+ "normalization_of_other_onto_reference": {
+  "median_dn": [
+   924.5214762026444,
+   749.2860519792885
+  ],
+  "scale": 0.9105655257158733
+ },
+ "warp": {
+  "method": "scipy map_coordinates cubic (design-time stand-in for Lanczos-3)",
+  "f05_to_other_matrix": [
+   0.9996019447206702,
+   -0.0001479667205704102,
+   -31.524291007674115,
+   7.084728945432296e-05,
+   0.9996044140215345,
+   -35.11725573587727,
+   -2.093723793918391e-09,
+   -3.872560802341345e-09,
+   1.0000000448023272
+  ]
+ },
+ "pixel_shift_between_frames_px": {
+  "min": 48.38598080318112,
+  "median": 48.65440396240657,
+  "max": 48.91885699878028
+ },
+ "alignment_stars_crop_px": [
+  {
+   "x": 404.9,
+   "y": 673.1,
+   "fwhm_px": 8.03,
+   "snr": 59.0
+  },
+  {
+   "x": 245.9,
+   "y": 411.6,
+   "fwhm_px": 7.76,
+   "snr": 11.1
+  },
+  {
+   "x": 1064.2,
+   "y": 673.6,
+   "fwhm_px": 8.15,
+   "snr": 10.7
+  }
+ ],
+ "background_patch_crop_px": {
+  "x": 95,
+  "y": 205,
+  "size": 160
+ },
+ "background": {
+  "frame05": {
+   "std_dn": 56.043326271766944,
+   "madn_dn": 36.86497803117854,
+   "median_dn": 758.2675344665522
+  },
+  "frame02": {
+   "std_dn": 53.85389352052796,
+   "madn_dn": 37.63631413325129,
+   "median_dn": 759.8563456679766
+  },
+  "naive_average": {
+   "std_dn": 48.25317570551353,
+   "madn_dn": 26.56093827658796,
+   "median_dn": 759.2752491807641
+  },
+  "frame02_aligned": {
+   "std_dn": 56.21020360812596,
+   "madn_dn": 33.649094675316434,
+   "median_dn": 756.8140759919729
+  },
+  "aligned_average": {
+   "std_dn": 39.87318998583328,
+   "madn_dn": 25.10394099759473,
+   "median_dn": 757.4356402187116
+  }
+ },
+ "expected_noise_ratio_two_frames": 0.7071067811865475,
+ "measured_noise_ratio": {
+  "naive_average_over_frame05": 0.8609977122257664,
+  "aligned_average_over_frame05": 0.7114707965847537
+ }
+}
