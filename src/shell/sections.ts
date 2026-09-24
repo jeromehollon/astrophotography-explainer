@@ -8,4 +8,10 @@ export type Section = {
   Component: ComponentType;
 };
 
-export const sections: Section[] = [];
+import Flats from '../sections/flats';
+import Flats2 from '../sections/flats-2';
+
+export const sections: Section[] = [
+  { path: '/calibration/flats', chapter: 'Calibration', page: 'Flats', Component: Flats },
+  { path: '/calibration/flats-2', chapter: 'Calibration', page: 'Flats, continued', Component: Flats2 },
+];
