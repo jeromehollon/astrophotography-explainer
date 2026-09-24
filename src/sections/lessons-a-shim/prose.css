@@ -1,0 +1,6 @@
+/* Type helpers for the lessons-a pages (mirrors the Figma text styles). */
+.eyebrow { font-family: var(--font-heading); font-weight: 500; font-size: 13px; line-height: 16px; letter-spacing: 1.5px; text-transform: uppercase; white-space: nowrap; }
+.prose-col h2 { font-family: var(--font-heading); font-weight: 600; font-size: 28px; line-height: 34px; width: 100%; margin: 0; }
+.prose-col h3 { font-family: var(--font-heading); font-weight: 500; font-size: 22px; line-height: 28px; width: 100%; margin: 0; }
+.prose-col p { font-family: var(--font-body); font-size: 16px; line-height: 24px; width: 100%; margin: 0; overflow-wrap: break-word; }
+.cap-on-stage { font-family: var(--font-body); font-size: 14px; line-height: 20px; color: var(--color-text-on-stage-muted); }
