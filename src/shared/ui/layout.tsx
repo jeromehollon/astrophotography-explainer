@@ -1,8 +1,9 @@
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { sections } from '../../shell/sections';
 import { Logo } from './icons';
 import { Button } from './controls';
+import { Lightbox } from './lightbox';
 
 const cx = (...a: Array<string | false | undefined | null>) => a.filter(Boolean).join(' ');
 
@@ -135,12 +136,17 @@ export function BottomNav() {
   );
 }
 
+/* Page card: the 1440 px Figma page sits centred on a darker cream viewport (surface/viewport) with a soft shadow.
+   No transform or overflow here, so position: sticky inside <main> (the Workbench ROI strip) still sticks to the viewport.
+   Every <img>/<canvas> inside <main> opens the global Lightbox (see lightbox.tsx). */
 export function LessonPage({ children, className }: { children: ReactNode; className?: string }) {
+  const mainRef = useRef<HTMLElement>(null);
   return (
-    <div className={cx('flex min-h-screen w-full flex-col bg-surface-page', className)}>
+    <div className={cx('mx-auto flex min-h-screen w-[1440px] flex-col bg-surface-page shadow-[0_2px_24px_rgba(28,26,23,0.10)]', className)}>
       <TopBar />
-      <main className="flex flex-1 flex-col">{children}</main>
+      <main ref={mainRef} className="flex flex-1 flex-col">{children}</main>
       <BottomNav />
+      <Lightbox root={mainRef} />
     </div>
   );
 }

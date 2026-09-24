@@ -4,6 +4,7 @@
 @theme {
   --color-cream-50: #F7F2EA;
   --color-cream-100: #F2EBE0;
+  --color-cream-150: #EAE2D4;
   --color-cream-200: #E7DCCB;
   --color-cream-300: #D5C6AE;
   --color-ink-900: #1C1A17;
@@ -31,6 +32,7 @@
   --color-white: #FFFFFF;
 
   /* semantic */
+  --color-surface-viewport: var(--color-cream-150);
   --color-surface-page: var(--color-cream-100);
   --color-surface-panel: var(--color-cream-200);
   --color-surface-card: var(--color-cream-50);
@@ -69,8 +71,13 @@
   --radius-md: 6px;
 }
 
-html { background: var(--color-surface-page); color: var(--color-text-primary); font-family: var(--font-body); }
+html { background: var(--color-surface-viewport); color: var(--color-text-primary); font-family: var(--font-body); }
+/* Desktop only: the 1440 px page card never reflows; narrower viewports scroll horizontally. */
 body { margin: 0; min-width: 1440px; }
+
+/* Any image in the page body opens the global lightbox (layout.tsx), except inside controls and dialogs that own the click. */
+main img, main canvas { cursor: zoom-in; }
+main :is(button, [role="button"], a, [role="dialog"]) :is(img, canvas) { cursor: inherit; }
 
 /* Text styles from the Figma library (docs/figma-state.json → textStyles; mono/md and mono/sm are Regular). */
 @utility t-display-hero { font-family: var(--font-heading); font-weight: 600; font-size: 56px; line-height: 60px; }
