@@ -5,14 +5,14 @@ The workbench's light-frame block, ROI strip and stacks reuse assets/light-frame
 (tools/assets/light_frames_review_page.py). This script adds the calibration tables:
 
   cal_<id>.png            each master calibration frame, whole field binned 4x (1556x1042).
-                          Bias and dark use their own AutoSTF (target background 0.30, shadows
-                          clip -2.8 MADN, the astro.py default strength) so the grain shows.
-                          The dark flat and the flats use a linear stretch between their own
-                          0.1 and 99.9 percentiles (the Flats-1 treatment), so vignetting and
-                          dust show at every flat level, including the nearly featureless 85 %
+                          Bias, dark and dark flat use their own AutoSTF (target background
+                          0.30, shadows clip -2.8 MADN, the astro.py default strength) so the
+                          grain shows. The flats are written with NO stretch (owner direction):
+                          the pixel value as recorded, so the 10 % flat is dark and the 85 %
+                          flat is bright, which is what the histogram levels mean.
   stats.json              per master: median and spread in pixel brightness (DN), the stretch,
-                          and a 64-bin histogram over the master's own 0.1-99.9 percentile
-                          range, drawn as vectors in Figma
+                          and a 128-bin histogram over the whole range a pixel can report
+                          (0 to 65,535), drawn as vectors in Figma
 
 Masters: masterBias, masterDark (300 s), darkflat_50, flat_10_darkflat, flat_50_darkflat,
 flat_85_darkflat (the flats the learner can pick, each calibrated with its dark flats).
@@ -37,8 +37,8 @@ CAL = REPO / "source_images" / "calibration"
 OUT = REPO / "assets" / "workbench"
 DN = 65535.0
 BIN = 4
-STF = dict(target_bg=0.30, shadows_clip=-2.8)  # bias and dark only
-N_BINS = 64
+STF = dict(target_bg=0.30, shadows_clip=-2.8)  # bias, dark and dark flat
+N_BINS = 128
 
 MASTERS = {
     "bias": ("Bias", lambda: next(CAL.glob("masterBias*.xisf"))),
@@ -62,16 +62,15 @@ def main() -> None:
         img, _ = astro.load(path_fn())
         full = img[0].astype(np.float64)
         small = binned(full, BIN)
-        if mid in ("bias", "dark"):
+        if mid.startswith("flat"):
+            shown = np.clip(small, 0, 1)
+            stretch = {"kind": "none", "note": "pixel value / 65535, as recorded"}
+        else:
             stf = astro.auto_stf(small[None].astype(np.float32), **STF)
             shown = astro.apply_stf(np.clip(small, 0, 1)[None].astype(np.float32), stf)[0]
             stretch = {"kind": "autostf", "c0": stf[0][0], "m": stf[0][1], **STF}
-        else:
-            slo, shi = np.percentile(small, [0.1, 99.9])
-            shown = np.clip((small - slo) / max(shi - slo, 1e-12), 0, 1)
-            stretch = {"kind": "linear", "lo_dn": slo * DN, "hi_dn": shi * DN}
         astro.save(shown[None].astype(np.float32), OUT / f"cal_{mid}.png", bits=8)
-        lo, hi = np.percentile(full, [0.1, 99.9])
+        lo, hi = 0.0, 1.0  # the whole range a pixel can report
         counts, edges = np.histogram(full, bins=N_BINS, range=(lo, hi))
         med = float(np.median(full))
         stats["masters"][mid] = {
