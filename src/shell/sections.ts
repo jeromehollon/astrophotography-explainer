@@ -1,4 +1,6 @@
 import type { ComponentType } from 'react';
+import BiasPage from '../sections/bias';
+import DarksPage from '../sections/darks';
 
 /** One entry per app page. Section agents append exactly one line each (SPEC §4.6). */
 export type Section = {
@@ -8,4 +10,7 @@ export type Section = {
   Component: ComponentType;
 };
 
-export const sections: Section[] = [];
+export const sections: Section[] = [
+  { path: '/calibration/bias', chapter: 'Calibration', page: 'Bias', Component: BiasPage },
+  { path: '/calibration/darks', chapter: 'Calibration', page: 'Darks', Component: DarksPage },
+];

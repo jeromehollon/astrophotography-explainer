@@ -1,0 +1,95 @@
+{
+ "frame": "f13",
+ "bias_applied_to_every_light_image": true,
+ "region": {
+  "x": 82,
+  "y": 863,
+  "w": 64,
+  "h": 64,
+  "zoom": 5,
+  "chosen_by": "centred on the brightest well-removed hot pixel whose 64\u00d764 window holds no stars and no dark-only pixels"
+ },
+ "hot_pixel_definition": {
+  "dark_minus_bias_above_dn": 200.0,
+  "light_minus_bias_above_background_madn": 10
+ },
+ "hot_pixels_in_region": {
+  "in_dark": 7,
+  "shared_with_light": 5,
+  "well_removed": 1
+ },
+ "well_removed_definition": "light \u2212 bias above background by > 15 MADN, and light \u2212 dark within \u00b12 MADN of it",
+ "hot_pixels_in_frame": {
+  "in_dark": 16761,
+  "shared_with_light": 13653
+ },
+ "dark_over_light_excess_ratio_percentiles": {
+  "p10": 0.32898786959092324,
+  "p50": 0.39252813907976747,
+  "p90": 0.4469554753919499
+ },
+ "residual_after_dark_madn_median": 11.555056048034862,
+ "circled_hot_pixel": {
+  "x_in_region": 32,
+  "y_in_region": 32,
+  "raw_dn": 1886.5300207701512,
+  "computed_dark_on_dn": 760.636342652142,
+  "dark_minus_bias_dn": 1125.8936781180091,
+  "background_median_dn": 607.1307046513539
+ },
+ "region_background": {
+  "raw_median_dn": 607.1307046513539,
+  "raw_madn_dn": 35.03489422868611,
+  "computed_dark_on_median_dn": 606.6515249514487,
+  "computed_dark_on_madn_dn": 34.79618334481352
+ },
+ "masters": {
+  "bias_median_dn": 160.49495700979605,
+  "dark_median_dn": 160.99999996251427,
+  "dark_minus_bias_median_dn": 0.4610372765455395
+ },
+ "stretches": {
+  "roi": {
+   "c0": 0.0071258257806301115,
+   "m": 0.0032041675624767617,
+   "target_bg": 0.4,
+   "shadows_clip": -4.0
+  },
+  "dark_piece": {
+   "c0": 0.0024018901720643045,
+   "m": 8.637765691758999e-05,
+   "target_bg": 0.4,
+   "shadows_clip": -4.0,
+   "crop": {
+    "x": 0,
+    "y": 769,
+    "w": 376,
+    "h": 252
+   }
+  },
+  "ampglow": {
+   "c0": 0.005883566337227822,
+   "m": 0.0023616688648481765,
+   "target_bg": 0.3,
+   "shadows_clip": -2.8,
+   "binning": 2
+  }
+ },
+ "old_camera_dark": {
+  "camera": "ZWO ASI294MM Pro",
+  "exposure_s": 600.0,
+  "ccd_temp_c": -8.4,
+  "size_px": [
+   8288,
+   5644
+  ],
+  "median_dn": 451.99999989476055,
+  "centre_median_dn": 451.99999989476055,
+  "edge_median_dn": {
+   "left": 447.9999998956919,
+   "right": 459.9999998928979,
+   "top": 451.99999989476055,
+   "bottom": 451.99999989476055
+  }
+ }
+}
