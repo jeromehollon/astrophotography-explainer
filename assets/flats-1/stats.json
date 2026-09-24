@@ -38,8 +38,8 @@
    "shadows_clip": -1.8
   },
   "removed_stretch_dn": {
-   "lo": -74.6107058554492,
-   "hi": 1.7073173959552406
+   "grey": 0.0,
+   "span": 74.62806414102174
   },
   "core_radius_px": 25,
   "raw_core_dn": 821.3819315088294,
@@ -47,13 +47,13 @@
    "flat_50_none": {
     "response_at_core": 0.9170684497038265,
     "computed_core_dn": 895.6680065913631,
-    "removed_core_dn": -74.28607508253367,
+    "added_core_dn": 74.28607508253367,
     "mote_contrast_after": 0.0033721874899661497
    },
    "flat_50_darkflat": {
     "response_at_core": 0.9166671489140914,
     "computed_core_dn": 896.0605080236028,
-    "removed_core_dn": -74.67857651477334,
+    "added_core_dn": 74.67857651477334,
     "mote_contrast_after": 0.003637421497300286
    }
   }
@@ -65,16 +65,13 @@
    "w": 720,
    "h": 480
   },
-  "stretch_relative": {
-   "lo": 0.9177750996624897,
-   "hi": 1.0019096642634293
+  "removed_stretch_dn": {
+   "grey": 0.0,
+   "span": 0.41129413854183694
   },
-  "removed_stretch_relative": {
-   "lo": -2.191740593084912e-05,
-   "hi": 0.0004154353919759352
-  },
-  "flat_as_shot_core": 0.9170684497038265,
-  "flat_darkflat_core": 0.9166671489140914,
+  "median_difference_dn": 0.1493665009335471,
+  "core_difference_dn": 0.3925014322396358,
+  "crop_background_madn_dn": 45.42153235739982,
   "darkflat_master_median_dn": 160.7200054556597,
   "flat_median_dn": 33581.63210839033
  }

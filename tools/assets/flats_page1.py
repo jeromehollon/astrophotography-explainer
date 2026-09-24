@@ -15,17 +15,17 @@ Try it, experiment 1 (light-frame ROI around the left-side dust mote, native pix
   roi_raw.png                          (L - D)
   roi_computed_flat-as-shot.png        (L - D) / (flat_50_none / f_v)
   roi_computed_flat-darkflat.png       (L - D) / (flat_50_darkflat / f_v)
-  roi_removed_flat-as-shot.png         raw - computed, one linear stretch shared by both variants
-  roi_removed_flat-darkflat.png
+  roi_removed_flat-as-shot.png         computed - raw centred on mid grey (lighter = brightness added),
+  roi_removed_flat-darkflat.png        one symmetric stretch shared by both variants
   roi_removed_none.png                 flat off: nothing removed (uniform neutral grey)
   All light ROIs share one AutoSTF computed on the raw crop, stronger than the default
   (target bg 0.30, shadows clip -1.8 MADN) so the ring reads at tile size.
 
-Try it, experiment 2 (the same ROI of the *flat*, not the light):
-  flatroi_raw.png              flat_50_none (flat as shot, no dark flat)
-  flatroi_computed.png         flat_50_darkflat (dark flat subtracted), same linear stretch
-  flatroi_removed.png          flat_50_none - flat_50_darkflat, i.e. the dark flat's signal
-  flatroi_removed_none.png     dark flats off: nothing removed
+Try it, experiment 2 (the same light-frame ROI; the flat is on in both tiles):
+  Raw      = roi_computed_flat-as-shot.png   (flat without dark-flat calibration)
+  Computed = roi_computed_flat-darkflat.png  (flat with dark flats subtracted)
+  roi_exp2_removed.png         computed - raw on its own symmetric stretch (the difference is tiny)
+  roi_removed_none.png         dark flats off: nothing removed
 
   stats.json                   per-tile numbers (DN and relative response at the mote core),
                                the whole-field vignetting numbers, and every stretch used
@@ -139,14 +139,16 @@ def main() -> None:
 
     lcx, lcy = mx - xs.start, my - ys.start  # mote core inside the crop
     computed = {vid: raw / flats[vid][ys, xs] for vid in flats}
-    removed = {vid: raw - c for vid, c in computed.items()}
-    allr = np.concatenate([r.ravel() for r in removed.values()])
-    rlo, rhi = np.percentile(allr, [0.5, 99.5])
+    # "What was removed" tiles: computed - raw, centred on mid grey. Lighter = the correction added
+    # brightness, darker = it took brightness away, mid grey = nothing changed.
+    diffs = {vid: c - raw for vid, c in computed.items()}
+    span = float(np.percentile(np.abs(np.concatenate([d.ravel() for d in diffs.values()])), 99.5))
+    diff_show = lambda d, sp: np.clip(0.5 + d / (2 * sp), 0, 1)
     raw_core = core_mean(raw, lcx, lcy, CORE_R) * DN
     stats["experiment_1"] = {
         "crop": {"x": xs.start, "y": ys.start, "w": CROP_W, "h": CROP_H},
         "stf": {"c0": stf_roi[0][0], "m": stf_roi[0][1], **ROI_STF},
-        "removed_stretch_dn": {"lo": rlo * DN, "hi": rhi * DN},
+        "removed_stretch_dn": {"grey": 0.0, "span": span * DN},
         "core_radius_px": CORE_R,
         "raw_core_dn": raw_core,
         "variants": {},
@@ -154,32 +156,29 @@ def main() -> None:
     for vid in flats:
         tag = "flat-as-shot" if vid.endswith("none") else "flat-darkflat"
         save_gray(show_roi(computed[vid]), OUT / f"roi_computed_{tag}.png")
-        save_gray((removed[vid] - rlo) / (rhi - rlo), OUT / f"roi_removed_{tag}.png")
+        save_gray(diff_show(diffs[vid], span), OUT / f"roi_removed_{tag}.png")
         resp = core_mean(flats[vid][ys, xs], lcx, lcy, CORE_R)
         comp_core = core_mean(computed[vid], lcx, lcy, CORE_R) * DN
         stats["experiment_1"]["variants"][vid] = {
             "response_at_core": resp,
             "computed_core_dn": comp_core,
-            "removed_core_dn": raw_core - comp_core,
+            "added_core_dn": comp_core - raw_core,
             "mote_contrast_after": check["variants"][vid]["mote_contrast"],
         }
     save_gray(np.full_like(raw, 0.5), OUT / "roi_removed_none.png")  # nothing removed: neutral grey
 
-    # ---- Try it, experiment 2: the same ROI of the flat ----
-    fn, fd = flats["flat_50_none"][ys, xs], flats["flat_50_darkflat"][ys, xs]
-    fshow, flohi = percentile_stretch(np.concatenate([fn, fd]), 0.5, 99.5)
-    save_gray(percentile_stretch(fn, lo=flohi[0], hi=flohi[1])[0], OUT / "flatroi_raw.png")
-    save_gray(percentile_stretch(fd, lo=flohi[0], hi=flohi[1])[0], OUT / "flatroi_computed.png")
-    dflat = fn - fd  # the dark flat's contribution, in relative-response units
-    dshow, dlohi = percentile_stretch(dflat, 0.5, 99.5)
-    save_gray(dshow, OUT / "flatroi_removed.png")
-    save_gray(np.full_like(dflat, 0.5), OUT / "flatroi_removed_none.png")  # nothing removed: neutral grey
+    # ---- Try it, experiment 2: the same light-frame ROI, flat as shot vs dark-flat-calibrated flat ----
+    # Raw = computed with flat_50_none, Computed = computed with flat_50_darkflat (both saved above);
+    # what was removed is their difference, on its own symmetric stretch because it is tiny.
+    d2 = computed["flat_50_darkflat"] - computed["flat_50_none"]
+    span2 = float(np.percentile(np.abs(d2), 99.5))
+    save_gray(diff_show(d2, span2), OUT / "roi_exp2_removed.png")
     stats["experiment_2"] = {
         "crop": stats["experiment_1"]["crop"],
-        "stretch_relative": {"lo": flohi[0], "hi": flohi[1]},
-        "removed_stretch_relative": {"lo": dlohi[0], "hi": dlohi[1]},
-        "flat_as_shot_core": core_mean(fn, lcx, lcy, CORE_R),
-        "flat_darkflat_core": core_mean(fd, lcx, lcy, CORE_R),
+        "removed_stretch_dn": {"grey": 0.0, "span": span2 * DN},
+        "median_difference_dn": float(np.median(d2) * DN),
+        "core_difference_dn": float(core_mean(d2, lcx, lcy, CORE_R) * DN),
+        "crop_background_madn_dn": float(1.4826 * np.median(np.abs(raw - np.median(raw))) * DN),
         "darkflat_master_median_dn": masters["darkflat_50"]["median_dn"],
         "flat_median_dn": masters["flat_50_none"]["median_dn"],
     }
