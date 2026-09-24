@@ -198,11 +198,11 @@ export default function AlgorithmsPage() {
         <div className="flex flex-col items-start gap-[16px]">
           <div className="flex items-center gap-[24px]">
             <h3 className="whitespace-nowrap font-heading text-[22px] font-medium leading-[28px] text-text-on-stage">Combining the frames</h3>
-            <ChipGroup>
-              <Chip selected={method === 'average'} onClick={() => choose('average')}>
+            <ChipGroup label="Combining method">
+              <Chip selected={method === 'average'} onSelect={() => choose('average')}>
                 Average
               </Chip>
-              <Chip selected={method === 'median'} onClick={() => choose('median')}>
+              <Chip selected={method === 'median'} onSelect={() => choose('median')}>
                 Median
               </Chip>
             </ChipGroup>
@@ -292,13 +292,20 @@ export default function AlgorithmsPage() {
             Average and median are the two simplest rules. There are three other more advanced algorithms that can be utilized
             depending on your stack of images.
           </p>
-          <table className="w-[1200px] border-collapse text-[14px] leading-[20px]">
+          <table className="w-[1200px] table-fixed border-collapse text-[14px] leading-[20px]">
+            {/* Figma columns 200/180/372/376 with 24 px gaps: text starts at x 0/224/428/824 */}
+            <colgroup>
+              <col style={{ width: 224 }} />
+              <col style={{ width: 204 }} />
+              <col style={{ width: 396 }} />
+              <col style={{ width: 376 }} />
+            </colgroup>
             <thead>
               <tr className="border-b-2 border-border-strong text-left align-top text-text-secondary">
-                <th className={`${labelMd} w-[200px] py-[12px] pr-[24px]`}>Method</th>
-                <th className={`${labelMd} w-[180px] py-[12px] pr-[24px]`}>Recommended for</th>
-                <th className={`${labelMd} w-[372px] py-[12px] pr-[24px]`}>What happens to an unusual value</th>
-                <th className={`${labelMd} w-[376px] py-[12px]`}>When it is useful</th>
+                <th className={`${labelMd} py-[12px] pr-[24px]`}>Method</th>
+                <th className={`${labelMd} py-[12px] pr-[24px]`}>Recommended for</th>
+                <th className={`${labelMd} py-[12px] pr-[24px]`}>What happens to an unusual value</th>
+                <th className={`${labelMd} py-[12px]`}>When it is useful</th>
               </tr>
             </thead>
             <tbody>
