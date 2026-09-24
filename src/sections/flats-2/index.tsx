@@ -2,8 +2,10 @@
 // the Figma frames "P5 · Flats 2" A (66:2), B (112:2178), C (112:2357) and
 // D (112:2536) on page 8:8.
 import { useState } from 'react';
+import { LessonPage } from '../../shared/ui';
+import { useAppStore } from '../../shared/store';
 import {
-  LessonPage, Reading, PageHead, H2, P, Rule, Stage, StageHead, Experiment, Chip, ChipGroup, ROITile, Callout,
+  Reading, PageHead, H2, P, Rule, Stage, StageHead, Experiment, Chip, ChipGroup, ROITile, Callout,
 } from './ui';
 import curve10 from './assets/curve-10.svg?raw';
 import curve50 from './assets/curve-50.svg?raw';
@@ -21,7 +23,7 @@ import roiRemoved10 from './assets/roi_removed_10.png';
 import roiRemoved50 from './assets/roi_removed_50.png';
 import roiRemoved85 from './assets/roi_removed_85.png';
 
-type FlatLevel = null | 10 | 50 | 85;
+import type { FlatLevel } from '../../shared/store';
 
 const NBSP = ' ';
 
@@ -70,16 +72,16 @@ function HistogramChart() {
 }
 
 export default function Flats2() {
-  const [level, setLevel] = useState<FlatLevel>(null);
+  // Starts at frame A (No flat); each choice is written to the shared store's
+  // calibration.flat without touching the other calibration fields (design-notes §3).
+  const [level, setLevelState] = useState<FlatLevel>(null);
+  const calibration = useAppStore((s) => s.calibration);
+  const set = useAppStore((s) => s.set);
+  const setLevel = (v: FlatLevel) => { setLevelState(v); set({ calibration: { ...calibration, flat: v } }); };
   const current = levels.find((l) => l.level === level) ?? levels[0];
 
   return (
-    <LessonPage
-      chapter="Calibration"
-      page="Flats, continued"
-      prev={{ label: '← Flats', path: '/calibration/flats' }}
-      next={{ label: 'Alignment →', path: '/alignment' }}
-    >
+    <LessonPage>
       <Reading>
         <PageHead
           eyebrow="Chapter 4 · Calibration"

@@ -1,8 +1,10 @@
 // Calibration > Flats. Layout, sizes and every line of prose follow the Figma
 // frames "P4 · Flats 1" A (14:2), B (49:835) and C (49:1060) on page 8:7.
 import { useState } from 'react';
+import { LessonPage } from '../../shared/ui';
+import { useAppStore } from '../../shared/store';
 import {
-  LessonPage, Reading, PageHead, H2, P, Rule, Stage, StageHead, Experiment, Toggle, ROITile, Callout,
+  Reading, PageHead, H2, P, Rule, Stage, StageHead, Experiment, Toggle, ROITile, Callout,
 } from './ui';
 import illustration from './assets/flats-illustration.svg?raw';
 import flatFull from './assets/flat_full.png';
@@ -18,16 +20,17 @@ const removedCaption =
   'Difference between the two images. Gray means nothing changed, darker color means removal, lighter color means addition';
 
 export default function Flats() {
-  const [flat, setFlat] = useState(false);
-  const [darkFlat, setDarkFlat] = useState(false);
+  // Local state starts where frame A does (both off); each change is written to
+  // the shared store without touching the other calibration fields (design-notes §3).
+  const [flat, setFlatState] = useState(false);
+  const [darkFlat, setDarkFlatState] = useState(false);
+  const calibration = useAppStore((s) => s.calibration);
+  const set = useAppStore((s) => s.set);
+  const setFlat = (v: boolean) => { setFlatState(v); set({ calibration: { ...calibration, flat: v ? 50 : null } }); };
+  const setDarkFlat = (v: boolean) => { setDarkFlatState(v); set({ calibration: { ...calibration, darkFlat: v } }); };
 
   return (
-    <LessonPage
-      chapter="Calibration"
-      page="Flats"
-      prev={{ label: '← Darks', path: '/calibration/darks' }}
-      next={{ label: 'Flats, continued →', path: '/calibration/flats-2' }}
-    >
+    <LessonPage>
       <Reading>
         <PageHead
           eyebrow="Chapter 4 · Calibration"
