@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Stacking Explainer mark, "Registration": three copies of the NGC 7331 silhouette offset like unaligned subs.
+       Tokens: red/400 #E0604B, ochre/300 #F2CE6B, cobalt/600 #1F4AA8, cream/50 #F7F2EA. Figma: Logo/Mark (123:2159). -->
+  <g transform="translate(-6 -5) rotate(-22 32 32)"><ellipse cx="32" cy="32" rx="24" ry="8.5" fill="#E0604B"/></g>
+  <g transform="translate(6 5) rotate(-22 32 32)"><ellipse cx="32" cy="32" rx="24" ry="8.5" fill="#F2CE6B"/></g>
+  <g transform="rotate(-22 32 32)">
+    <ellipse cx="32" cy="32" rx="24" ry="8.5" fill="#1F4AA8"/>
+    <circle cx="32" cy="32" r="4.5" fill="#F7F2EA"/>
+  </g>
+</svg>

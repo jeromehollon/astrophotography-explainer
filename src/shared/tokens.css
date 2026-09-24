@@ -1,0 +1,73 @@
+/* Design tokens, copied from the Figma library (docs/figma-state.json). Owner: Foundation. */
+@import 'tailwindcss';
+
+@theme {
+  --color-cream-50: #F7F2EA;
+  --color-cream-100: #F2EBE0;
+  --color-cream-200: #E7DCCB;
+  --color-cream-300: #D5C6AE;
+  --color-ink-900: #1C1A17;
+  --color-ink-700: #3E3A34;
+  --color-ink-500: #6B655C;
+  --color-ink-300: #A39C90;
+  --color-space-900: #0F1220;
+  --color-space-800: #181C2E;
+  --color-space-700: #2A3050;
+  --color-cobalt-700: #173A85;
+  --color-cobalt-600: #1F4AA8;
+  --color-cobalt-400: #4A78D6;
+  --color-cobalt-200: #C7D6F2;
+  --color-red-600: #C8321F;
+  --color-red-400: #E0604B;
+  --color-red-200: #F3CDC5;
+  --color-ochre-500: #E3A81E;
+  --color-ochre-300: #F2CE6B;
+  --color-ochre-200: #F7E6B5;
+  --color-violet-600: #6B3FA0;
+  --color-violet-400: #9A72CC;
+  --color-violet-200: #DCCDEF;
+  --color-grey-500: #8B8B8B;
+  --color-grey-300: #C4C4C4;
+  --color-white: #FFFFFF;
+
+  /* semantic */
+  --color-surface-page: var(--color-cream-100);
+  --color-surface-panel: var(--color-cream-200);
+  --color-surface-card: var(--color-cream-50);
+  --color-surface-stage: var(--color-space-900);
+  --color-surface-stage-raised: var(--color-space-800);
+  --color-text-primary: var(--color-ink-900);
+  --color-text-secondary: var(--color-ink-500);
+  --color-text-disabled: var(--color-ink-300);
+  --color-text-on-stage: var(--color-cream-50);
+  --color-text-on-stage-muted: var(--color-cream-300);
+  --color-text-on-accent: var(--color-white);
+  --color-text-link: var(--color-cobalt-600);
+  --color-border-default: var(--color-cream-300);
+  --color-border-strong: var(--color-ink-900);
+  --color-border-on-stage: var(--color-space-700);
+  --color-accent-primary: var(--color-cobalt-600);
+  --color-accent-primary-hover: var(--color-cobalt-700);
+  --color-accent-focus: var(--color-cobalt-600);
+  --color-accent-focus-on-stage: var(--color-ochre-500);
+  --color-source-bias: var(--color-cobalt-600);
+  --color-source-bias-soft: var(--color-cobalt-200);
+  --color-source-dark: var(--color-red-600);
+  --color-source-dark-soft: var(--color-red-200);
+  --color-source-flat: var(--color-ochre-500);
+  --color-source-flat-soft: var(--color-ochre-200);
+  --color-source-noise: var(--color-grey-500);
+  --color-source-noise-soft: var(--color-grey-300);
+  --color-source-external: var(--color-violet-600);
+  --color-source-external-soft: var(--color-violet-200);
+
+  --font-heading: 'Jost', sans-serif;
+  --font-body: 'Public Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  --radius-sm: 2px;
+  --radius-md: 6px;
+}
+
+html { background: var(--color-surface-page); color: var(--color-text-primary); font-family: var(--font-body); }
+body { margin: 0; min-width: 1440px; }

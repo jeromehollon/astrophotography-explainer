@@ -1,0 +1,9 @@
+source_images
+.venv
+node_modules
+dist
+data/*
+!data/derived
+data/derived/*
+!data/derived/runtime
+.git

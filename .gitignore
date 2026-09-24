@@ -173,3 +173,10 @@ desktop.ini
 
 # Claude Code per-user settings (shared settings.json and skills ARE committed)
 .claude/settings.local.json
+
+# app
+node_modules
+dist
+playwright-report
+test-results
+e2e/screenshots
