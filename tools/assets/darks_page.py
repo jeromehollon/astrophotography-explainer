@@ -8,10 +8,14 @@ region of the master dark. The bias is applied to every light-frame image on thi
 Bias lesson already covered it; the Darks page never mentions it.
 
 Region choice: the master dark is used exactly as supplied (owner decision 2026-09-24: "trust the
-master dark"). It cancels most hot pixels only partly, so the window is chosen for the clearest removal:
-among 64×64 sky-only windows (no stars, no pixel hotter in the dark than in the light) it holds the most
-"well removed" hot pixels (clearly visible before, within the noise after), then the most shared hot
-pixels. One well-removed pixel is circled on the page; its position is in stats.json.
+master dark"). It cancels most hot pixels only partly (it carries about 37% of their excess in the
+lights), so the window is centred on the brightest "well removed" hot pixel in the frame: bright in the
+light (> 15 MADN above the background) and within 2 MADN of the background after subtraction. In f13
+that is the pixel at (114, 895). (The frame's saturated hot pixels cancel too, but overshoot by about
+3 MADN and print as dark holes, so they are excluded by the ±2 MADN rule.) The window must hold no
+stars and no pixel that is hotter in the dark than in the light. The ROI stretch is stronger than
+Flats-1's (target background 0.40, shadows clip −4 MADN) so the grain reads evenly and a dimmed hot
+pixel still shows as dimmed. The circled pixel's position and values are in stats.json.
 
 Reading column:
   grain_light.png     (L − B) on the region, one AutoSTF (target bg 0.30, clip −1.8 MADN), enlarged ×5
@@ -46,12 +50,12 @@ PRE = REPO / "data" / "derived" / "precompute"
 CAL = REPO / "source_images" / "calibration"
 OUT = REPO / "assets" / "darks"
 
-FRAME = "f03"
+FRAME = "f13"
 DN = 65535.0
 ROI = 64          # native pixels, square
 ZOOM = 5          # nearest-neighbour enlargement for the page (64 × 5 = 320 px)
 BORDER = 64       # keep the window away from the frame edge
-ROI_STF = dict(target_bg=0.30, shadows_clip=-1.8)
+ROI_STF = dict(target_bg=0.40, shadows_clip=-4.0)
 FRAME_STF = dict(target_bg=0.30, shadows_clip=-2.8)
 HOT_DN = 200.0    # a hot pixel: dark − bias above this many pixel-brightness units (65535 = full scale)
 
@@ -100,18 +104,20 @@ def main() -> None:
     star = bright & (nb >= 4)
     dark_only = hot & ((lb - sky_med) < 0.5 * dark_excess)
     shared = hot & bright & ~star
-    good = shared & (lb - sky_med > 12 * sky_madn) & (np.abs((L - D) - sky_med) < 2 * sky_madn)
+    good = shared & (lb - sky_med > 15 * sky_madn) & (np.abs((L - D) - sky_med) < 2 * sky_madn)
     ok = (box_sum(star, ROI) == 0) & (box_sum(dark_only, ROI) == 0)
-    score = np.where(ok, box_sum(good, ROI) * 1000 + box_sum(shared, ROI), -1)
-    score[:BORDER] = -1
-    score[-BORDER:] = -1
-    score[:, :BORDER] = -1
-    score[:, -BORDER:] = -1
-    # among the best windows, take the one whose centre is closest to a well-removed pixel
-    cands = np.argwhere(score == score.max())
-    gy, gx = np.where(good)
-    y0, x0 = min((tuple(c) for c in cands),
-                 key=lambda c: np.min((gy - (c[0] + ROI / 2)) ** 2 + (gx - (c[1] + ROI / 2)) ** 2))
+    best = None
+    for gy, gx in np.argwhere(good):
+        wy = int(np.clip(gy - ROI // 2, BORDER, H - BORDER - ROI))
+        wx = int(np.clip(gx - ROI // 2, BORDER, W - BORDER - ROI))
+        if not ok[wy, wx]:
+            continue
+        key = (float(lb[gy, gx] - sky_med), int(box_sum(shared, ROI)[wy, wx]))
+        if best is None or key > best[0]:
+            best = (key, wy, wx)
+    if best is None:
+        raise SystemExit("no well-removed hot pixel in a clean window")
+    _, y0, x0 = best
     ys, xs = slice(y0, y0 + ROI), slice(x0, x0 + ROI)
 
     raw = lb[ys, xs]                     # L − B
@@ -154,12 +160,12 @@ def main() -> None:
         "frame": FRAME,
         "bias_applied_to_every_light_image": True,
         "region": {"x": int(x0), "y": int(y0), "w": ROI, "h": ROI, "zoom": ZOOM,
-                   "chosen_by": "most well-removed, then most shared hot pixels among 64×64 sky-only windows; centred on a well-removed pixel"},
+                   "chosen_by": "centred on the brightest well-removed hot pixel whose 64×64 window holds no stars and no dark-only pixels"},
         "hot_pixel_definition": {"dark_minus_bias_above_dn": HOT_DN,
                                  "light_minus_bias_above_background_madn": 10},
         "hot_pixels_in_region": {"in_dark": int(hot_roi.sum()), "shared_with_light": int(shared_roi.sum()),
                                  "well_removed": int(good_roi.sum())},
-        "well_removed_definition": "light − bias above background by > 12 MADN, and light − dark within ±2 MADN of it",
+        "well_removed_definition": "light − bias above background by > 15 MADN, and light − dark within ±2 MADN of it",
         "hot_pixels_in_frame": {"in_dark": int(hot.sum()), "shared_with_light": int(shared.sum())},
         "dark_over_light_excess_ratio_percentiles": {
             "p10": float(np.percentile(ratio, 10)), "p50": float(np.percentile(ratio, 50)),
