@@ -8,7 +8,9 @@ say so. Light-frame crops share the Flats-1 stretch (AutoSTF target background 0
 shadows clip -1.8 MADN), each computed on its own crop.
 
 Outputs (assets/noise/):
-  problem_galaxy.png       f03 raw, 880x660 around NGC 7331: the target in its noise (440x330 slot at 2x)
+  problem_galaxy.png       f03 raw, 2200x1650 around NGC 7331 binned x5 to 440x330, so the outer halo fits
+  problem_master.png       the same region of the WBPP master light (source_images/final), rotated 180 degrees
+                           because the master is registered to an East-side reference, same binning and STF settings
   tour_noise.png           f03 raw background patch: random variation
   tour_bias.png            master bias, same patch: the readout offset and its noise
   tour_dark.png            master dark, 360x240 patch chosen for hot-pixel density (shown 1:1): hot pixels
@@ -42,7 +44,9 @@ W, H = 720, 480
 STF = dict(target_bg=0.30, shadows_clip=-1.8)
 
 # Crop centres in native pixels (x, y) of the raw frame.
-GALAXY = (3160, 2120)
+GALAXY = (3248, 2100)      # galaxy core in f03 (centroid)
+GALAXY_MASTER = (3164, 2052)  # galaxy core in the master after a 180-degree rotation (template match, refined below)
+PROBLEM_W, PROBLEM_H, PROBLEM_BIN = 2200, 1650, 5  # native region and binning for the 440x330 problem slot
 BACKGROUND = (2400, 3200)  # plain sky, away from the galaxy and the dust mote at (720, 2337)
 HOT_PIXELS = (1216, 960)   # densest 128 px block of the master dark (count > 500 DN)
 STARS = (3060, 3780)       # bright double star, so the doubling reads at tile size
@@ -92,9 +96,19 @@ def main() -> None:
     f03 = load_frame(frames, "f03")
     stats["f03_whole_frame"] = med_madn(f03)
 
-    # The problem you can see: the galaxy in a single raw frame.
-    g = crop(f03, *GALAXY, 880, 660)
-    stats["problem_galaxy"] = {"frame": "f03", "centre": GALAXY, "size": [880, 660], "stf": save_stf(g, OUT / "problem_galaxy.png", **STF)}
+    # The problem you can see: the galaxy in a single raw frame, and the same region of the finished master.
+    def refine_core(a, cx, cy, r=40):
+        w = np.clip(a[cy - r : cy + r, cx - r : cx + r] - np.median(a), 0, None)
+        yy, xx = np.mgrid[0 : 2 * r, 0 : 2 * r]
+        return int(round(cx - r + (w * xx).sum() / w.sum())), int(round(cy - r + (w * yy).sum() / w.sum()))
+    gc = refine_core(f03, *GALAXY)
+    g = binned(crop(f03, *gc, PROBLEM_W, PROBLEM_H), PROBLEM_BIN)
+    stats["problem_galaxy"] = {"frame": "f03", "centre": gc, "size": [PROBLEM_W, PROBLEM_H], "bin": PROBLEM_BIN, "stf": save_stf(g, OUT / "problem_galaxy.png", **STF)}
+    master, _ = astro.load(next((REPO / "source_images" / "final").glob("masterLight_*.xisf")))
+    Mr = master[0].astype(np.float64)[::-1, ::-1]  # rotate 180 degrees to match the West-side sub
+    mc = refine_core(Mr, *GALAXY_MASTER)
+    gm = binned(crop(Mr, *mc, PROBLEM_W, PROBLEM_H), PROBLEM_BIN)
+    stats["problem_master"] = {"source": "final/masterLight_*_autocrop.xisf rotated 180 degrees", "centre_in_rotated_master": mc, "size": [PROBLEM_W, PROBLEM_H], "bin": PROBLEM_BIN, "stf": save_stf(gm, OUT / "problem_master.png", **STF)}
 
     # Random variation: a plain background patch of the same frame.
     bg = crop(f03, *BACKGROUND)

@@ -14,16 +14,35 @@
  "problem_galaxy": {
   "frame": "f03",
   "centre": [
-   3160,
-   2120
+   3246,
+   2100
   ],
   "size": [
-   880,
-   660
+   2200,
+   1650
   ],
+  "bin": 5,
   "stf": {
-   "c0": 0.016946609554812312,
-   "m": 0.0033192842872212134,
+   "c0": 0.01731240449398756,
+   "m": 0.0014923864996332584,
+   "target_bg": 0.3,
+   "shadows_clip": -1.8
+  }
+ },
+ "problem_master": {
+  "source": "final/masterLight_*_autocrop.xisf rotated 180 degrees",
+  "centre_in_rotated_master": [
+   3162,
+   2051
+  ],
+  "size": [
+   2200,
+   1650
+  ],
+  "bin": 5,
+  "stf": {
+   "c0": 0.009509134733527899,
+   "m": 0.00026494018160124264,
    "target_bg": 0.3,
    "shadows_clip": -1.8
   }
