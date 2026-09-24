@@ -59,20 +59,46 @@
   }
  },
  "experiment_2": {
+  "flat_level_percent": 10,
   "crop": {
    "x": 400,
    "y": 2157,
    "w": 720,
    "h": 480
   },
+  "stf": {
+   "c0": 0.011902945488020778,
+   "m": 0.0029061332681159045,
+   "target_bg": 0.3,
+   "shadows_clip": -1.8
+  },
   "removed_stretch_dn": {
    "grey": 0.0,
-   "span": 0.41129413854183694
+   "span": 1.7862351160879175,
+   "span_percentile": 98.0
   },
-  "median_difference_dn": 0.1493665009335471,
-  "core_difference_dn": 0.3925014322396358,
+  "median_difference_dn": 0.6915863042570591,
+  "difference_dn_p1_p99": [
+   -0.12072706632603704,
+   1.986737012391296
+  ],
+  "core_dn": {
+   "flat_as_shot": 883.6300327678794,
+   "flat_darkflat": 885.3131794735793
+  },
+  "core_difference_dn": 1.68314670569995,
+  "crop_background_dn": 861.8181941017974,
   "crop_background_madn_dn": 45.42153235739982,
-  "darkflat_master_median_dn": 160.7200054556597,
-  "flat_median_dn": 33581.63210839033
+  "vignetting_corner_over_centre": {
+   "flat_as_shot": 0.9575064026285095,
+   "flat_darkflat": 0.9628757747664003
+  },
+  "mote_contrast": {
+   "flat_as_shot": -0.006532391631987489,
+   "flat_darkflat": -0.0054291834793138705
+  },
+  "darkflat_master_median_dn": 160.51999630057253,
+  "flat_median_dn": 6593.521947897971,
+  "pedestal_fraction_of_flat": 0.02434510684411184
  }
 }
