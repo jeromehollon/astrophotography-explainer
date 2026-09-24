@@ -1,0 +1,81 @@
+{
+ "frame": "f03",
+ "mote_center_px": {
+  "x": 720,
+  "y": 2337
+ },
+ "flat_full": {
+  "source": "flat_50_darkflat (relative response, f_v = 1)",
+  "stretch": {
+   "linear_lo": 0.8746950332082777,
+   "linear_hi": 1.132668296594264
+  },
+  "corner_over_centre": 0.7643598076489087
+ },
+ "frame_before_after": {
+  "stf": {
+   "c0": 0.0103345122981444,
+   "m": 0.007888319935469176,
+   "target_bg": 0.3,
+   "shadows_clip": -2.8
+  },
+  "vignetting_corner_over_centre": {
+   "before": 0.7643598076489087,
+   "after": 0.9616937269133203
+  }
+ },
+ "experiment_1": {
+  "crop": {
+   "x": 400,
+   "y": 2157,
+   "w": 720,
+   "h": 480
+  },
+  "stf": {
+   "c0": 0.011902945488020778,
+   "m": 0.0029061332681159045,
+   "target_bg": 0.3,
+   "shadows_clip": -1.8
+  },
+  "removed_stretch_dn": {
+   "lo": -74.6107058554492,
+   "hi": 1.7073173959552406
+  },
+  "core_radius_px": 25,
+  "raw_core_dn": 821.3819315088294,
+  "variants": {
+   "flat_50_none": {
+    "response_at_core": 0.9170684497038265,
+    "computed_core_dn": 895.6680065913631,
+    "removed_core_dn": -74.28607508253367,
+    "mote_contrast_after": 0.0033721874899661497
+   },
+   "flat_50_darkflat": {
+    "response_at_core": 0.9166671489140914,
+    "computed_core_dn": 896.0605080236028,
+    "removed_core_dn": -74.67857651477334,
+    "mote_contrast_after": 0.003637421497300286
+   }
+  }
+ },
+ "experiment_2": {
+  "crop": {
+   "x": 400,
+   "y": 2157,
+   "w": 720,
+   "h": 480
+  },
+  "stretch_relative": {
+   "lo": 0.9177750996624897,
+   "hi": 1.0019096642634293
+  },
+  "removed_stretch_relative": {
+   "lo": -2.191740593084912e-05,
+   "hi": 0.0004154353919759352
+  },
+  "flat_as_shot_core": 0.9170684497038265,
+  "flat_darkflat_core": 0.9166671489140914,
+  "darkflat_master_median_dn": 160.7200054556597,
+  "flat_median_dn": 33581.63210839033
+ }
+}
