@@ -9,7 +9,7 @@ Read this before working in the repo. It covers what we're building, the tools, 
 - **Build:** a React/TS/Tailwind SPA built with Vite, served by a small Node (Fastify) server. That server exposes exactly **one** API, `GET /api/roi`, which returns a pixel region of one image (SPEC §4.3). All image processing runs in the browser. Everything ships as one Docker container.
 - **Platform:** desktop only. Target the latest **Chrome and Firefox**. Don't spend time on mobile layouts, Safari, or touch.
 - **Assets:** every example image is made from real or synthetic data by `tools/astro.py`, so the numbers the page shows (FWHM, noise, SNR) are reproducible.
-- **Status:** setup only. The app hasn't been scaffolded yet.
+- **Status:** implemented (2026-09-24): all eleven pages, the live pipeline, the ROI API and the Docker image are on `main`. Figma-vs-page reviews live in `docs/reviews/`; open items are in `TODO.md`. Run `npm run dev` (needs `data/derived/runtime`, see `tools/precompute/README.md`) or `docker build -t stacking-explainer . && docker run -p 8080:8080 stacking-explainer`.
 
 ## Tooling
 
