@@ -29,8 +29,10 @@ Outputs (assets/light-frames/, 8-bit PNG):
                                                 8x without smoothing (design reference only)
   stats.json                                    crop positions, stretches, the star catalogue
                                                 numbers the prose quotes (median FWHM and star
-                                                count per frame), the profile star and its
-                                                brightness profile in both frames
+                                                count per frame), the profile star, its
+                                                brightness profile in both frames, and a direct
+                                                Moffat fit of that star in both frames (the
+                                                catalogue run does not detect it in the copy)
 
 Usage:
   uv run tools/assets/light_frames_page.py            # writes assets/light-frames/
@@ -193,7 +195,18 @@ def main() -> None:
         cx, cy = int(round(sx)), int(round(sy))
         box = img[cy - STAR_BOX // 2 : cy + STAR_BOX // 2, cx - STAR_BOX // 2 : cx + STAR_BOX // 2]
         save_gray(np.kron(show(box, stf_track), np.ones((STAR_ZOOM, STAR_ZOOM))), OUT / f"star_{fid}.png")
+    # Direct fit of the same star in both frames (the star finder drops it in the tracking copy,
+    # so the catalogue has no number there): Moffat, as the catalogue uses, on a sky-subtracted cutout.
+    fits = {}
+    for fid, img in ((TRACK_REF, ref), (TRACK_VAR, var)):
+        cx, cy = int(round(sx)), int(round(sy))
+        cut = img[cy - STAR_BOX // 2 : cy + STAR_BOX // 2, cx - STAR_BOX // 2 : cx + STAR_BOX // 2]
+        cut = cut - np.median(cut)
+        f = astro._fit_star(cut, "moffat")
+        fits[fid] = {k: (float(v) if isinstance(v, (float, np.floating)) else v) for k, v in f.items() if k in ("fwhm", "fwhm_major", "fwhm_minor", "ecc", "amp", "ok")}
+        fits[fid]["amp_dn"] = fits[fid].pop("amp") * DN
     stats["fwhm_star"] = {
+        "direct_fit": {"model": "moffat, 48 px cutout, sky = cutout median", **fits},
         "sensor_px": [sx, sy],
         "crop_px": [sx - x0, sy - y0],
         "profile_axis": "image row through the peak, 33 pixels, sky subtracted, pixel brightness (0-65535)",
