@@ -315,12 +315,14 @@
    "Noise & Defects / Light path": "35:2",
    "Bias / Where the bias comes from": "35:41",
    "Darks / Where dark signal comes from": "35:81",
-   "Flats / Where uneven brightness comes from": "14:517"
+   "Flats / Where uneven brightness comes from": "14:517",
+   "Welcome / From one exposure to a photograph": "58:2"
   },
   "frames": {
    "P4 Flats 1 A flat off": "14:2",
    "P4 Flats 1 B flat on nothing": "49:835",
-   "P4 Flats 1 C flat on darkflats": "49:1060"
+   "P4 Flats 1 C flat on darkflats": "49:1060",
+   "P0 Welcome A": "57:619"
   },
   "nodes": {
    "P4 A flat-image": "44:612",
@@ -330,7 +332,15 @@
    "P4 A section-light-path": "49:622",
    "P4 A light-path-box": "49:619",
    "P4 A flat-column": "49:620",
-   "P4 A before-after-box": "49:623"
+   "P4 A before-after-box": "49:623",
+   "P0 A illustration": "59:209",
+   "P0 A prose-observatory": "57:656",
+   "P0 A section-hook": "57:645",
+   "P0 A hook step-exposure-image": "57:651",
+   "P0 A hook step-stack-image": "57:654",
+   "P0 A hook step-colour-image": "59:325",
+   "P0 A section-galaxies": "59:327",
+   "P0 A photo-image": "59:333"
   }
  },
  "completedSteps": [
@@ -358,7 +368,8 @@
   "I2.illustrations-simplified",
   "I3.illustrations-optical-path",
   "R6.flats1-optical-path-and-real-flat",
-  "R7.flats1-boxes-and-exp2-light-frame"
+  "R7.flats1-boxes-and-exp2-light-frame",
+  "P0.welcome-page"
  ],
  "notes": [
   "Prototype connections cannot cross Figma pages; agents build per page, then frames are moved onto one Prototype page and wired at the end.",
@@ -371,6 +382,7 @@
   "Illustration components carry no eyebrow, title or caption text (owner direction 2026-09-24): the lesson page owns all prose around an illustration. The 'For lesson: X' notes on the Illustrations canvas are organisational only. Bias/Darks/Flats components have full-height 'highlight-*' bars (source soft colours) behind the relevant parts.",
   "Illustrations page holds only the four optical-path components (Noise & Defects, Bias, Darks, Flats). The Flats-continued, Alignment and Algorithms illustrations were removed on 2026-09-24; section agents decide whether their pages need one.",
   "Flats-1 R7 (2026-09-24): the optical-path SVG sits in a cream bounding box (800 wide, instance rescaled to 752) with its two paragraphs; the real flat sits to its right (376 wide) with the caption 'The flat recorded by the camera'. Before/after is wrapped in a dark (surface/stage) box. Experiment 2 tiles are the LIGHT-FRAME ROI: Raw = frame divided by the flat as shot, Computed = divided by the dark-flat-calibrated flat, removed = their difference. 'What was removed' tiles are computed - raw centred on mid grey (lighter = added). The owner rewrote all Try-it prose and tile captions in frame A; B and C are clones of A with only toggle states, tile images and the two state-dependent captions changed.",
-  "Flats-1 R8 (2026-09-24): 'What was removed' is populated with the real difference in EVERY toggle state (exp1: with flat minus without; exp2: dark-flat-calibrated flat minus flat as shot). Only the Computed tile follows the switch. The exp2 difference is ~0.4 DN but clean (the raw noise cancels because both tiles divide the same frame), so on its own symmetric stretch it shows the same donut as exp1, slightly different."
+  "Flats-1 R8 (2026-09-24): 'What was removed' is populated with the real difference in EVERY toggle state (exp1: with flat minus without; exp2: dark-flat-calibrated flat minus flat as shot). Only the Computed tile follows the switch. The exp2 difference is ~0.4 DN but clean (the raw noise cancels because both tiles divide the same frame), so on its own symmetric stretch it shows the same donut as exp1, slightly different.",
+  "P0 Welcome (2026-09-24): single frame A, no Try-it stage and no ROI tiles by owner direction; full-field images are allowed on Welcome. Assets from tools/assets/welcome_page.py in assets/welcome/."
  ]
 }

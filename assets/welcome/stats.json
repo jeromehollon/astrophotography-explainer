@@ -1,0 +1,47 @@
+{
+ "frame": "f07",
+ "sub_full": {
+  "source": "source_images/light/TARGET_NGC 7331_DATE_2026-09-17_FRAME_0007_FILTER_Red_300.00s.xisf",
+  "size_px": {
+   "w": 1244,
+   "h": 833
+  },
+  "bin_factor": 5,
+  "stf": {
+   "c0": 0.011656948278881609,
+   "m": 0.0041707712415291354,
+   "target_bg": 0.3,
+   "shadows_clip": -1.8
+  },
+  "median_dn": 882.0000303117558,
+  "whole_frame_madn_dn": 72.64737736074999
+ },
+ "master_full": {
+  "source": "masterLight_BIN-1_6224x4168_EXPOSURE-300.00s_FILTER-Red_mono_TARGET-NGC 7331_(1)_autocrop.xisf",
+  "size_px": {
+   "w": 1218,
+   "h": 818
+  },
+  "bin_factor": 5,
+  "stf": {
+   "c0": 0.009365814648866653,
+   "m": 0.0003813697319075721,
+   "target_bg": 0.3,
+   "shadows_clip": -1.8
+  },
+  "median_dn": 624.8436759458855,
+  "whole_frame_madn_dn": 9.915279146874324
+ },
+ "noise_ratio_sub_over_master": 7.326811104824136,
+ "colour_full": {
+  "source": "source_images/final/NGC7331.png",
+  "original_px": {
+   "w": 6094,
+   "h": 4092
+  },
+  "size_px": {
+   "w": 1200,
+   "h": 806
+  }
+ }
+}

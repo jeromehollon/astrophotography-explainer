@@ -38,6 +38,7 @@ Figma file: https://www.figma.com/design/jtYi1LQf1fVyUAUfAgthP5/Astrophotography
 | Where | Placeholder | Real source |
 |---|---|---|
 | ROITile image wells on P4 Flats-1 | real crops from `assets/flats-1/` (script `tools/assets/flats_page1.py`) | `/api/roi` crops at runtime; the Figma crops define the stretch (STF target bg 0.30, clip −1.8 MADN) |
+| P0 Welcome image wells | real full-field images from `assets/welcome/` (script `tools/assets/welcome_page.py`): f07 sub, WBPP master, colour composite | Stage D static art |
 | Every other ROITile image well | "PLACEHOLDER · real ROI crop" | `/api/roi` crops, reference-frame STF (SPEC §4.5) |
 | P4 full-field flat and before/after frame | `assets/flats-1/flat_full.png`, `frame_before.png`, `frame_after.png` (binned ×5) | Stage D static art |
 | Histogram and Histogram/Mini | "PLACEHOLDER" bar shape | `histograms.json` |
@@ -57,6 +58,11 @@ Figma file: https://www.figma.com/design/jtYi1LQf1fVyUAUfAgthP5/Astrophotography
 7. **Illustrations are full width (1200×360)** above the first section; a 440×330 ROI image slot sits beside "The problem you can see" on every lesson page. Stage D (static art) should produce those ROI crops at 2× for the illustration slot.
 8. **Amp-glow example** on Darks (display-only old-camera dark) conflicts with "ROIs only". Owner decision pending (see copy.md P3).
 9. **Prototype flow across Figma pages.** Prototype links cannot cross pages, so the final flow is assembled on the "Prototype" page by moving one frame per app page there and wiring Next/Previous. Page agents build on their own pages first.
+
+10. **P0 Welcome has no "Try it" stage and no ROI tiles (owner direction, 2026-09-24).** The page skeleton in §1 lists a dark stage on every lesson page; Welcome is the exception. Its reading column is: page head → illustration "Welcome / From one exposure to a photograph" (1200×360) → observatory prose → the hook, a dark box with three full-field images (one 300 s sub f07, the WBPP master, the colour composite) → the colour composite at column width with the galaxies prose → BottomNav with a single "Start: Noise & Defects →" button (Previous hidden). SPEC P0 stands; the skeleton rule needs the exception written down. Full-field views are allowed on Welcome per §5.1.
+11. **Welcome prose does not define its terms.** SPEC §9 asks that light, stack, calibration and similar words be defined on first use. The owner's Welcome text uses "calibration frames", "stacking" and "stack" without definitions and is kept verbatim; the definitions land on Noise & Defects. Reconcile §9 or the Welcome copy.
+12. **Deer Lick Group claim.** The Welcome prose says the four galaxies above NGC 7331 are gravitationally bound to it and will merge within 1–3 billion years. Published redshift distances place NGC 7335, 7336, 7337 and 7340 roughly ten times farther away, so they are a line-of-sight grouping. Kept verbatim at the owner's direction; flagged for a fact check before launch.
+13. **Spelling on Welcome.** The owner's prose uses American spelling ("color"); captions and the illustration label on that page follow it ("Color photograph"). The rest of the file uses British spelling ("colour"). Pick one before the copy is final.
 
 ## 6. Figma API gotchas recorded for other agents
 
