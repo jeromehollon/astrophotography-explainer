@@ -141,3 +141,35 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# --- Project additions ---
+# Python (tools/ via uv; uv.lock IS committed)
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Astro data: raw frames and regenerable intermediates are large; keep them out of git
+data/raw/
+source_images/
+data/derived/
+*.fits
+*.fit
+*.fts
+*.xisf
+*.cr2
+*.cr3
+*.nef
+*.arw
+*.dng
+*.xdrz
+!tests/fixtures/**
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+
+# Claude Code per-user settings (shared settings.json and skills ARE committed)
+.claude/settings.local.json
