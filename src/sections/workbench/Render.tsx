@@ -4,7 +4,7 @@ import type { View } from './live';
 
 /**
  * Draws one view so that it covers its box (like object-fit: cover): an <img> for bundled assets, a
- * RoiCanvas for live Float32 data through the reference STF. The wrapper is always rendered so its
+ * RoiCanvas for live Float32 data through that image's own STF (live.ts ownStf). The wrapper is always rendered so its
  * size is known by the time live data arrives.
  */
 export function Render({ view, alt = '', className }: { view: View | null; alt?: string; className?: string }) {

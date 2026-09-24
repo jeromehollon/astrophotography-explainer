@@ -10,14 +10,70 @@ import { useAppStore, type AlgorithmName, type FlatLevel } from './store';
 import { Btn, Check, Chip, cx, DrawnHistogram, LessonLink, Progress, rovingKeyDown, SectionHeader, T, Tile } from './ui';
 
 const TOPBAR_HEIGHT = 104;
+/** Fits the longest scenario text ("Satellite Trail Challenge": label line + description) at 1200 px, 16/24 body: measured 72 px. */
+const DESCRIPTION_MIN_HEIGHT = 72;
 
+/** Hover enlargement of a strip tile (owner request): the same live view at 2×, in a floating panel under the tile. */
+const HOVER_DELAY_MS = 150;
+const HOVER_WELL = { w: 840, h: 560 }; // 2 × the 1440×960 ROI at bin 2 (720×480) ≈ the 282-wide tile at 3×; keeps the 3:2 shape
 function StripTile({ region, inputs, job }: { region: (typeof ROI_KEYS)[number]; inputs: StackInputs; job: Job | null }) {
   const { view, pending, empty } = useRegionStack(region, inputs);
   const state = job ? 'processing' : empty ? 'empty' : pending ? 'pending' : 'default';
+  const ref = useRef<HTMLDivElement>(null);
+  const timer = useRef<number | undefined>(undefined);
+  const [panel, setPanel] = useState<{ left: number; top: number; w: number; h: number } | null>(null);
+  const enter = () => {
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => {
+      const r = ref.current?.getBoundingClientRect();
+      if (!r) return;
+      // 2× well, scaled down (3:2 kept) when the space under the strip is shorter; centred under the tile and pulled
+      // inside the viewport (8 px margin) when it would overflow sideways
+      const top = r.bottom + 8;
+      const h = Math.max(240, Math.min(HOVER_WELL.h, window.innerHeight - top - 8 - 42));
+      const w = Math.round((h * HOVER_WELL.w) / HOVER_WELL.h);
+      const width = w + 2;
+      const left = Math.max(8, Math.min(r.left + r.width / 2 - width / 2, window.innerWidth - width - 8));
+      setPanel({ left, top, w, h });
+    }, HOVER_DELAY_MS);
+  };
+  const leave = () => { window.clearTimeout(timer.current); setPanel(null); };
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+  const title = ROIS[region].title;
   return (
-    <Tile title={ROIS[region].title} width={282} height={269} state={state} progress={job ? (100 * job.done) / job.total : undefined}>
-      <Render view={view} alt={`${ROIS[region].title}, ${METHOD_LABEL[inputs.algorithm]} of ${inputs.frames.length} photographs`} />
-    </Tile>
+    <div ref={ref} className="relative" onMouseEnter={enter} onMouseLeave={leave}>
+      <Tile title={title} width={282} height={269} state={state} progress={job ? (100 * job.done) / job.total : undefined}>
+        <Render view={view} alt={`${title}, ${METHOD_LABEL[inputs.algorithm]} of ${inputs.frames.length} photographs`} />
+      </Tile>
+      {panel && view && state === 'default' && (
+        <div aria-hidden data-hover-panel={region} className="pointer-events-none fixed z-50 box-border border border-border-on-stage bg-surface-stage-raised shadow-[0_12px_32px_rgba(15,18,32,0.45)]"
+          style={{ left: panel.left, top: panel.top, width: panel.w + 2 }}>
+          <div className={cx('flex w-full items-center px-3 py-2.5 text-text-on-stage whitespace-nowrap', T.labelMd)}>{title} · enlarged</div>
+          <div className="relative overflow-hidden bg-surface-stage" style={{ width: panel.w, height: panel.h }}>
+            <Render view={view} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Full-width band per section (owner request: the sections should read as separate areas, so the page deviates
+ * from the Figma frame here). Type, columns and controls inside are unchanged.
+ */
+const BAND_BG = {
+  page: 'bg-surface-page',
+  panel: 'bg-surface-panel',
+  card: 'bg-surface-card',
+  dark: 'bg-source-dark-soft/25',
+  flat: 'bg-source-flat-soft/30',
+} as const;
+function Band({ tone, children, className }: { tone: keyof typeof BAND_BG; children: React.ReactNode; className?: string }) {
+  return (
+    <section className={cx('w-full border-t border-border-default py-12', BAND_BG[tone], className)}>
+      <div className="mx-auto flex w-[1200px] flex-col gap-6">{children}</div>
+    </section>
   );
 }
 
@@ -47,6 +103,7 @@ export default function Workbench() {
   const setFlat = (level: FlatLevel) => setCal({ flat: level });
 
   const [job, setJob] = useState<Job | null>(null);
+  const [output, setOutput] = useState<{ w: number; h: number; cropped: boolean } | null>(null);
   const jobRef = useRef<Job | null>(null);
   const actionsRef = useRef<HTMLDivElement>(null);
   useEffect(() => () => jobRef.current?.controller.abort(), []);
@@ -65,8 +122,9 @@ export default function Workbench() {
     jobRef.current = j;
     setJob({ ...j });
     try {
-      const blob = await stackFullPng(inputs, (done, total) => { j.done = done; j.total = total; setJob({ ...j }); }, controller.signal);
-      const url = URL.createObjectURL(blob);
+      const out = await stackFullPng(inputs, (done, total) => { j.done = done; j.total = total; setJob({ ...j }); }, controller.signal);
+      setOutput({ w: out.w, h: out.h, cropped: out.cropped });
+      const url = URL.createObjectURL(out.blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = pngFilename(inputs);
@@ -90,11 +148,12 @@ export default function Workbench() {
       <div className="sticky z-10 flex w-full items-start gap-6 bg-surface-stage px-[120px] py-4" style={{ top: 0, minHeight: 269 + 32 }} data-topbar-height={TOPBAR_HEIGHT}>
         {ROI_KEYS.map((k) => <StripTile key={k} region={k} inputs={inputs} job={job} />)}
       </div>
-      <Reading>
+      <Reading className="pb-12">
         <PageHead eyebrow="Workbench" title="Build your own master"
           lede="Everything the lessons taught is here in one place. Choose the calibration frames, tick the photographs to combine, pick a combination method, and watch the four regions at the top of the page update as you go. Each section links back to the lesson that explains it. When you are happy, stack the full image and download it." />
+      </Reading>
 
-        <section className="flex flex-col gap-6">
+        <Band tone="card">
           <SectionHeader title="Preconfigured Scenarios" links={[{ label: 'Lesson: Algorithms →', to: '/algorithms' }]} />
           <div className="flex items-start gap-3">
             {SCENARIOS.map((s) => (
@@ -104,13 +163,14 @@ export default function Workbench() {
               </Btn>
             ))}
           </div>
-          <p className={cx('m-0 w-[1200px] text-text-primary', T.bodyMd)}>
+          {/* Constant height so hover-swapping the description never moves the sections below (owner request). */}
+          <p className={cx('m-0 w-[1200px] text-text-primary', T.bodyMd)} style={{ minHeight: DESCRIPTION_MIN_HEIGHT }}>
             {shown ? shown.label : 'Custom'}<br />
             {shown ? shown.description : 'Your own combination of calibration frames, photographs and method. Press a scenario to return to one of the prepared setups.'}
           </p>
-        </section>
+        </Band>
 
-        <section className="flex flex-col gap-6">
+        <Band tone="dark">
           <SectionHeader title="Calibration" />
           <div className="flex w-[1200px] flex-col">
             <div className={cx('flex w-[1200px] gap-4 border-b-2 border-border-strong py-3 text-text-secondary', T.labelMd)}>
@@ -134,9 +194,9 @@ export default function Workbench() {
               </div>
             ))}
           </div>
-        </section>
+        </Band>
 
-        <section className="flex flex-col gap-6">
+        <Band tone="flat">
           <SectionHeader title="Flat calibration" links={[{ label: 'Lesson: Flats →', to: '/calibration/flats' }, { label: 'Lesson: Flats, continued →', to: '/calibration/flats-2' }]} />
           <div className="flex w-[1200px] flex-col">
             <div className={cx('flex w-[1200px] gap-4 border-b-2 border-border-strong py-3 text-text-secondary', T.labelMd)}>
@@ -161,17 +221,17 @@ export default function Workbench() {
               </div>
             ))}
           </div>
-        </section>
+        </Band>
 
-        <section className="flex flex-col gap-6">
+        <Band tone="card">
           <SectionHeader wide title="Light frames" links={[{ label: 'Lesson: Light frames →', to: '/light-frames' }, { label: 'Lesson: Alignment →', to: '/alignment' }]} />
           <p className={cx('m-0 w-[680px] text-text-primary', T.bodyMd)}>
             Tick the photographs to combine. Step through them with Previous frame and Next frame to see the whole frame and the four regions at the same places. Twenty-four entries are listed: the twenty photographs as taken and four altered copies, each marked as a copy of its original.
           </p>
           <LightFramesBlock />
-        </section>
+        </Band>
 
-        <section className="flex flex-col gap-6">
+        <Band tone="panel">
           <SectionHeader title="Combination method" links={[{ label: 'Lesson: Algorithms →', to: '/algorithms' }]} />
           <div className="flex w-[1200px] flex-col" role="radiogroup" aria-label="Combination method" onKeyDownCapture={rovingKeyDown}>
             <div className={cx('flex w-[1200px] gap-4 border-b-2 border-border-strong py-3 text-text-secondary', T.labelMd)}>
@@ -185,9 +245,9 @@ export default function Workbench() {
               </div>
             ))}
           </div>
-        </section>
+        </Band>
 
-        <section className="flex flex-col gap-6">
+        <Band tone="page">
           <SectionHeader title="Your master" />
           <p className={cx('m-0 w-[680px] text-text-primary', T.bodyMd)}>
             This is what the four regions at the top of the page are showing. Stacking the full image takes a while; a progress bar keeps you informed, and the PNG is ready to download when it finishes.
@@ -198,7 +258,9 @@ export default function Workbench() {
               ['Calibration', calibrationText, <span key="b" className={cx('text-text-link', T.labelMd)}><LessonLink to="/calibration/bias">Lessons: Bias →</LessonLink> <LessonLink to="/calibration/darks">Darks →</LessonLink> <LessonLink to="/calibration/flats">Flats →</LessonLink></span>],
               ['Photographs', `${frames.length} of 24 ticked`, <LessonLink key="c" to="/light-frames">Lesson: Light frames →</LessonLink>],
               ['Method', METHOD_LABEL[algorithm.name], <LessonLink key="d" to="/algorithms">Lesson: Algorithms →</LessonLink>],
-              ['Output', `${SENSOR.w} × ${SENSOR.h} pixels, 8-bit PNG with the stretch shown on screen`, null],
+              ['Output', output
+                ? `PNG, ${output.w} × ${output.h}${output.cropped ? ' after cropping the edges no frame shares' : ', no cropping needed'}`
+                : `8-bit PNG, up to ${SENSOR.w} × ${SENSOR.h} pixels, cropped to the area every photograph covers`, null],
             ] as const).map(([label, value, link]) => (
               <div key={label} className="flex w-[1152px] items-start gap-4 text-[14px] leading-5">
                 <span className={cx('w-[160px] text-text-secondary', T.labelMd)}>{label}</span>
@@ -211,8 +273,7 @@ export default function Workbench() {
               {job && <Progress label="Stacking the full image…" value={`${Math.round(percent)}% · ${framesDone} of ${frames.length} frames`} percent={percent} onCancel={() => job.controller.abort()} />}
             </div>
           </div>
-        </section>
-      </Reading>
+        </Band>
     </LessonPage>
   );
 }

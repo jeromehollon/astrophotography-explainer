@@ -1,4 +1,4 @@
-/** The 24 FrameCards (P8-2 125:56 / P9 126:4103): header row, cards, drawn 96-bar histograms at x 452. */
+/** The 24 FrameCards (P8-2 125:56 / P9 126:4103): header row, cards, drawn 96-bar histograms at x 452. Checkbox and frame number both toggle; the row opens the viewer. */
 import { FRAMES, thumbSrc } from './data';
 import { cx, Check, DrawnHistogram, T } from './ui';
 
@@ -24,7 +24,12 @@ export function FrameList({ selected, onToggle, current, onView }: {
             className={cx('relative box-border flex h-[72px] w-[560px] cursor-pointer items-center gap-3 px-3 py-2 focus-visible:outline-3 focus-visible:outline-border-strong focus-visible:-outline-offset-3',
               ticked ? 'bg-source-bias-soft border border-border-default' : 'bg-surface-card border border-border-default')}>
             <Check checked={ticked} onChange={(v) => onToggle(f.id, v)} label={`Include frame ${f.number}${f.variantOf ? ` (${f.note})` : ''} in the stack`} />
-            <span className={cx('w-10 text-text-primary', T.monoMd)}>{f.number}</span>
+            {/* The frame number is a second way to tick the frame (owner request); the row itself still opens the viewer. */}
+            <button type="button" aria-pressed={ticked} aria-label={`Frame ${f.number}${f.variantOf ? ` (${f.note})` : ''}: ${ticked ? 'remove from' : 'add to'} the stack`}
+              onClick={(e) => { e.stopPropagation(); onToggle(f.id, !ticked); }} onKeyDown={(e) => e.stopPropagation()}
+              className={cx('m-0 w-10 cursor-pointer border-0 bg-transparent p-0 text-left text-text-primary underline decoration-border-default underline-offset-2 hover:decoration-border-strong focus-visible:outline-3 focus-visible:outline-border-strong focus-visible:outline-offset-2', T.monoMd)}>
+              {f.number}
+            </button>
             <img src={thumbSrc(f.id)} alt="" className="h-14 w-[83px] object-cover" draggable={false} />
             <div className="flex flex-col text-[12px] leading-4">
               <span className={cx('w-[72px] text-text-secondary', T.labelSm)}>FWHM</span>
