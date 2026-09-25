@@ -99,6 +99,14 @@ export default function Workbench() {
   const [hovered, setHovered] = useState<Scenario | null>(null);
   const shown = hovered ?? matched;
   const applyScenario = (s: Scenario) => set({ frames: [...s.frames], algorithm: { name: s.algorithm, params: {} }, calibration: { ...s.calibration } });
+  // On arrival, state the lessons left behind (a flat switched off, the average, no dark) matches no scenario, yet the
+  // page would otherwise open on "Default". Apply the Default scenario unless the state already matches one exactly
+  // (owner request; design-notes §3).
+  useEffect(() => {
+    const s = useAppStore.getState();
+    if (!matchScenario(s.frames, s.algorithm.name, s.calibration)) applyScenario(SCENARIOS[0]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const setCal = (patch: Partial<typeof calibration>) => set({ calibration: { ...calibration, ...patch } });
   const setFlat = (level: FlatLevel) => setCal({ flat: level });
@@ -134,7 +142,7 @@ export default function Workbench() {
       a.download = pngFilename(inputs);
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 10_000);
-      // The download has started. The first time in this tab session, thank the learner: opened on the next tick so
+      // The download has started. The first time on this page load, thank the learner: opened on the next tick so
       // the job-end focus effect below runs before the dialog takes focus (it returns focus to the button on close).
       if (claimThanks()) setTimeout(() => setThanks(true), 0);
     } catch (e) {
@@ -164,7 +172,7 @@ export default function Workbench() {
           <SectionHeader title="Preconfigured Scenarios" links={[{ label: 'Lesson: Algorithms →', to: '/algorithms' }]} />
           <div className="flex items-start gap-3">
             {SCENARIOS.map((s) => (
-              <Btn key={s.id} variant={s.id === (matched?.id ?? 'default') ? 'primary' : 'secondary'} ariaPressed={matched?.id === s.id}
+              <Btn key={s.id} variant={matched?.id === s.id ? 'primary' : 'secondary'} ariaPressed={matched?.id === s.id}
                 onClick={() => applyScenario(s)} onMouseEnter={() => setHovered(s)} onMouseLeave={() => setHovered((h) => (h?.id === s.id ? null : h))}>
                 {s.label}
               </Btn>
