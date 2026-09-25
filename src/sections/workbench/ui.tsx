@@ -97,8 +97,10 @@ export function DrawnHistogram({ bars, width, height, barWidth, className }: { b
   const step = width / bars.length;
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className={cx('block shrink-0', className)} aria-hidden>
-      {bars.map((h, i) => (h > 0 ? <rect key={i} x={i * step} y={height - 1 - h} width={barWidth} height={h} fill="var(--color-ink-900)" /> : null))}
       <rect x={0} y={height - 1} width={width} height={1} fill="var(--color-border-strong)" />
+      {/* Bars are drawn after the axis and never thinner than 3 px: on the full 0-65,535 range a master's
+          histogram is one spike in the first bin (bias ~160 DN), which a sub-2 px bar hid under the axis. */}
+      {bars.map((h, i) => (h > 0 ? <rect key={i} x={i * step} y={height - 1 - h} width={Math.max(barWidth, 3)} height={h} fill="var(--color-ink-900)" /> : null))}
     </svg>
   );
 }
