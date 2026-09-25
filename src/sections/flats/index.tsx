@@ -13,22 +13,15 @@ import frameAfter from './assets/frame_after.png';
 import roiRaw from './assets/roi_raw.png';
 import roiComputedAsShot from './assets/roi_computed_flat-as-shot.png';
 import roiRemovedAsShot from './assets/roi_removed_flat-as-shot.png';
+import roiComputedDarkflat from './assets/roi_computed_flat-darkflat.png';
 import roiRemovedNone from './assets/roi_removed_none.png';
-import roiExp2Raw from './assets/roi_exp2_raw.png';
-import roiExp2Computed from './assets/roi_exp2_computed.png';
 import roiExp2Removed from './assets/roi_exp2_removed.png';
 
 const removedCaption =
   'Difference between the two images. Gray means nothing changed, darker color means removal, lighter color means addition';
-// Experiment 2 uses the 10 % flat, where the dark flat's pedestal (161 DN) is 2.4 % of the flat's
-// level, five times the share it has in the 50 % flat. Numbers from assets/flats-1/stats.json
-// (experiment_2): mote core 884 -> 885 DN, corner-to-centre ratio 0.958 -> 0.963, pixel noise
-// about 45 DN, so the change is below what the eye can see in the Computed tile.
-const exp2ComputedOnCaption =
-  'Dark Flats On - 10 % flat. Dust-mote core 884 → 885 DN (+1.7 DN), corner-to-centre ratio 0.958 → 0.963. The change is 1 to 3 DN under about 45 DN of pixel noise, so look at the difference tile';
-const exp2ComputedOffCaption = 'Dark Flats Off - 10 % flat, as shot';
-const exp2RemovedOnCaption =
-  'Difference between the two images, stretched about 40× harder than the difference tile in the experiment above. Lighter means the dark flats let the correction add brightness: the dust shadow (+1.7 DN at its core) and, across the whole field, the darker corners';
+// Experiment 2 uses the 50 % flat, as the Figma frames do. Its Raw and Computed tiles are the
+// experiment-1 tiles for the flat as shot and the dark-flat-calibrated flat; the removed tile is
+// their difference on its own symmetric stretch (assets/flats-1/stats.json, experiment_2).
 
 export default function Flats() {
   // Local state starts where frame A does (both off); each change is written to
@@ -159,21 +152,21 @@ export default function Flats() {
 
         <Experiment
           title="Calibrating the flat"
-          help="Subtract a matching dark flat from each flat before building the master flat. The flat stays on for this experiment. It uses the 10 % flat, where the offset is a larger share of the flat's level than in the 50 % flat, so the dark flats change more."
+          help="Subtract a matching dark flat from each flat before building the master flat. The flat stays on for this experiment."
           controls={<Toggle label="Dark flats" checked={darkFlat} onChange={setDarkFlat} />}
         >
-          <ROITile title="Raw" caption="Frame with the 10 % flat applied, but without dark calibration applied to the flat" src={roiExp2Raw} alt="The region divided by the 10 % flat as shot" />
+          <ROITile title="Raw" caption="Frame with a flat applied, but without dark calibration applied to the flat" src={roiComputedAsShot} alt="The region divided by the flat as shot" />
           <ROITile
             title="Computed"
-            caption={darkFlat ? exp2ComputedOnCaption : exp2ComputedOffCaption}
-            src={darkFlat ? roiExp2Computed : roiExp2Raw}
-            alt={darkFlat ? 'The region divided by the dark-flat-calibrated 10 % flat' : 'The region divided by the 10 % flat as shot'}
+            caption={darkFlat ? 'Dark Flats On' : 'Dark Flats Off'}
+            src={darkFlat ? roiComputedDarkflat : roiComputedAsShot}
+            alt={darkFlat ? 'The region divided by the dark-flat-calibrated flat' : 'The region divided by the flat as shot'}
           />
           <ROITile
             title="What was removed"
-            caption={darkFlat ? exp2RemovedOnCaption : 'Nothing removed yet - Dark flats toggled off'}
+            caption={darkFlat ? 'This may appear identical to the earlier example but there are subtle differences' : 'Nothing removed yet - Dark flats toggled off'}
             src={darkFlat ? roiExp2Removed : roiRemovedNone}
-            alt={darkFlat ? 'Difference between the two corrections: a bright double donut where the dust shadow is, on a gradient' : 'Uniform mid grey: nothing has been removed yet'}
+            alt={darkFlat ? 'Difference between the two corrections: a faint double donut where the dust shadow is' : 'Uniform mid grey: nothing has been removed yet'}
           />
         </Experiment>
       </Stage>
