@@ -4,14 +4,14 @@
  * stale results by key and share in-flight fetches): the ROI strip and the wide galaxy view are stack()
  * results on the reference (f03) grid at bin 2, the viewer shows one calibrated frame at bin 4 and its
  * four ROIs as single-frame stacks, and Download PNG runs the full grid at bin 1 and crops it to the area every
- * frame covers. Every live image is stretched with its own AutoSTF (ownStf below). West-side output is
+ * frame covers (the pipeline's commonCropLive). Every live image is stretched with its own AutoSTF (ownStf below). West-side output is
  * rotated 180° for display (design-notes item 27). The bundled PNGs remain only as a first paint
  * while normalization.json loads.
  */
 import { useMemo, useRef } from 'react';
 import {
-  autoStf, exportPng, medianMadn, stack, useCalibratedRoi, useStack,
-  type StackRequest, type StackResult, type StfParams,
+  autoStf, commonCropLive, cropResult, exportPng, medianMadn, stack, useCalibratedRoi, useStack,
+  type StackRequest, type StfParams,
 } from '../../shared/pipeline';
 import type { AlgorithmName, CalibrationChoice } from './store';
 import { FALLBACK_STF, FRAME_BY_ID, REFERENCE, ROIS, SENSOR, WIDE_RECT, fullSrc, roiSrc, stackSrc, type Rect, type RoiKey } from './data';
@@ -101,56 +101,19 @@ export function useFrameView(id: string, calibration: CalibrationChoice): { full
   };
 }
 
-/**
- * The largest interior rectangle every frame covers: rows and columns are scanned from each edge inward until one
- * holds fewer than NAN_FRACTION missing (NaN) samples. After registration the frames' footprints differ by the
- * dither, so the union grid has ragged NaN edges that would otherwise appear as stage-coloured borders in the PNG.
- */
-const NAN_FRACTION = 0.005;
-export function commonCropRect(data: Float32Array, w: number, h: number): Rect {
-  const rowNaN = new Uint32Array(h), colNaN = new Uint32Array(w);
-  for (let y = 0; y < h; y++) {
-    const row = y * w;
-    for (let x = 0; x < w; x++) if (data[row + x] !== data[row + x]) { rowNaN[y]++; colNaN[x]++; }
-  }
-  let x0 = 0, y0 = 0, x1 = w, y1 = h;
-  // A fully missing column makes every row look partly missing (and vice versa), so the edge with the largest
-  // missing fraction is trimmed first, the counts are updated for that line, and the scan repeats until every
-  // edge line is below the threshold.
-  const isNaN = (x: number, y: number) => data[y * w + x] !== data[y * w + x];
-  for (;;) {
-    if (y1 - y0 < 2 || x1 - x0 < 2) return { x: 0, y: 0, w, h };
-    const f = [rowNaN[y0] / (x1 - x0), rowNaN[y1 - 1] / (x1 - x0), colNaN[x0] / (y1 - y0), colNaN[x1 - 1] / (y1 - y0)];
-    let edge = 0;
-    for (let i = 1; i < 4; i++) if (f[i] > f[edge]) edge = i;
-    if (f[edge] < NAN_FRACTION) break;
-    if (edge === 0) { for (let x = x0; x < x1; x++) if (isNaN(x, y0)) colNaN[x]--; y0++; }
-    else if (edge === 1) { for (let x = x0; x < x1; x++) if (isNaN(x, y1 - 1)) colNaN[x]--; y1--; }
-    else if (edge === 2) { for (let y = y0; y < y1; y++) if (isNaN(x0, y)) rowNaN[y]--; x0++; }
-    else { for (let y = y0; y < y1; y++) if (isNaN(x1 - 1, y)) rowNaN[y]--; x1--; }
-  }
-  return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
-}
-
-export function cropResult(result: StackResult, r: Rect): StackResult {
-  if (r.x === 0 && r.y === 0 && r.w === result.w && r.h === result.h) return result;
-  const data = new Float32Array(r.w * r.h);
-  for (let y = 0; y < r.h; y++) data.set(result.data.subarray((r.y + y) * result.w + r.x, (r.y + y) * result.w + r.x + r.w), y * r.w);
-  return { ...result, data, w: r.w, h: r.h };
-}
-
 export type FullStack = { blob: Blob; w: number; h: number; cropped: boolean };
 
 /**
- * Stack the full reference grid at bin 1, crop to the region every frame covers, and return an 8-bit PNG with
- * the image's own AutoSTF (SPEC §4.6).
+ * Stack the full reference grid at bin 1, crop it to the region every frame covers (the pipeline's commonCrop,
+ * from the frames' alignment geometry), and return an 8-bit PNG with the cropped image's own AutoSTF (SPEC §4.6).
  */
 export async function stackFullPng(inputs: StackInputs, onProgress: (done: number, total: number) => void, signal: AbortSignal): Promise<FullStack> {
   const req: StackRequest = { grid: grid({ x: 0, y: 0, w: SENSOR.w, h: SENSOR.h }, 1), frames: inputs.frames, calibration: inputs.calibration, algorithm: { name: inputs.algorithm } };
+  const crop = await commonCropLive(req);
   const full = await stack(req, { signal, onProgress });
-  const result = cropResult(full, commonCropRect(full.data, full.w, full.h));
-  const blob = await exportPng(result, ownStf(result.data), { rotate180: true });
-  return { blob, w: result.w, h: result.h, cropped: result !== full };
+  const cropped = crop && (crop.w < full.w || crop.h < full.h) ? cropResult(full, crop) : full;
+  const blob = await exportPng(cropped, ownStf(cropped.data), { rotate180: true });
+  return { blob, w: cropped.w, h: cropped.h, cropped: cropped !== full };
 }
 
 export function pngFilename(inputs: StackInputs): string {
