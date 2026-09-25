@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - Index</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-row">
+            <h1>Claude Code transcript</h1>
+            <div id="search-box">
+                <input type="text" id="search-input" placeholder="Search..." aria-label="Search transcripts">
+                <button id="search-btn" type="button" aria-label="Search">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+                </button>
+            </div>
+        </div>
+        
+
+<div class="pagination">
+<span class="current">Index</span>
+<span class="disabled">&larr; Prev</span>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-001.html">Next &rarr;</a>
+</div>
+
+        <p style="color: var(--text-muted); margin-bottom: 24px;">7 prompts · 216 messages · 73 tool calls · 0 commits · 2 pages</p>
+        
+<div class="index-item"><a href="page-001.html#msg-2026-09-24T18-59-38-010Z"><div class="index-item-header"><span class="index-item-number">#1</span><time datetime="2026-09-24T18:59:38.010Z" data-timestamp="2026-09-24T18:59:38.010Z">2026-09-24T18:59:38.010Z</time></div><div class="index-item-content"><p><pasted_content id="41a1"></p>
+<h1>Design the Alignment page in Figma</h1>
+<h2>Who you are and what you are doing</h2>
+<p>You are a section agent on the Astrophotography Explainer (a single-page web app that
+teaches image stacking and calibration frames to beginners). Your job is to design
+<strong>one lesson page, Alignment</strong>, in the Figma file <em>Astrophotography Explainer</em>
+(https://www.figma.com/design/jtYi1LQf1fVyUAUfAgthP5/Astrophotography-Explainer),
+on its own Figma page, using the shared library, plus generate the real image assets
+that page needs. You are authorized to work on Alignment and nothing else.</p>
+<p>The product owner has just signed off on the <strong>P4 Flats-1</strong> page. It is the reference
+for quality, layout, voice and process. Match it.</p>
+<h2>Read these first, in this order, before touching Figma</h2>
+<ol>
+<li><code>AGENTS.md</code> (repo rules, tooling, commit rules)</li>
+<li><code>SPEC.md</code> §7 entry for Alignment, plus §3 (dataset), §6 (processing semantics), §9 (language rules)</li>
+<li><code>docs/design-notes.md</code> (approved direction, colour/shape semantics, placeholders, open items)</li>
+<li><code>docs/figma-state.json</code> (library node ids, tokens, fonts, what has been built)</li>
+<li><code>.claude/skills/astro-image/SKILL.md</code> and <code>tools/assets/flats_page1.py</code> (how Flats-1 assets were made)</li>
+<li>The Flats-1 page in Figma: open it, study frame A and its Try-it stage, and reuse its structure.</li>
+<li>Load the <code>figma:figma-use</code> skill before any <code>use_figma</code> call.</li>
+</ol>
+<h2>Owner guidance for this page</h2>
+<p>Recommended prose:
+<prose></p>
+<h1>Bringing the same stars together</h1>
+<p>After calibration, each exposure still has its own view of the sky. The telescope deliberately moves between captures to spread out the signal and prevent something called “walking noise”, as time progresses through the night the sky actually rotates. Small shifts between exposures can put the same star on different pixels. Before we combine the individual frames, we need to align the photos by stars. This will let us increase the signal to noise ratio of our image by averaging pixel values across multiple images to dampen the effect of noise and strength the effects of real signal.</p>
+<h2>Why collect more than one photograph?</h2>
+<p>The faint light from a galaxy is the signal we want to keep. Random noise makes its measured brightness fluctuate from one exposure to the next. The signal-to-noise ratio, or SNR, compares the strength of that useful signal with the size of the fluctuations. A higher ratio makes faint structure easier to distinguish from the grain around it.</p>
+<p>When we average independent exposures of the same quality, the galaxy stays at the same average brightness while the random fluctuations get smaller. The improvement follows a square root: four photographs give about twice the SNR of one, sixteen give four times, and sixty-four give eight times. Each further doubling of SNR takes four times as many photographs.</p>
+<p>..provide a graph here of the rate of change on noise and signal with additional exposures..</p>
+<p>as an aside:</p>
+<aside>
+#Where the square root comes from
+
+If we add N equal exposures, the useful signal grows by N. Independent random noise adds in quadrature: we square its size, add those squares, then take the square root. For equally noisy exposures, that makes the total noise grow by √N. Dividing signal by noise leaves an improvement of N ÷ √N = √N.
+
+4 exposures:  (4 × signal) ÷ (2 × noise)  →  2 × SNR
+
+For example, a signal of 100 and noise of 10 give an SNR of 10 in one exposure. Adding four such exposures gives a signal of 400 and noise of 20, so the SNR is 20. Averaging divides both totals by four and leaves the same ratio. These numbers are illustrative.
+</aside>
+<p></prose></p>
+<p>We should have an example of naive stacking where frame 5 and frame 14 are averaged together and show the results. ROI of the galaxy.
+We should show an example of proper stacking where frame 5 and 14 are averaged together after alignment. Circle in red the stars that could have been used for alignment, point out the change in background smoothness to the user. This is our first example of stacking.</p>
+<p>No try it section.</p>
+<p>If anything above conflicts with SPEC.md or design-notes.md, the owner guidance wins.
+Record the conflict in <code>docs/design-notes.md</code> §5 so the spec can be reconciled later.</p>
+<h2>Rules that are not negotiable</h2>
+<p>These come from the owner's reviews of Flats-1. Check every frame against them before you report.</p>
+<p><strong>Scope</strong>
+- Build only what SPEC §7 and the owner guidance ask for. Do not invent requirements,
+  extra states, extra markers, readouts, scale bars, tags, legends or affordances.
+  If an item is ambiguous, ask; do not add.
+- Edit only your own Figma page. Never edit library components. If you need a library
+  change, write the request in <code>TODO.md</code> and work around it with an instance override.
+- Do not touch other app pages in Figma, and do not touch other agents' files in the repo.</p>
+<p><strong>Teaching</strong>
+- One idea per page. Anything that belongs to another lesson stays off this page.
+- ROIs only in examples. No full-field or bin-8 views in a lesson (the only exceptions are the
+  Welcome teaser, the workbench reference view, and in static areas of the lesson).
+- Calibration pages show three tiles: <strong>Raw / Computed / What was removed</strong>. Every tile is
+  populated in every toggle state; only the Computed tile follows the switch; the removed
+  tile shows <code>computed − raw</code> centred on mid grey.
+- No "Page X of Y", no expand/collapse asides, no binning labels, no noise readout on lesson
+  ROI tiles, no success signal. The learner eyeballs the result.
+- Page skeleton: TopBar → page head → full-width illustration (1200×360) → "The problem you
+  can see" with a 440×330 ROI image slot → further prose → 6 px ink rule → dark "Try it"
+  stage → BottomNav. Reuse the library components for all of these.</p>
+<p><strong>Prose</strong>
+- Neutral narrator, a conversational blend of enthusiastic expert and textbook. No pithy
+  declaratives, no engagement hacks, no LLM tropes.
+- Plain words a first-time reader knows: "removed", not "divided out". Say "pixel brightness",
+  not ADU; "standard deviation", not sigma. Define light, bias, dark, flat, dark flat, stack,
+  master and reference frame the first time each appears on the page.
+- Write copy directly into Figma text nodes. Do not route it through <code>docs/copy.md</code>.
+- Figma text is authoritative. If the owner has edited text on your page, keep their version.
+  Owner edits happen in frame A only; rebuild state variants B, C… as clones of A, changing
+  only toggle states, tile images and state-dependent captions.</p>
+<p><strong>Illustrations</strong>
+- One illustration per lesson, named for the lesson. It holds only the drawing and plain
+  noun labels ("Pixel Grid"). No eyebrow, title or caption inside the component.
+- Every visible element must be nameable by a beginner from its label. No symbol glyphs,
+  badge legends, or parts we do not teach. Emphasis is a full-height <code>source/*-soft</code> colour
+  bar behind the relevant part. Blocky, low detail. Colour is never the only carrier of
+  meaning (see the colour/shape table in design-notes §2).</p>
+<p><strong>Assets and numbers</strong>
+- Every image is produced by <code>tools/astro.py</code> (or a script that calls it) from
+  <code>source_images/</code> or <code>data/derived/</code>, so every number shown is reproducible.
+- Put the generator in <code>tools/assets/&lt;page&gt;_page.py</code>, outputs in <code>assets/&lt;page&gt;/</code>, and a
+  <code>stats.json</code> next to them with the numbers your captions quote. Match the Flats-1 stretch
+  (STF target background 0.30, clip −1.8 MADN) unless the owner guidance says otherwise.
+- Any number you cannot yet produce is written as <code>[PLACEHOLDER: what it is]</code>, never guessed.</p>
+<h2>Process</h2>
+<ol>
+<li>Plan first: post a short outline (sections, tiles, states, assets needed, open questions)
+   and wait for the owner's answer to any question before building. Ask questions in one batch.</li>
+<li>Generate assets and <code>stats.json</code>; run <code>uv run pytest tools</code> if you changed anything under <code>tools/</code>.</li>
+<li>Build frame A on your Figma page from library instances. Upload the real assets into the
+   image wells. Then build the state variants as clones of A.</li>
+<li>Self-review against every rule above and against the Flats-1 page. Fix before reporting.</li>
+<li>Update <code>docs/figma-state.json</code> (your page and node ids) and <code>docs/design-notes.md</code>
+   §4 (placeholders) and §5 (reconciliation items). Add library requests to <code>TODO.md</code>.</li>
+<li>Commit on branch <code>section/&lt;page&gt;</code> with a message that explains <em>why</em> and includes the
+   exact asset-generation command. Do not commit <code>source_images/</code>, <code>data/</code>, FITS or XISF.</li>
+</ol>
+<h2>Working with the owner</h2>
+<ul>
+<li>Do not narrate screenshots back to the owner; they can see Figma. Use screenshots only
+  for your own QA.</li>
+<li>When the owner rejects something, correct only the specified change and nothing more.</li>
+<li>You may run concurrent <code>use_figma</code> calls only when each targets a different Figma page.</li>
+</ul>
+<h2>Definition of done</h2>
+<ul>
+<li>The page passes the SPEC §7 acceptance criteria for Alignment as far as a static
+  design can show them.</li>
+<li>Every rule in this brief is satisfied; every tile has a real crop or a clearly marked placeholder.</li>
+<li><code>docs/figma-state.json</code>, <code>docs/design-notes.md</code>, <code>assets/&lt;page&gt;/</code> and <code>tools/assets/</code> are
+  updated and committed on <code>section/&lt;page&gt;</code>.</li>
+<li>Your final report lists: the Figma page link, the assets and the commands that made them,
+  every placeholder left, every open question, and any spec conflicts you recorded.
+</pasted_content id="41a1"></li>
+</ul></div></a><div class="index-item-stats"><span>11 bash</span>
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>Outline for the Alignment page. I've read the brief, SPEC §3/§6/§7/§9, the design notes, the Figma state file and the Flats-1 generator. Nothing has been built yet. One data fact changes the plan, so please read question 1 first.</p>
+<p><strong>Key fact from the data:</strong> frame 5 is West-side and frame 14 is East-side. The precomputed alignment matrix for f14 has a −1 diagonal, so f14 is rotated about 180° relative to f5, not shifted by a few dozen pixels. A naive average of f5 and f14 on the galaxy shows the galaxy plus a rotated, offset copy of itself. SPEC P6 asked for f02 + f05 (same pier side, about 47 px apart), which gives clean doubled stars.</p>
+<p><strong>Proposed page structure</strong> (no Try-it stage, no ink rule, single frame A, no state variants, following the Welcome and Noise &amp; Defects precedents):</p>
+<ol>
+<li>TopBar (Current = Alignment) → page head "Bringing the same stars together" with the owner's intro paragraph as the lede.</li>
+<li>Full-width illustration 1200×360, "Alignment / The same stars on different pixels": two blocky pixel-grid frames side by side with the same three stars landing on different cells, plain labels only. New component on the Illustrations page (the Alignment illustration was removed on 2026-09-24 and left to the section agent).</li>
+<li>Section "Why collect more than one photograph?" with the two SNR paragraphs, then a drawn chart at reading-column width: exposures 1 to 64 on the x axis, relative SNR (√N) and relative noise (1/√N) as two lines, mono numbers at 1, 4, 16, 64. Drawn as Figma vectors from computed points, not an image.</li>
+<li>The aside "Where the square root comes from" as a Callout (Why) instance at 680 wide, always open.</li>
+<li>Dark box "Averaged as they are": three tiles, Frame 5 | Frame 14 | Average of the two, on the galaxy ROI, one shared stretch. Caption points at the doubled stars.</li>
+<li>Dark box "Averaged after alignment": Frame 5 (reference frame) | Frame 14 aligned to frame 5 | Average. Red circles on the alignment stars in the two single-frame tiles. Caption quotes the background standard deviation of one frame vs the average from stats.json (no NoiseReadout on the tiles).</li>
+<li>BottomNav: "← Flats, continued" / "Algorithms →".</li>
+</ol>
+<p><strong>Assets</strong> in <code>assets/alignment/</code> from <code>tools/assets/alignment_page.py</code>: the six tiles above plus stats.json (crop, STF parameters, star positions used for the circles, per-tile background standard deviation, the offset between the frames). The f14 warp uses the precomputed matrices (f14 → f07 → f5) with scipy cubic interpolation on the ROI only, recorded as a deviation from the Lanczos-3 pipeline warp since the pipeline doesn't exist yet. Stretch: STF target background 0.30, clip −1.8 MADN, as on Flats-1.</p>
+<p><strong>Questions, one batch:</strong></p>
+<ol>
+<li><strong>Frame pair.</strong> Keep f5 + f14 (a dramatic 180° flip, galaxy doubled and rotated, but the prose says "small shifts"), or use f02 + f05 as SPEC P6 says (47 px shift, cleanly doubled stars)? I recommend f02 + f05 and recording the choice in design-notes §5.</li>
+<li><strong>Galaxy ROI scale.</strong> NGC 7331 spans about 2,200 × 900 native pixels, far bigger than a 720×480 tile. Native crop of the bright core and inner disk (ROIs-only rule kept), or a 2× binned crop of the whole galaxy as a static-area exception?</li>
+<li><strong>Background smoothness.</strong> Both averages, naive and aligned, smooth the background by the same amount; alignment only fixes the stars and galaxy. May the caption say that plainly ("the background is smoother in both averages; only the aligned one keeps the stars single")?</li>
+<li><strong>Red circles.</strong> Red is <code>source/dark</code> in the colour table. Fine to use <code>red/600</code> for the circles anyway as you asked, or would you rather use ochre, which the table already assigns to "reference-frame star"?</li>
+<li><strong>Chart.</strong> Theoretical √N curve only, or also measured points from real aligned stacks of 1, 2, 4, 8, 16 frames on a background ROI? Measured points cost an extra warp per frame but make the chart reproducible from data.</li>
+<li><strong>Illustration.</strong> Build the new Alignment illustration described in item 2, or skip the illustration on this page?</li>
+<li><strong>Copy.</strong> I will paste your prose verbatim into Figma. Three things I'd flag rather than change: "strength the effects" (typo for "strengthen"); "the sky actually rotates" (on an equatorial mount the frame only rotates at the meridian flip); and "stack", "reference frame" and "light" are not defined on first use (SPEC §9). Fix any of these, or keep verbatim and log them in design-notes §5?</li>
+</ol>
+<p>I'll start on the assets and the page as soon as you answer.</p></div></div><button class="expand-btn">Show more</button></div></div>
+</div></div>
+<div class="index-item"><a href="page-001.html#msg-2026-09-24T19-06-05-837Z"><div class="index-item-header"><span class="index-item-number">#2</span><time datetime="2026-09-24T19:06:05.837Z" data-timestamp="2026-09-24T19:06:05.837Z">2026-09-24T19:06:05.837Z</time></div><div class="index-item-content"><p>1) use the frames I said. Ignore the 180 flip we should never present the user with knowledge of a meridian flip. 2) Use the largest section that will fit. I may direct you to use a broader ROI. 3) Allow the eye to see. The background will be better in the aligned one because the noise overlaps properly. 4) Yes, use red. 5) Theortical, beginner remember simplify simplify simplify. 6) We can use the graph we create for the SNR changes. 7) my prose is just a suggestion. Improve as you see fit.</p></div></a><div class="index-item-stats"><span>5 bash · 3 read · 1 write · 1 skill · 1 toolsearch</span>
+</div></div>
+<div class="index-item"><a href="page-001.html#msg-2026-09-24T19-08-45-126Z"><div class="index-item-header"><span class="index-item-number">#3</span><time datetime="2026-09-24T19:08:45.126Z" data-timestamp="2026-09-24T19:08:45.126Z">2026-09-24T19:08:45.126Z</time></div><div class="index-item-content"><p>Base directory for this skill: /home/jerome/.claude/plugins/synced/c0954601-c5e6-4c86-a300-6863211d9287_57fed749-f0e5-4c6a-bf31-72f60e8e0b69/figma/skills/figma-use</p>
+<h1>use_figma — Figma Plugin API Skill</h1>
+<p>Use the <code>use_figma</code> tool to execute JavaScript in Figma files via the Plugin API. All detailed reference docs live in <code>references/</code>.</p>
+<p><strong>Always include <code>figma-use</code> in the comma-separated <code>skillNames</code> parameter when calling <code>use_figma</code>. If this skill was loaded via an MCP resource, you MUST prefix the name with <code>resource:</code> (e.g. <code>resource:figma-use</code>).</strong> This is a logging parameter used to track skill usage — it does not affect execution.</p>
+<p><strong>If Figma MCP tools appear as deferred tools, batch-load all their schemas in a single <code>ToolSearch</code> call</strong> using the <code>select:</code> syntax — e.g. <code>ToolSearch query="select:use_figma,get_screenshot,get_metadata,create_new_file"</code>. One round trip beats six.</p>
+<p><strong>If the task involves building or updating a full page, screen, or multi-section layout in Figma from code</strong>, also load <a href="../figma-generate-design/SKILL.md">figma-generate-design</a>. It provides the workflow for discovering design system components via <code>search_design_system</code>, importing them, and assembling screens incrementally. Both skills work together: this one for the API rules, that one for the screen-building workflow.</p>
+<p><strong>If the task involves creating or building a component in Figma</strong> (even a single component), also load <a href="../figma-generate-library/SKILL.md">figma-generate-library</a>. It provides the component creation workflow — variable foundations, variant sets, design token bindings — that <code>figma-use</code> alone doesn't cover.</p>
+<p>Before anything, load <a href="references/plugin-api-standalone.index.md">plugin-api-standalone.index.md</a> to understand what is possible. When you are asked to write plugin API code, use this context to grep <a href="references/plugin-api-standalone.d.ts">plugin-api-standalone.d.ts</a> for relevant types, methods, and properties. This is the definitive source of truth for the API surface. It is a large typings file, so do not load it all at once, grep for relevant sections as needed.</p>
+<p>IMPORTANT: Whenever you work with design systems, start with <a href="references/working-with-design-systems/wwds.md">working-with-design-systems/wwds.md</a> to understand the key concepts, processes, and guidelines for working with design systems in Figma. Then load the more specific references for components, variables, text styles, and effect styles as needed.</p>
+<h2>1. Critical Rules</h2>
+<ol>
+<li><strong>Use <code>return</code> to send data back.</strong> The return value is JSON-serialized automatically (objects, arrays, strings, numbers). Do NOT call <code>figma.closePlugin()</code> or wrap code in an async IIFE — this is handled for you.</li>
+<li><strong>Write plain JavaScript with top-level <code>await</code> and <code>return</code>.</strong> Code is automatically wrapped in an async context. Do NOT wrap in <code>(async () =&gt; { ... })()</code>.</li>
+<li><code>figma.notify()</code> <strong>throws "not implemented"</strong> — never use it
+3a. <strong>Return node IDs and keep workflow state outside the Figma file.</strong> Set human-readable component purpose and usage in <code>node.description</code> only on a <code>COMPONENT</code> or <code>COMPONENT_SET</code> — never on a frame or instance.
+3b. <strong>Narrow before accessing type-specific properties.</strong> Check <code>node.type</code>, use a capability guard such as <code>"characters" in node</code>, or prefilter with <code>findAllWithCriteria</code>. <code>characters</code> requires a text-capable node; optional chaining does not protect unsupported property access.</li>
+<li><code>console.log()</code> is NOT returned — use <code>return</code> for output</li>
+<li><strong>Work incrementally in small steps.</strong> Break large operations into multiple <code>use_figma</code> calls. Validate after each step. This is the single most important practice for avoiding bugs.</li>
+<li>Colors are <strong>0–1 range</strong> (not 0–255): <code>{r: 1, g: 0, b: 0}</code> = red. Paint <code>color</code> objects use <code>{r, g, b}</code> <strong>only — no <code>a</code> field</strong>; opacity goes at the paint level (<code>{ type: 'SOLID', color: {...}, opacity: 0.5 }</code>).</li>
+<li>Fills/strokes are <strong>read-only arrays</strong> — clone, modify, reassign</li>
+<li><strong>Every text edit follows the canonical recipe: load font → <code>await</code> → mutate → return affected node IDs.</strong> Skipping the load throws <code>Cannot write to node with unloaded font "&lt;family&gt; &lt;style&gt;"</code>. The rule covers more than <code>characters</code> — it applies to any operation on nodes with unloaded fonts (<code>appendChild</code>, <code>insertChild</code>, <code>setBoundVariable</code>, <code>setExplicitVariableModeForCollection</code>, <code>setValueForMode</code>, <code>findAll</code> callbacks touching text). When mutating existing text, load the node's <em>current</em> fonts via <code>getStyledTextSegments(['fontName'])</code>, not a hardcoded default. Inter is preloaded in most environments so other families surface this bug more often — the recipe is the same for every font. Use <code>await figma.listAvailableFontsAsync()</code> first if the style string is unverified — <strong>never guess</strong> (<code>"SemiBold"</code> vs <code>"Semi Bold"</code> is a common footgun). For <code>FONT_FAMILY</code>-scoped variables, load every value across every relevant mode before <code>setBoundVariable("fontFamily", …)</code>, <code>setValueForMode</code>, or <code>setExplicitVariableModeForCollection</code>. <code>lineHeight</code>/<code>letterSpacing</code> take <code>{unit, value}</code>, not bare numbers. See <a href="references/gotchas.md#canonical-text-edit-recipe-font-load--await--mutate--return-ids">Canonical text-edit recipe</a>.</li>
+<li><strong>Pages load incrementally</strong> — use <code>await figma.setCurrentPageAsync(page)</code> to switch pages and load their content. The sync setter <code>figma.currentPage = page</code> does <strong>NOT</strong> work and throws <code>"Setting figma.currentPage is not supported"</code>. Page context resets to the <strong>first page</strong> at the start of every <code>use_figma</code> call, so re-switch each call; switch <strong>at most once per call</strong> and fan multi-page work out in parallel — see <a href="#2-page-rules-critical">Page Rules</a> and <a href="references/gotchas.md#set-current-page-once-per-use_figma-call--split-multi-page-work-into-parallel-calls">gotchas.md</a>.</li>
+<li><code>setBoundVariableForPaint</code> returns a <strong>NEW</strong> paint — must capture and reassign</li>
+<li><code>createVariable</code> accepts collection <strong>object or ID string</strong> (object preferred)</li>
+<li><strong><code>layoutSizingHorizontal/Vertical</code> is value-restricted by structural context — <code>FIXED</code> always works, <code>HUG</code> and <code>FILL</code> do not.</strong> <code>'HUG'</code> is valid only on an auto-layout frame itself OR on a <strong>TEXT</strong> child of one. <code>'FILL'</code> is valid only on a child of an auto-layout frame that is also not absolute-positioned, not inside an immutable frame, and not a canvas-grid child. Practical consequence: append to an auto-layout parent FIRST, then set <code>HUG</code>/<code>FILL</code> — a newly-created or unparented node can't satisfy the rule yet. The property itself exists on every <code>SceneNode</code>; the error is value-rejection, not "no such property". See <a href="references/gotchas.md#layoutsizinghorizontallayoutsizingvertical-value-rules-fixed-hug-fill">Gotchas</a>.
+12a. <strong>Use auto-layout for containers that hold related children.</strong> When children have a structural relationship — stacked, side-by-side, aligned, gapped, hugged — wrap them in <code>figma.createAutoLayout()</code>, not <code>figma.createFrame()</code> with absolute <code>x</code>/<code>y</code>. Absolute coordinates govern where a container sits on the canvas; auto-layout governs how its children relate inside it. Skipping the container leaves no protection against text reflow, content changes, or overlap.
+12b. <strong><code>layoutSizing*</code> and <code>*AxisSizingMode</code> are different enums — don't cross them.</strong> <code>layoutSizingHorizontal</code>/<code>layoutSizingVertical</code> (set on a <strong>child</strong>) take <code>'FIXED'|'HUG'|'FILL'</code>; <code>primaryAxisSizingMode</code>/<code>counterAxisSizingMode</code> (set on the <strong>frame</strong> itself) take <code>'FIXED'|'AUTO'</code>. So <code>layoutSizingVertical = 'AUTO'</code> is invalid (use <code>'HUG'</code>), and <code>counterAxisSizingMode = 'FILL'</code> throws <code>Expected 'FIXED' | 'AUTO', received 'FILL'</code> (use <code>'FIXED'</code>/<code>'AUTO'</code>). Two more errors from the same setter — <code>Error: in set_layoutSizingHorizontal: node must be an auto-layout frame or a child of an auto-layout frame</code> and <code>Error: in set_layoutSizingHorizontal: FILL can only be set on children of auto-layout frames</code> — mean the node isn't in an auto-layout context yet; <strong>recommendation: make the parent auto-layout (<code>figma.createAutoLayout()</code>) and <code>appendChild</code> the node before setting</strong> (see Rule 12). See <a href="references/gotchas.md#layoutsizing-vs-axissizingmode-two-different-sizing-enums">Gotchas</a>.
+12c. <strong><code>resize()</code> resets sizing modes to <code>FIXED</code>, so call it BEFORE setting <code>layoutSizing*</code>.</strong> A wrapping <strong>TEXT</strong> block needs <code>textAutoResize = 'HEIGHT'</code> plus an explicit FIXED width (<code>resize()</code>), NOT <code>FILL</code> alone — the default <code>WIDTH_AND_HEIGHT</code> mode ignores <code>FILL</code> and collapses the node to a near-zero-width thread. Verify <code>node.width &gt; 0</code> afterward.</li>
+<li><strong>Position new top-level nodes away from (0,0).</strong> Nodes appended directly to the page default to (0,0). Scan <code>figma.currentPage.children</code> to find a clear position (e.g., to the right of the rightmost node). This only applies to page-level nodes — nodes nested inside other frames or auto-layout containers are positioned by their parent. See <a href="references/gotchas.md">Gotchas</a>.</li>
+<li><strong>On <code>use_figma</code> error, obey <code>safeToRetryWithoutCanvasRead</code>.</strong> If <code>true</code>, fix the error and retry. If <code>false</code>, read the canvas, determine what changed, then make changes. See <a href="#7-error-recovery--self-correction">Error Recovery</a>.</li>
+<li><strong>MUST <code>return</code> ALL created/mutated node IDs.</strong> Whenever a script creates new nodes or mutates existing ones on the canvas, collect every affected node ID and return them in a structured object (e.g. <code>return { createdNodeIds: [...], mutatedNodeIds: [...] }</code>). This is essential for subsequent calls to reference, validate, or clean up those nodes. No state persists across <code>use_figma</code> calls, so pass IDs from previous calls as <strong>string literals</strong>, not variables. See <a href="references/common-patterns.md">common-patterns.md</a> for worked multi-step examples.</li>
+<li><strong>Always set <code>variable.scopes</code> explicitly when creating variables.</strong> The default <code>ALL_SCOPES</code> pollutes every property picker — almost never what you want. Use specific scopes like <code>["FRAME_FILL", "SHAPE_FILL"]</code> for backgrounds, <code>["TEXT_FILL"]</code> for text colors, <code>["GAP"]</code> for spacing, etc. See <a href="references/variable-patterns.md">variable-patterns.md</a> for the full list.</li>
+<li><strong><code>await</code> every Promise.</strong> Never leave a Promise unawaited — unawaited async calls (e.g. <code>figma.loadFontAsync(...)</code> without <code>await</code>, or <code>figma.setCurrentPageAsync(page)</code> without <code>await</code>) will fire-and-forget, causing silent failures or race conditions. The script may return before the async operation completes, leading to missing data or half-applied changes.</li>
+<li><strong>Never read <code>componentPropertyDefinitions</code> from a variant component.</strong> Narrow the owner first: use the node itself when it is a <code>COMPONENT_SET</code>, use a <code>COMPONENT</code> only when its parent is not a <code>COMPONENT_SET</code>, and otherwise promote a variant <code>COMPONENT</code> to its parent set. Optional chaining does not make the getter safe. See <a href="references/component-patterns.md#component-property-owner-narrowing">Component-property owner narrowing</a>.<blockquote>
+<p>For detailed WRONG/CORRECT examples of each rule, see <a href="references/gotchas.md">Gotchas &amp; Common Mistakes</a>.</p>
+</blockquote>
+</li>
+</ol>
+<h2>2. Page Rules (Critical)</h2>
+<p>The async-only setter and the per-call context reset are covered in Rule 9. This section elaborates the one rule that needs a worked example: <strong>switch pages at most once per script, and fan multi-page work out in parallel.</strong></p>
+<p>Never loop over <code>figma.root.children</code> and switch pages inside the loop — each switch reloads the file. If the work spans multiple pages, <strong>split it into N <code>use_figma</code> calls (one per target page) and emit them in parallel</strong> — a single assistant message containing N <code>use_figma</code> tool-use blocks. The harness runs them concurrently; each script sets <code>currentPage</code> exactly once.</p>
+<blockquote>
+<p><strong>Explicit instruction:</strong> when fanning out, you MUST issue the N tool calls in <strong>one message</strong>. Do not send them across multiple turns. Do not await one before issuing the next. Sequential per-page calls waste the entire benefit of splitting.</p>
+</blockquote>
+<pre><code class="language-js">// AVOID — switches pages N times in one script, reloads the file each time
+for (const page of figma.root.children) {
+  await figma.setCurrentPageAsync(page);
+  // ... touch this page ...
+}
+
+// PREFER — read-only discovery call to get page IDs, then in the NEXT message
+// emit N parallel use_figma tool calls (one per page), each setting currentPage once.
+</code></pre>
+<p>Default to parallel fan-out for any multi-page work — reads and writes alike. You can also call <code>use_figma</code> multiple times to build incrementally (e.g. <code>return</code> metadata about existing nodes, then modify them in a subsequent script). See <a href="references/gotchas.md#set-current-page-once-per-use_figma-call--split-multi-page-work-into-parallel-calls">gotchas.md → Set current page once per <code>use_figma</code> call</a> for the full rationale.</p>
+<h2>3. <code>return</code> Is Your Output Channel</h2>
+<p>The agent sees <strong>ONLY</strong> the value you <code>return</code> — <code>console.log()</code> is invisible (Rule 4), and thrown errors are auto-captured (let them propagate or <code>throw</code> explicitly). The hard requirement is Rule 15: every script that creates or mutates canvas nodes <strong>MUST</strong> return all affected node IDs plus any actionable status in a structured object — e.g. <code>return { createdNodeIds: [...], mutatedNodeIds: [...], count: 5, errors: [] }</code> — so subsequent calls can reference, validate, or clean them up.</p>
+<h2>4. Editor Mode</h2>
+<p><code>use_figma</code> works in <strong>design mode</strong> (editorType <code>"figma"</code>, the default). FigJam (<code>"figjam"</code>) and Slides (<code>"slides"</code>) have different sets of available node types — most design nodes are blocked in FigJam, and FigJam-only nodes are blocked in Slides.</p>
+<p><strong>Tell the editor from the URL:</strong> Design = <code>figma.com/design/...</code>, FigJam = <code>figma.com/board/...</code>, Slides = <code>figma.com/slides/...</code>. Confirm before assuming an API is available.</p>
+<p>Available in design mode: Rectangle, Frame, Component, Text, Ellipse, Star, Line, Vector, Polygon, BooleanOperation, Slice, Page, Section, TextPath.</p>
+<p><strong>Blocked</strong> in design mode: Sticky, Connector, ShapeWithText, CodeBlock, Slide, SlideRow, SlideGrid, InteractiveSlideElement, Webpage.</p>
+<p>Available in Slides mode: Rectangle, Frame, Component, Text, Ellipse, Star, Line, Vector, Polygon, BooleanOperation, Slice, Section, TextPath, Slide, SlideRow, SlideGrid, InteractiveSlideElement.</p>
+<p><strong>Blocked</strong> in Slides mode: Sticky, Connector, ShapeWithText, CodeBlock, Webpage, Page.</p>
+<p><strong>Design-only APIs (not just node types):</strong> <code>figma.createPage()</code> is available only in Design files (<code>figma.com/design/...</code>). In both FigJam (<code>figma.com/board/...</code>) and Slides (<code>figma.com/slides/...</code>) it throws <code>TypeError: figma.createPage no such property 'createPage' on the figma global object</code>. Do not emit <code>figma.createPage()</code> in FigJam or Slides workflows.</p>
+<blockquote>
+<p><strong>Slides note:</strong> There is no dedicated read tool for Slides files yet. Use <code>use_figma</code> with read-only scripts for inspection (see Section 6 "Inspect first" pattern), and <code>get_screenshot</code> / <code>await node.screenshot()</code> for visual context. For Slides-specific API guidance, load the <a href="../figma-use-slides/SKILL.md">figma-use-slides</a> skill.</p>
+</blockquote>
+<h2>5. Efficient APIs — Prefer These Over Verbose Alternatives</h2>
+<p>These APIs reduce boilerplate, eliminate ordering errors, and compress token output. <strong>Always prefer them over the verbose alternatives.</strong></p>
+<h3><code>node.query(selector)</code> — CSS-like node search</h3>
+<p>Find nodes within a subtree using CSS-like selectors. Replaces verbose <code>findAll</code> + filter loops.</p>
+<pre><code class="language-js">// BEFORE — verbose traversal
+const texts = frame.findAll(n =&gt; n.type === 'TEXT' &amp;&amp; n.name === 'Title')
+
+// AFTER — one-liner with query
+const texts = frame.query('TEXT[name=Title]')
+</code></pre>
+<p><strong>Selector syntax:</strong>
+- Type: <code>FRAME</code>, <code>TEXT</code>, <code>RECTANGLE</code>, <code>ELLIPSE</code>, <code>COMPONENT</code>, <code>INSTANCE</code>, <code>SECTION</code> (case-insensitive)
+- Attribute exact: <code>[name=Card]</code>, <code>[visible=true]</code>, <code>[opacity=0.5]</code>
+- Attribute substring: <code>[name*=art]</code> (contains), <code>[name^=Header]</code> (starts-with), <code>[name$=Nav]</code> (ends-with)
+- Dot-path traversal: <code>[fills.0.type=SOLID]</code>, <code>[fills.*.type=SOLID]</code> (wildcard index)
+- Instance matching: <code>[mainComponent=nodeId]</code>, <code>[mainComponent.name=Button]</code>
+- Combinators: <code>FRAME &gt; TEXT</code> (direct child), <code>FRAME TEXT</code> (any descendant), <code>A + B</code> (adjacent sibling), <code>A ~ B</code> (general sibling)
+- Pseudo-classes: <code>:first-child</code>, <code>:last-child</code>, <code>:nth-child(2)</code>, <code>:not(TYPE)</code>, <code>:is(FRAME, RECTANGLE)</code>, <code>:where(TEXT, ELLIPSE)</code>
+- Node ID: <code>#nodeId</code> or bare GUID
+- Comma: <code>TEXT, RECTANGLE</code> (union)
+- Wildcard: <code>*</code> (any type)</p>
+<p><strong>QueryResult methods:</strong>
+| Method | Description |
+|---|---|
+| <code>.length</code> | Number of matched nodes |
+| <code>.first()</code> | First matched node (or <code>null</code>) |
+| <code>.last()</code> | Last matched node (or <code>null</code>) |
+| <code>.toArray()</code> | Convert to regular array |
+| <code>.each(fn)</code> | Iterate with callback, returns <code>this</code> for chaining |
+| <code>.map(fn)</code> | Map to new array |
+| <code>.filter(fn)</code> | Filter to new QueryResult |
+| <code>.values(keys)</code> | Extract property values: <code>.values(['name', 'x', 'y'])</code> → <code>[{name, x, y}, ...]</code> |
+| <code>.set(props)</code> | Set properties on all matched nodes (see <code>node.set()</code> below) |
+| <code>.query(selector)</code> | Sub-query within matched nodes |
+| <code>for...of</code> | Iterable — works in <code>for</code> loops |</p>
+<p><strong>Scope:</strong> <code>node.query()</code> searches within that node's subtree. To search the whole page: <code>figma.currentPage.query('...')</code>. There is no global <code>figma.query()</code>.</p>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-js">// Recolor all text inside cards
+figma.currentPage.query('FRAME[name^=Card] TEXT').set({
+  fills: [{type: 'SOLID', color: {r: 0.2, g: 0.2, b: 0.8}}]
+})
+
+// Get names and positions of all frames
+return figma.currentPage.query('FRAME').values(['name', 'x', 'y'])
+
+// Find the first component named &quot;Button&quot;
+const btn = figma.currentPage.query('COMPONENT[name=Button]').first()
+
+// Find all instances of a specific component
+figma.currentPage.query(`INSTANCE[mainComponent=${compId}]`)
+
+// Find nodes with solid fills using dot-path traversal
+figma.currentPage.query('[fills.0.type=SOLID]')
+</code></pre>
+<h3><code>node.set(props)</code> — batch property updates</h3>
+<p>Set multiple properties in one call. Returns <code>this</code> for chaining.</p>
+<pre><code class="language-js">// BEFORE — one line per property
+frame.opacity = 0.5
+frame.cornerRadius = 8
+frame.name = &quot;Card&quot;
+
+// AFTER — single call
+frame.set({ opacity: 0.5, cornerRadius: 8, name: &quot;Card&quot; })
+</code></pre>
+<p><strong>Priority key ordering:</strong> <code>layoutMode</code> is always applied before other properties (like <code>width</code>/<code>height</code>) regardless of object key order. This prevents the common bug where <code>resize()</code> behaves differently depending on whether <code>layoutMode</code> is set.</p>
+<p><strong>Width/height handling:</strong> <code>width</code> and <code>height</code> are routed through <code>node.resize()</code> automatically — setting <code>{ width: 200 }</code> calls <code>resize(200, currentHeight)</code>.</p>
+<p><strong>Chaining with query:</strong></p>
+<pre><code class="language-js">// Find all rectangles named &quot;Divider&quot; and update them
+figma.currentPage.query('RECTANGLE[name=Divider]').set({
+  fills: [{type: 'SOLID', color: {r: 0.9, g: 0.9, b: 0.9}}],
+  cornerRadius: 2
+})
+</code></pre>
+<h3><code>figma.createAutoLayout(direction?, props?)</code> — auto-layout frames</h3>
+<p>Creates a frame with auto-layout already enabled and both axes hugging content. <strong>This is the default container whenever children have a structural relationship to each other (see Rule 12a).</strong></p>
+<pre><code class="language-js">// BEFORE — manual setup, easy to get ordering wrong
+const frame = figma.createFrame()
+frame.layoutMode = 'VERTICAL'
+frame.primaryAxisSizingMode = 'AUTO'
+frame.counterAxisSizingMode = 'AUTO'
+frame.layoutSizingHorizontal = 'HUG'
+frame.layoutSizingVertical = 'HUG'
+
+// AFTER — one call, layout ready
+const frame = figma.createAutoLayout('VERTICAL')
+</code></pre>
+<p>Children can immediately use <code>layoutSizingHorizontal/Vertical = 'FILL'</code> after being appended — no need to set sizing modes manually.</p>
+<p>Accepts an optional props object as the first or second argument:</p>
+<pre><code class="language-js">figma.createAutoLayout({ name: 'Card', itemSpacing: 12 })               // HORIZONTAL + props
+figma.createAutoLayout('VERTICAL', { name: 'Column', itemSpacing: 8 })  // VERTICAL + props
+</code></pre>
+<h3><code>node.placeholder</code> — shimmer overlay for AI-in-progress feedback</h3>
+<p>Sets a visual shimmer overlay on a node indicating work is in progress. <strong>Always remove the shimmer when done</strong> — leftover shimmers confuse users and indicate incomplete work.</p>
+<pre><code class="language-js">// Mark as in-progress
+frame.placeholder = true
+
+// ... build out the content ...
+
+// MUST remove when done — never leave shimmers on finished nodes
+frame.placeholder = false
+</code></pre>
+<p>When building complex layouts, set <code>placeholder = true</code> on sections before populating them, then set <code>placeholder = false</code> on each section as it's completed.</p>
+<h3><code>await node.screenshot(opts?)</code> — inline screenshots</h3>
+<p>Capture a node as a PNG and return it inline in the response. Eliminates the need for a separate <code>get_screenshot</code> call.</p>
+<pre><code class="language-js">// Take a screenshot of a frame (returned inline in the tool response)
+await frame.screenshot()
+
+// Custom scale (default auto-scales: 0.5x or capped so max dimension ≤ 1024px)
+await frame.screenshot({ scale: 2 })
+
+// Include overlapping content from sibling nodes
+await frame.screenshot({ contentsOnly: false })
+</code></pre>
+<p><strong>When to use:</strong> After creating or modifying nodes, call <code>screenshot()</code> to visually verify the result within the same script. No need for a separate <code>get_screenshot</code> call.</p>
+<p><strong>Auto-naming:</strong> The image caption includes node metadata — <code>"Card (300x150 at 0,60).png"</code> — giving spatial context without parsing the image.</p>
+<p><strong>Default scaling:</strong> Uses 0.5x scale, but automatically caps so the largest output dimension never exceeds 1024px. Explicit <code>{ scale: N }</code> bypasses the cap.</p>
+<h2>6. Incremental Workflow (How to Avoid Bugs)</h2>
+<p>The most common cause of bugs is trying to do too much in a single <code>use_figma</code> call. <strong>Work in small steps and validate after each one.</strong></p>
+<h3>Key rules</h3>
+<ul>
+<li><strong>At most 10 logical operations per <code>use_figma</code> call.</strong> A "logical operation" is creating a node, setting its properties, and parenting it. If you need to create 20 nodes, split across 2-3 calls. <strong>Slides override:</strong> in Slides files, slides are isolated subtrees — the relevant limit is complexity per slide, not total nodes across slides. Building 3–5 new slides in one call is safe, and so is applying the same edit (e.g. adding a footer, recoloring a heading) across every slide in the deck in a single call. See <a href="../figma-use-slides/SKILL.md">figma-use-slides</a> for the deck-building workflow.</li>
+<li><strong>Build top-down, starting with placeholders.</strong> Create the outer structure first with <code>placeholder = true</code> on each section, then incrementally replace placeholders with real content in subsequent calls.</li>
+</ul>
+<h3>The pattern</h3>
+<ol>
+<li><strong>Inspect first.</strong> Before creating anything, run a read-only <code>use_figma</code> to discover what already exists in the file — pages, components, variables, naming conventions. Match what's there.</li>
+<li><strong>Build the skeleton.</strong> Create the top-level structure with placeholder sections. Set <code>placeholder = true</code> on each section so the user sees progress.</li>
+<li><strong>Fill in sections incrementally.</strong> In each subsequent call, populate one section and set its <code>placeholder = false</code> when done. Take a <code>screenshot()</code> to verify.</li>
+<li><strong>Return IDs from every call</strong> (Rule 15) — you'll need created node/variable/collection IDs as inputs to subsequent calls.</li>
+<li><strong>Validate after each step.</strong> Use <code>get_metadata</code> to verify structure (counts, names, hierarchy, positions). Use <code>await node.screenshot()</code> inline or <code>get_screenshot</code> after major milestones to catch visual issues.</li>
+<li><strong>Fix before moving on.</strong> If validation reveals a problem, fix it before proceeding to the next step. Don't build on a broken foundation.</li>
+</ol>
+<h3>Suggested step order for complex tasks</h3>
+<pre><code>Step 1: Inspect file — discover existing pages, components, variables, conventions
+Step 2: Create tokens/variables (if needed)
+       → validate with get_metadata
+Step 3: Create individual components
+       → validate with get_metadata + get_screenshot
+Step 4: Compose layouts from component instances
+       → validate with get_screenshot
+Step 5: Final verification
+</code></pre>
+<h3>What to validate at each step</h3>
+<table>
+<thead>
+<tr>
+<th>After...</th>
+<th>Check with <code>get_metadata</code></th>
+<th>Check with <code>get_screenshot</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Creating variables</td>
+<td>Collection count, variable count, mode names</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Creating components</td>
+<td>Child count, variant names, property definitions</td>
+<td>Variants visible, not collapsed, grid readable</td>
+</tr>
+<tr>
+<td>Binding variables</td>
+<td>Node properties reflect bindings</td>
+<td>Colors/tokens resolved correctly</td>
+</tr>
+<tr>
+<td>Composing layouts</td>
+<td>Instance nodes have mainComponent, hierarchy correct</td>
+<td>No cropped/clipped text, no overlapping elements, correct spacing</td>
+</tr>
+</tbody>
+</table>
+<h2>7. Error Recovery &amp; Self-Correction</h2>
+<p>On any <code>use_figma</code> error, obey <code>safeToRetryWithoutCanvasRead</code> (Rule 14): <code>true</code> → fix and retry; <code>false</code> → read the canvas, determine what changed, then make changes. Errors whose fix is already a Critical Rule are diagnosed there — <code>"not implemented"</code> (<code>figma.notify</code>, Rule 3), the <code>layoutSizing*</code> HUG/FILL rejections (Rules 12, 12b), <code>"Setting figma.currentPage is not supported"</code> (Rule 9), <code>componentPropertyDefinitions</code> on a variant (Rule 18), and <code>characters</code>/<code>description</code> on the wrong node type (Rules 3a, 3b). The rows below cover failures the contract doesn't name:</p>
+<table>
+<thead>
+<tr>
+<th>Error message</th>
+<th>Likely cause</th>
+<th>How to fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Property value out of range</td>
+<td>Color channel &gt; 1 (used 0–255 instead of 0–1)</td>
+<td>Divide by 255</td>
+</tr>
+<tr>
+<td><code>"Cannot read properties of null"</code></td>
+<td>Node doesn't exist (wrong ID, wrong page)</td>
+<td>Check page context, verify ID</td>
+</tr>
+<tr>
+<td>Script hangs / no response</td>
+<td>Infinite loop or unresolved promise</td>
+<td>Check for <code>while(true)</code> or missing <code>await</code>; ensure code terminates</td>
+</tr>
+<tr>
+<td><code>"The node with id X does not exist"</code></td>
+<td>Parent instance was implicitly detached by a child <code>detachInstance()</code>, changing IDs</td>
+<td>Re-discover nodes by traversal from a stable (non-instance) parent frame</td>
+</tr>
+</tbody>
+</table>
+<h3>When the script succeeds but the result looks wrong</h3>
+<p>Call <code>get_metadata</code> for structural correctness (hierarchy, counts, positions) and <code>get_screenshot</code> for visual correctness — look closely for cropped/clipped text (line heights cutting off content) and overlapping elements, which are common and easy to miss. Identify whether the discrepancy is structural or visual, then write a <strong>targeted</strong> fix script that modifies only the broken parts — don't recreate everything.</p>
+<blockquote>
+<p>For the full validation workflow, see <a href="references/validation-and-recovery.md">Validation &amp; Error Recovery</a>.</p>
+</blockquote>
+<h2>8. Pre-Flight Checklist</h2>
+<p>Before submitting ANY <code>use_figma</code> call, re-read the script against the operating contract in <a href="#1-critical-rules">Section 1</a>. Every gate that used to be enumerated here now lives there — a script that violates any of these is not ready to submit:</p>
+<ul>
+<li>[ ] <strong>Output</strong> — uses <code>return</code> (not <code>figma.closePlugin()</code>), not wrapped in an async IIFE, no <code>console.log()</code> as output; <code>return</code>s structured data with ALL created/mutated node IDs (Rules 1, 2, 4, 15)</li>
+<li>[ ] <strong>Color &amp; fills</strong> — 0–1 range; paint <code>color</code> is <code>{r, g, b}</code> only (no <code>a</code>); fills/strokes reassigned as new arrays (Rules 6, 7)</li>
+<li>[ ] <strong>Type narrowing</strong> — <code>characters</code>, <code>description</code>, and <code>componentPropertyDefinitions</code> guarded/narrowed before access (Rules 3a, 3b, 18)</li>
+<li>[ ] <strong>Pages</strong> — switches use <code>await figma.setCurrentPageAsync(page)</code>, at most once per call (Rule 9)</li>
+<li>[ ] <strong>Layout &amp; sizing</strong> — related children in <code>figma.createAutoLayout()</code>; top-level nodes positioned away from (0,0); <code>HUG</code>/<code>FILL</code> set after <code>appendChild</code>; <code>resize()</code> before sizing modes; wrapping TEXT uses <code>textAutoResize='HEIGHT'</code> + FIXED width (Rules 12, 12a, 12b, 12c, 13)</li>
+<li>[ ] <strong>Text</strong> — canonical font recipe with style names verified via <code>listAvailableFontsAsync()</code>; <code>lineHeight</code>/<code>letterSpacing</code> as <code>{unit, value}</code>; <code>FONT_FAMILY</code> variables load every mode's value first (Rule 8)</li>
+<li>[ ] <strong>Async &amp; state</strong> — every Promise <code>await</code>ed; multi-step IDs passed as string literals (Rules 15, 17)</li>
+</ul>
+<h2>9. Discover Conventions Before Creating</h2>
+<p><strong>Always inspect the Figma file before creating anything.</strong> Different files use different naming conventions, variable structures, and component patterns. Your code should match what's already there, not impose new conventions.</p>
+<p>When in doubt about any convention (naming, scoping, structure), check the Figma file first, then the user's codebase. Only fall back to common patterns when neither exists.</p>
+<h3>Quick inspection scripts</h3>
+<p><strong>List all pages and top-level nodes:</strong></p>
+<pre><code class="language-js">const pages = figma.root.children.map(p =&gt; `${p.name} id=${p.id} children=${p.children.length}`);
+return pages.join('\n');
+</code></pre>
+<p><strong>List existing components across all pages:</strong></p>
+<p><code>search_design_system</code> is an option for published components. For on-canvas components, use the two-step fan-out — <strong>don't loop pages inside one script.</strong></p>
+<p>Step 1: one read-only <code>use_figma</code> to get page IDs:</p>
+<pre><code class="language-js">return figma.root.children.map(p =&gt; ({ id: p.id, name: p.name }));
+</code></pre>
+<p>Step 2: in the <strong>next assistant turn, emit one <code>use_figma</code> per page in parallel</strong> (a single message containing N tool-use blocks). Each runs:</p>
+<pre><code class="language-js">const page = await figma.getNodeByIdAsync(PAGE_ID);
+await figma.setCurrentPageAsync(page);
+// findAllWithCriteria uses an indexed type lookup — hundreds of times faster
+// than the findAll(n =&gt; n.type === '…') side-effect-in-predicate antipattern.
+const matches = page.findAllWithCriteria({ types: ['COMPONENT', 'COMPONENT_SET'] });
+return matches.map(n =&gt; ({ page: page.name, name: n.name, type: n.type, id: n.id }));
+</code></pre>
+<p><strong>List existing variable collections and their conventions:</strong></p>
+<pre><code class="language-js">const collections = await figma.variables.getLocalVariableCollectionsAsync();
+const results = collections.map(c =&gt; ({
+  name: c.name, id: c.id,
+  varCount: c.variableIds.length,
+  modes: c.modes.map(m =&gt; m.name)
+}));
+return results;
+</code></pre>
+<h2>10. Reference Docs</h2>
+<p>Load these as needed based on what your task involves:</p>
+<table>
+<thead>
+<tr>
+<th>Doc</th>
+<th>When to load</th>
+<th>What it covers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="references/gotchas.md">gotchas.md</a></td>
+<td>Before any <code>use_figma</code></td>
+<td>Every known pitfall with WRONG/CORRECT code examples — start with the <a href="references/gotchas.md#canonical-text-edit-recipe-font-load--await--mutate--return-ids">canonical text-edit recipe</a></td>
+</tr>
+<tr>
+<td><a href="references/common-patterns.md">common-patterns.md</a></td>
+<td>Need working code examples</td>
+<td>Script scaffolds: shapes, text, auto-layout, variables, components, multi-step workflows</td>
+</tr>
+<tr>
+<td><a href="references/plugin-api-patterns.md">plugin-api-patterns.md</a></td>
+<td>Creating/editing nodes</td>
+<td>Fills, strokes, Auto Layout, effects, grouping, cloning, styles</td>
+</tr>
+<tr>
+<td><a href="references/api-reference.md">api-reference.md</a></td>
+<td>Need exact API surface</td>
+<td>Node creation, variables API, core properties, what works and what doesn't</td>
+</tr>
+<tr>
+<td><a href="references/validation-and-recovery.md">validation-and-recovery.md</a></td>
+<td>Multi-step writes or error recovery</td>
+<td><code>get_metadata</code> vs <code>get_screenshot</code> workflow, mandatory error recovery steps</td>
+</tr>
+<tr>
+<td><a href="references/component-patterns.md">component-patterns.md</a></td>
+<td>Creating components/variants</td>
+<td>combineAsVariants, component properties, INSTANCE_SWAP, variant layout, discovering existing components, metadata traversal</td>
+</tr>
+<tr>
+<td><a href="references/variable-patterns.md">variable-patterns.md</a></td>
+<td>Creating/binding variables</td>
+<td>Collections, modes, scopes, aliasing, binding patterns, discovering existing variables</td>
+</tr>
+<tr>
+<td><a href="references/text-style-patterns.md">text-style-patterns.md</a></td>
+<td>Creating/applying text styles</td>
+<td>Type ramps, font discovery via <code>listAvailableFontsAsync</code>, listing styles, applying styles to nodes</td>
+</tr>
+<tr>
+<td><a href="references/effect-style-patterns.md">effect-style-patterns.md</a></td>
+<td>Creating/applying effect styles</td>
+<td>Drop shadows, listing styles, applying styles to nodes</td>
+</tr>
+<tr>
+<td><a href="references/plugin-api-standalone.index.md">plugin-api-standalone.index.md</a></td>
+<td>Need to understand the full API surface</td>
+<td>Index of all types, methods, and properties in the Plugin API</td>
+</tr>
+<tr>
+<td><a href="references/plugin-api-standalone.d.ts">plugin-api-standalone.d.ts</a></td>
+<td>Need exact type signatures</td>
+<td>Full typings file — grep for specific symbols, don't load all at once</td>
+</tr>
+</tbody>
+</table>
+<h2>11. Snippet examples</h2>
+<p>You will see snippets throughout documentation here. These snippets contain useful plugin API code that can be repurposed. Use them as is, or as starter code as you go. If there are key concepts that are best documented as generic snippets, call them out and write to disk so you can reuse in the future.</p></div></a><div class="index-item-stats"><span>10 mcp__plugin_figma_figma__use_figma · 9 bash · 3 mcp__plugin_figma_figma__get_metadata · 2 mcp__plugin_figma_figma__get_screenshot · 1 mcp__plugin_figma_figma__upload_assets</span>
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>Base directory for this skill: /home/jerome/.claude/plugins/synced/c0954601-c5e6-4c86-a300-6863211d9287_57fed749-f0e5-4c6a-bf31-72f60e8e0b69/figma/skills/figma-use</p>
+<h1>use_figma — Figma Plugin API Skill</h1>
+<p>Use the <code>use_figma</code> tool to execute JavaScript in Figma files via the Plugin API. All detailed reference docs live in <code>references/</code>.</p>
+<p><strong>Always include <code>figma-use</code> in the comma-separated <code>skillNames</code> parameter when calling <code>use_figma</code>. If this skill was loaded via an MCP resource, you MUST prefix the name with <code>resource:</code> (e.g. <code>resource:figma-use</code>).</strong> This is a logging parameter used to track skill usage — it does not affect execution.</p>
+<p><strong>If Figma MCP tools appear as deferred tools, batch-load all their schemas in a single <code>ToolSearch</code> call</strong> using the <code>select:</code> syntax — e.g. <code>ToolSearch query="select:use_figma,get_screenshot,get_metadata,create_new_file"</code>. One round trip beats six.</p>
+<p><strong>If the task involves building or updating a full page, screen, or multi-section layout in Figma from code</strong>, also load <a href="../figma-generate-design/SKILL.md">figma-generate-design</a>. It provides the workflow for discovering design system components via <code>search_design_system</code>, importing them, and assembling screens incrementally. Both skills work together: this one for the API rules, that one for the screen-building workflow.</p>
+<p><strong>If the task involves creating or building a component in Figma</strong> (even a single component), also load <a href="../figma-generate-library/SKILL.md">figma-generate-library</a>. It provides the component creation workflow — variable foundations, variant sets, design token bindings — that <code>figma-use</code> alone doesn't cover.</p>
+<p>Before anything, load <a href="references/plugin-api-standalone.index.md">plugin-api-standalone.index.md</a> to understand what is possible. When you are asked to write plugin API code, use this context to grep <a href="references/plugin-api-standalone.d.ts">plugin-api-standalone.d.ts</a> for relevant types, methods, and properties. This is the definitive source of truth for the API surface. It is a large typings file, so do not load it all at once, grep for relevant sections as needed.</p>
+<p>IMPORTANT: Whenever you work with design systems, start with <a href="references/working-with-design-systems/wwds.md">working-with-design-systems/wwds.md</a> to understand the key concepts, processes, and guidelines for working with design systems in Figma. Then load the more specific references for components, variables, text styles, and effect styles as needed.</p>
+<h2>1. Critical Rules</h2>
+<ol>
+<li><strong>Use <code>return</code> to send data back.</strong> The return value is JSON-serialized automatically (objects, arrays, strings, numbers). Do NOT call <code>figma.closePlugin()</code> or wrap code in an async IIFE — this is handled for you.</li>
+<li><strong>Write plain JavaScript with top-level <code>await</code> and <code>return</code>.</strong> Code is automatically wrapped in an async context. Do NOT wrap in <code>(async () =&gt; { ... })()</code>.</li>
+<li><code>figma.notify()</code> <strong>throws "not implemented"</strong> — never use it
+3a. <strong>Return node IDs and keep workflow state outside the Figma file.</strong> Set human-readable component purpose and usage in <code>node.description</code> only on a <code>COMPONENT</code> or <code>COMPONENT_SET</code> — never on a frame or instance.
+3b. <strong>Narrow before accessing type-specific properties.</strong> Check <code>node.type</code>, use a capability guard such as <code>"characters" in node</code>, or prefilter with <code>findAllWithCriteria</code>. <code>characters</code> requires a text-capable node; optional chaining does not protect unsupported property access.</li>
+<li><code>console.log()</code> is NOT returned — use <code>return</code> for output</li>
+<li><strong>Work incrementally in small steps.</strong> Break large operations into multiple <code>use_figma</code> calls. Validate after each step. This is the single most important practice for avoiding bugs.</li>
+<li>Colors are <strong>0–1 range</strong> (not 0–255): <code>{r: 1, g: 0, b: 0}</code> = red. Paint <code>color</code> objects use <code>{r, g, b}</code> <strong>only — no <code>a</code> field</strong>; opacity goes at the paint level (<code>{ type: 'SOLID', color: {...}, opacity: 0.5 }</code>).</li>
+<li>Fills/strokes are <strong>read-only arrays</strong> — clone, modify, reassign</li>
+<li><strong>Every text edit follows the canonical recipe: load font → <code>await</code> → mutate → return affected node IDs.</strong> Skipping the load throws <code>Cannot write to node with unloaded font "&lt;family&gt; &lt;style&gt;"</code>. The rule covers more than <code>characters</code> — it applies to any operation on nodes with unloaded fonts (<code>appendChild</code>, <code>insertChild</code>, <code>setBoundVariable</code>, <code>setExplicitVariableModeForCollection</code>, <code>setValueForMode</code>, <code>findAll</code> callbacks touching text). When mutating existing text, load the node's <em>current</em> fonts via <code>getStyledTextSegments(['fontName'])</code>, not a hardcoded default. Inter is preloaded in most environments so other families surface this bug more often — the recipe is the same for every font. Use <code>await figma.listAvailableFontsAsync()</code> first if the style string is unverified — <strong>never guess</strong> (<code>"SemiBold"</code> vs <code>"Semi Bold"</code> is a common footgun). For <code>FONT_FAMILY</code>-scoped variables, load every value across every relevant mode before <code>setBoundVariable("fontFamily", …)</code>, <code>setValueForMode</code>, or <code>setExplicitVariableModeForCollection</code>. <code>lineHeight</code>/<code>letterSpacing</code> take <code>{unit, value}</code>, not bare numbers. See <a href="references/gotchas.md#canonical-text-edit-recipe-font-load--await--mutate--return-ids">Canonical text-edit recipe</a>.</li>
+<li><strong>Pages load incrementally</strong> — use <code>await figma.setCurrentPageAsync(page)</code> to switch pages and load their content. The sync setter <code>figma.currentPage = page</code> does <strong>NOT</strong> work and throws <code>"Setting figma.currentPage is not supported"</code>. Page context resets to the <strong>first page</strong> at the start of every <code>use_figma</code> call, so re-switch each call; switch <strong>at most once per call</strong> and fan multi-page work out in parallel — see <a href="#2-page-rules-critical">Page Rules</a> and <a href="references/gotchas.md#set-current-page-once-per-use_figma-call--split-multi-page-work-into-parallel-calls">gotchas.md</a>.</li>
+<li><code>setBoundVariableForPaint</code> returns a <strong>NEW</strong> paint — must capture and reassign</li>
+<li><code>createVariable</code> accepts collection <strong>object or ID string</strong> (object preferred)</li>
+<li><strong><code>layoutSizingHorizontal/Vertical</code> is value-restricted by structural context — <code>FIXED</code> always works, <code>HUG</code> and <code>FILL</code> do not.</strong> <code>'HUG'</code> is valid only on an auto-layout frame itself OR on a <strong>TEXT</strong> child of one. <code>'FILL'</code> is valid only on a child of an auto-layout frame that is also not absolute-positioned, not inside an immutable frame, and not a canvas-grid child. Practical consequence: append to an auto-layout parent FIRST, then set <code>HUG</code>/<code>FILL</code> — a newly-created or unparented node can't satisfy the rule yet. The property itself exists on every <code>SceneNode</code>; the error is value-rejection, not "no such property". See <a href="references/gotchas.md#layoutsizinghorizontallayoutsizingvertical-value-rules-fixed-hug-fill">Gotchas</a>.
+12a. <strong>Use auto-layout for containers that hold related children.</strong> When children have a structural relationship — stacked, side-by-side, aligned, gapped, hugged — wrap them in <code>figma.createAutoLayout()</code>, not <code>figma.createFrame()</code> with absolute <code>x</code>/<code>y</code>. Absolute coordinates govern where a container sits on the canvas; auto-layout governs how its children relate inside it. Skipping the container leaves no protection against text reflow, content changes, or overlap.
+12b. <strong><code>layoutSizing*</code> and <code>*AxisSizingMode</code> are different enums — don't cross them.</strong> <code>layoutSizingHorizontal</code>/<code>layoutSizingVertical</code> (set on a <strong>child</strong>) take <code>'FIXED'|'HUG'|'FILL'</code>; <code>primaryAxisSizingMode</code>/<code>counterAxisSizingMode</code> (set on the <strong>frame</strong> itself) take <code>'FIXED'|'AUTO'</code>. So <code>layoutSizingVertical = 'AUTO'</code> is invalid (use <code>'HUG'</code>), and <code>counterAxisSizingMode = 'FILL'</code> throws <code>Expected 'FIXED' | 'AUTO', received 'FILL'</code> (use <code>'FIXED'</code>/<code>'AUTO'</code>). Two more errors from the same setter — <code>Error: in set_layoutSizingHorizontal: node must be an auto-layout frame or a child of an auto-layout frame</code> and <code>Error: in set_layoutSizingHorizontal: FILL can only be set on children of auto-layout frames</code> — mean the node isn't in an auto-layout context yet; <strong>recommendation: make the parent auto-layout (<code>figma.createAutoLayout()</code>) and <code>appendChild</code> the node before setting</strong> (see Rule 12). See <a href="references/gotchas.md#layoutsizing-vs-axissizingmode-two-different-sizing-enums">Gotchas</a>.
+12c. <strong><code>resize()</code> resets sizing modes to <code>FIXED</code>, so call it BEFORE setting <code>layoutSizing*</code>.</strong> A wrapping <strong>TEXT</strong> block needs <code>textAutoResize = 'HEIGHT'</code> plus an explicit FIXED width (<code>resize()</code>), NOT <code>FILL</code> alone — the default <code>WIDTH_AND_HEIGHT</code> mode ignores <code>FILL</code> and collapses the node to a near-zero-width thread. Verify <code>node.width &gt; 0</code> afterward.</li>
+<li><strong>Position new top-level nodes away from (0,0).</strong> Nodes appended directly to the page default to (0,0). Scan <code>figma.currentPage.children</code> to find a clear position (e.g., to the right of the rightmost node). This only applies to page-level nodes — nodes nested inside other frames or auto-layout containers are positioned by their parent. See <a href="references/gotchas.md">Gotchas</a>.</li>
+<li><strong>On <code>use_figma</code> error, obey <code>safeToRetryWithoutCanvasRead</code>.</strong> If <code>true</code>, fix the error and retry. If <code>false</code>, read the canvas, determine what changed, then make changes. See <a href="#7-error-recovery--self-correction">Error Recovery</a>.</li>
+<li><strong>MUST <code>return</code> ALL created/mutated node IDs.</strong> Whenever a script creates new nodes or mutates existing ones on the canvas, collect every affected node ID and return them in a structured object (e.g. <code>return { createdNodeIds: [...], mutatedNodeIds: [...] }</code>). This is essential for subsequent calls to reference, validate, or clean up those nodes. No state persists across <code>use_figma</code> calls, so pass IDs from previous calls as <strong>string literals</strong>, not variables. See <a href="references/common-patterns.md">common-patterns.md</a> for worked multi-step examples.</li>
+<li><strong>Always set <code>variable.scopes</code> explicitly when creating variables.</strong> The default <code>ALL_SCOPES</code> pollutes every property picker — almost never what you want. Use specific scopes like <code>["FRAME_FILL", "SHAPE_FILL"]</code> for backgrounds, <code>["TEXT_FILL"]</code> for text colors, <code>["GAP"]</code> for spacing, etc. See <a href="references/variable-patterns.md">variable-patterns.md</a> for the full list.</li>
+<li><strong><code>await</code> every Promise.</strong> Never leave a Promise unawaited — unawaited async calls (e.g. <code>figma.loadFontAsync(...)</code> without <code>await</code>, or <code>figma.setCurrentPageAsync(page)</code> without <code>await</code>) will fire-and-forget, causing silent failures or race conditions. The script may return before the async operation completes, leading to missing data or half-applied changes.</li>
+<li><strong>Never read <code>componentPropertyDefinitions</code> from a variant component.</strong> Narrow the owner first: use the node itself when it is a <code>COMPONENT_SET</code>, use a <code>COMPONENT</code> only when its parent is not a <code>COMPONENT_SET</code>, and otherwise promote a variant <code>COMPONENT</code> to its parent set. Optional chaining does not make the getter safe. See <a href="references/component-patterns.md#component-property-owner-narrowing">Component-property owner narrowing</a>.<blockquote>
+<p>For detailed WRONG/CORRECT examples of each rule, see <a href="references/gotchas.md">Gotchas &amp; Common Mistakes</a>.</p>
+</blockquote>
+</li>
+</ol>
+<h2>2. Page Rules (Critical)</h2>
+<p>The async-only setter and the per-call context reset are covered in Rule 9. This section elaborates the one rule that needs a worked example: <strong>switch pages at most once per script, and fan multi-page work out in parallel.</strong></p>
+<p>Never loop over <code>figma.root.children</code> and switch pages inside the loop — each switch reloads the file. If the work spans multiple pages, <strong>split it into N <code>use_figma</code> calls (one per target page) and emit them in parallel</strong> — a single assistant message containing N <code>use_figma</code> tool-use blocks. The harness runs them concurrently; each script sets <code>currentPage</code> exactly once.</p>
+<blockquote>
+<p><strong>Explicit instruction:</strong> when fanning out, you MUST issue the N tool calls in <strong>one message</strong>. Do not send them across multiple turns. Do not await one before issuing the next. Sequential per-page calls waste the entire benefit of splitting.</p>
+</blockquote>
+<pre><code class="language-js">// AVOID — switches pages N times in one script, reloads the file each time
+for (const page of figma.root.children) {
+  await figma.setCurrentPageAsync(page);
+  // ... touch this page ...
+}
+
+// PREFER — read-only discovery call to get page IDs, then in the NEXT message
+// emit N parallel use_figma tool calls (one per page), each setting currentPage once.
+</code></pre>
+<p>Default to parallel fan-out for any multi-page work — reads and writes alike. You can also call <code>use_figma</code> multiple times to build incrementally (e.g. <code>return</code> metadata about existing nodes, then modify them in a subsequent script). See <a href="references/gotchas.md#set-current-page-once-per-use_figma-call--split-multi-page-work-into-parallel-calls">gotchas.md → Set current page once per <code>use_figma</code> call</a> for the full rationale.</p>
+<h2>3. <code>return</code> Is Your Output Channel</h2>
+<p>The agent sees <strong>ONLY</strong> the value you <code>return</code> — <code>console.log()</code> is invisible (Rule 4), and thrown errors are auto-captured (let them propagate or <code>throw</code> explicitly). The hard requirement is Rule 15: every script that creates or mutates canvas nodes <strong>MUST</strong> return all affected node IDs plus any actionable status in a structured object — e.g. <code>return { createdNodeIds: [...], mutatedNodeIds: [...], count: 5, errors: [] }</code> — so subsequent calls can reference, validate, or clean them up.</p>
+<h2>4. Editor Mode</h2>
+<p><code>use_figma</code> works in <strong>design mode</strong> (editorType <code>"figma"</code>, the default). FigJam (<code>"figjam"</code>) and Slides (<code>"slides"</code>) have different sets of available node types — most design nodes are blocked in FigJam, and FigJam-only nodes are blocked in Slides.</p>
+<p><strong>Tell the editor from the URL:</strong> Design = <code>figma.com/design/...</code>, FigJam = <code>figma.com/board/...</code>, Slides = <code>figma.com/slides/...</code>. Confirm before assuming an API is available.</p>
+<p>Available in design mode: Rectangle, Frame, Component, Text, Ellipse, Star, Line, Vector, Polygon, BooleanOperation, Slice, Page, Section, TextPath.</p>
+<p><strong>Blocked</strong> in design mode: Sticky, Connector, ShapeWithText, CodeBlock, Slide, SlideRow, SlideGrid, InteractiveSlideElement, Webpage.</p>
+<p>Available in Slides mode: Rectangle, Frame, Component, Text, Ellipse, Star, Line, Vector, Polygon, BooleanOperation, Slice, Section, TextPath, Slide, SlideRow, SlideGrid, InteractiveSlideElement.</p>
+<p><strong>Blocked</strong> in Slides mode: Sticky, Connector, ShapeWithText, CodeBlock, Webpage, Page.</p>
+<p><strong>Design-only APIs (not just node types):</strong> <code>figma.createPage()</code> is available only in Design files (<code>figma.com/design/...</code>). In both FigJam (<code>figma.com/board/...</code>) and Slides (<code>figma.com/slides/...</code>) it throws <code>TypeError: figma.createPage no such property 'createPage' on the figma global object</code>. Do not emit <code>figma.createPage()</code> in FigJam or Slides workflows.</p>
+<blockquote>
+<p><strong>Slides note:</strong> There is no dedicated read tool for Slides files yet. Use <code>use_figma</code> with read-only scripts for inspection (see Section 6 "Inspect first" pattern), and <code>get_screenshot</code> / <code>await node.screenshot()</code> for visual context. For Slides-specific API guidance, load the <a href="../figma-use-slides/SKILL.md">figma-use-slides</a> skill.</p>
+</blockquote>
+<h2>5. Efficient APIs — Prefer These Over Verbose Alternatives</h2>
+<p>These APIs reduce boilerplate, eliminate ordering errors, and compress token output. <strong>Always prefer them over the verbose alternatives.</strong></p>
+<h3><code>node.query(selector)</code> — CSS-like node search</h3>
+<p>Find nodes within a subtree using CSS-like selectors. Replaces verbose <code>findAll</code> + filter loops.</p>
+<pre><code class="language-js">// BEFORE — verbose traversal
+const texts = frame.findAll(n =&gt; n.type === 'TEXT' &amp;&amp; n.name === 'Title')
+
+// AFTER — one-liner with query
+const texts = frame.query('TEXT[name=Title]')
+</code></pre>
+<p><strong>Selector syntax:</strong>
+- Type: <code>FRAME</code>, <code>TEXT</code>, <code>RECTANGLE</code>, <code>ELLIPSE</code>, <code>COMPONENT</code>, <code>INSTANCE</code>, <code>SECTION</code> (case-insensitive)
+- Attribute exact: <code>[name=Card]</code>, <code>[visible=true]</code>, <code>[opacity=0.5]</code>
+- Attribute substring: <code>[name*=art]</code> (contains), <code>[name^=Header]</code> (starts-with), <code>[name$=Nav]</code> (ends-with)
+- Dot-path traversal: <code>[fills.0.type=SOLID]</code>, <code>[fills.*.type=SOLID]</code> (wildcard index)
+- Instance matching: <code>[mainComponent=nodeId]</code>, <code>[mainComponent.name=Button]</code>
+- Combinators: <code>FRAME &gt; TEXT</code> (direct child), <code>FRAME TEXT</code> (any descendant), <code>A + B</code> (adjacent sibling), <code>A ~ B</code> (general sibling)
+- Pseudo-classes: <code>:first-child</code>, <code>:last-child</code>, <code>:nth-child(2)</code>, <code>:not(TYPE)</code>, <code>:is(FRAME, RECTANGLE)</code>, <code>:where(TEXT, ELLIPSE)</code>
+- Node ID: <code>#nodeId</code> or bare GUID
+- Comma: <code>TEXT, RECTANGLE</code> (union)
+- Wildcard: <code>*</code> (any type)</p>
+<p><strong>QueryResult methods:</strong>
+| Method | Description |
+|---|---|
+| <code>.length</code> | Number of matched nodes |
+| <code>.first()</code> | First matched node (or <code>null</code>) |
+| <code>.last()</code> | Last matched node (or <code>null</code>) |
+| <code>.toArray()</code> | Convert to regular array |
+| <code>.each(fn)</code> | Iterate with callback, returns <code>this</code> for chaining |
+| <code>.map(fn)</code> | Map to new array |
+| <code>.filter(fn)</code> | Filter to new QueryResult |
+| <code>.values(keys)</code> | Extract property values: <code>.values(['name', 'x', 'y'])</code> → <code>[{name, x, y}, ...]</code> |
+| <code>.set(props)</code> | Set properties on all matched nodes (see <code>node.set()</code> below) |
+| <code>.query(selector)</code> | Sub-query within matched nodes |
+| <code>for...of</code> | Iterable — works in <code>for</code> loops |</p>
+<p><strong>Scope:</strong> <code>node.query()</code> searches within that node's subtree. To search the whole page: <code>figma.currentPage.query('...')</code>. There is no global <code>figma.query()</code>.</p>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-js">// Recolor all text inside cards
+figma.currentPage.query('FRAME[name^=Card] TEXT').set({
+  fills: [{type: 'SOLID', color: {r: 0.2, g: 0.2, b: 0.8}}]
+})
+
+// Get names and positions of all frames
+return figma.currentPage.query('FRAME').values(['name', 'x', 'y'])
+
+// Find the first component named &quot;Button&quot;
+const btn = figma.currentPage.query('COMPONENT[name=Button]').first()
+
+// Find all instances of a specific component
+figma.currentPage.query(`INSTANCE[mainComponent=${compId}]`)
+
+// Find nodes with solid fills using dot-path traversal
+figma.currentPage.query('[fills.0.type=SOLID]')
+</code></pre>
+<h3><code>node.set(props)</code> — batch property updates</h3>
+<p>Set multiple properties in one call. Returns <code>this</code> for chaining.</p>
+<pre><code class="language-js">// BEFORE — one line per property
+frame.opacity = 0.5
+frame.cornerRadius = 8
+frame.name = &quot;Card&quot;
+
+// AFTER — single call
+frame.set({ opacity: 0.5, cornerRadius: 8, name: &quot;Card&quot; })
+</code></pre>
+<p><strong>Priority key ordering:</strong> <code>layoutMode</code> is always applied before other properties (like <code>width</code>/<code>height</code>) regardless of object key order. This prevents the common bug where <code>resize()</code> behaves differently depending on whether <code>layoutMode</code> is set.</p>
+<p><strong>Width/height handling:</strong> <code>width</code> and <code>height</code> are routed through <code>node.resize()</code> automatically — setting <code>{ width: 200 }</code> calls <code>resize(200, currentHeight)</code>.</p>
+<p><strong>Chaining with query:</strong></p>
+<pre><code class="language-js">// Find all rectangles named &quot;Divider&quot; and update them
+figma.currentPage.query('RECTANGLE[name=Divider]').set({
+  fills: [{type: 'SOLID', color: {r: 0.9, g: 0.9, b: 0.9}}],
+  cornerRadius: 2
+})
+</code></pre>
+<h3><code>figma.createAutoLayout(direction?, props?)</code> — auto-layout frames</h3>
+<p>Creates a frame with auto-layout already enabled and both axes hugging content. <strong>This is the default container whenever children have a structural relationship to each other (see Rule 12a).</strong></p>
+<pre><code class="language-js">// BEFORE — manual setup, easy to get ordering wrong
+const frame = figma.createFrame()
+frame.layoutMode = 'VERTICAL'
+frame.primaryAxisSizingMode = 'AUTO'
+frame.counterAxisSizingMode = 'AUTO'
+frame.layoutSizingHorizontal = 'HUG'
+frame.layoutSizingVertical = 'HUG'
+
+// AFTER — one call, layout ready
+const frame = figma.createAutoLayout('VERTICAL')
+</code></pre>
+<p>Children can immediately use <code>layoutSizingHorizontal/Vertical = 'FILL'</code> after being appended — no need to set sizing modes manually.</p>
+<p>Accepts an optional props object as the first or second argument:</p>
+<pre><code class="language-js">figma.createAutoLayout({ name: 'Card', itemSpacing: 12 })               // HORIZONTAL + props
+figma.createAutoLayout('VERTICAL', { name: 'Column', itemSpacing: 8 })  // VERTICAL + props
+</code></pre>
+<h3><code>node.placeholder</code> — shimmer overlay for AI-in-progress feedback</h3>
+<p>Sets a visual shimmer overlay on a node indicating work is in progress. <strong>Always remove the shimmer when done</strong> — leftover shimmers confuse users and indicate incomplete work.</p>
+<pre><code class="language-js">// Mark as in-progress
+frame.placeholder = true
+
+// ... build out the content ...
+
+// MUST remove when done — never leave shimmers on finished nodes
+frame.placeholder = false
+</code></pre>
+<p>When building complex layouts, set <code>placeholder = true</code> on sections before populating them, then set <code>placeholder = false</code> on each section as it's completed.</p>
+<h3><code>await node.screenshot(opts?)</code> — inline screenshots</h3>
+<p>Capture a node as a PNG and return it inline in the response. Eliminates the need for a separate <code>get_screenshot</code> call.</p>
+<pre><code class="language-js">// Take a screenshot of a frame (returned inline in the tool response)
+await frame.screenshot()
+
+// Custom scale (default auto-scales: 0.5x or capped so max dimension ≤ 1024px)
+await frame.screenshot({ scale: 2 })
+
+// Include overlapping content from sibling nodes
+await frame.screenshot({ contentsOnly: false })
+</code></pre>
+<p><strong>When to use:</strong> After creating or modifying nodes, call <code>screenshot()</code> to visually verify the result within the same script. No need for a separate <code>get_screenshot</code> call.</p>
+<p><strong>Auto-naming:</strong> The image caption includes node metadata — <code>"Card (300x150 at 0,60).png"</code> — giving spatial context without parsing the image.</p>
+<p><strong>Default scaling:</strong> Uses 0.5x scale, but automatically caps so the largest output dimension never exceeds 1024px. Explicit <code>{ scale: N }</code> bypasses the cap.</p>
+<h2>6. Incremental Workflow (How to Avoid Bugs)</h2>
+<p>The most common cause of bugs is trying to do too much in a single <code>use_figma</code> call. <strong>Work in small steps and validate after each one.</strong></p>
+<h3>Key rules</h3>
+<ul>
+<li><strong>At most 10 logical operations per <code>use_figma</code> call.</strong> A "logical operation" is creating a node, setting its properties, and parenting it. If you need to create 20 nodes, split across 2-3 calls. <strong>Slides override:</strong> in Slides files, slides are isolated subtrees — the relevant limit is complexity per slide, not total nodes across slides. Building 3–5 new slides in one call is safe, and so is applying the same edit (e.g. adding a footer, recoloring a heading) across every slide in the deck in a single call. See <a href="../figma-use-slides/SKILL.md">figma-use-slides</a> for the deck-building workflow.</li>
+<li><strong>Build top-down, starting with placeholders.</strong> Create the outer structure first with <code>placeholder = true</code> on each section, then incrementally replace placeholders with real content in subsequent calls.</li>
+</ul>
+<h3>The pattern</h3>
+<ol>
+<li><strong>Inspect first.</strong> Before creating anything, run a read-only <code>use_figma</code> to discover what already exists in the file — pages, components, variables, naming conventions. Match what's there.</li>
+<li><strong>Build the skeleton.</strong> Create the top-level structure with placeholder sections. Set <code>placeholder = true</code> on each section so the user sees progress.</li>
+<li><strong>Fill in sections incrementally.</strong> In each subsequent call, populate one section and set its <code>placeholder = false</code> when done. Take a <code>screenshot()</code> to verify.</li>
+<li><strong>Return IDs from every call</strong> (Rule 15) — you'll need created node/variable/collection IDs as inputs to subsequent calls.</li>
+<li><strong>Validate after each step.</strong> Use <code>get_metadata</code> to verify structure (counts, names, hierarchy, positions). Use <code>await node.screenshot()</code> inline or <code>get_screenshot</code> after major milestones to catch visual issues.</li>
+<li><strong>Fix before moving on.</strong> If validation reveals a problem, fix it before proceeding to the next step. Don't build on a broken foundation.</li>
+</ol>
+<h3>Suggested step order for complex tasks</h3>
+<pre><code>Step 1: Inspect file — discover existing pages, components, variables, conventions
+Step 2: Create tokens/variables (if needed)
+       → validate with get_metadata
+Step 3: Create individual components
+       → validate with get_metadata + get_screenshot
+Step 4: Compose layouts from component instances
+       → validate with get_screenshot
+Step 5: Final verification
+</code></pre>
+<h3>What to validate at each step</h3>
+<table>
+<thead>
+<tr>
+<th>After...</th>
+<th>Check with <code>get_metadata</code></th>
+<th>Check with <code>get_screenshot</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Creating variables</td>
+<td>Collection count, variable count, mode names</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Creating components</td>
+<td>Child count, variant names, property definitions</td>
+<td>Variants visible, not collapsed, grid readable</td>
+</tr>
+<tr>
+<td>Binding variables</td>
+<td>Node properties reflect bindings</td>
+<td>Colors/tokens resolved correctly</td>
+</tr>
+<tr>
+<td>Composing layouts</td>
+<td>Instance nodes have mainComponent, hierarchy correct</td>
+<td>No cropped/clipped text, no overlapping elements, correct spacing</td>
+</tr>
+</tbody>
+</table>
+<h2>7. Error Recovery &amp; Self-Correction</h2>
+<p>On any <code>use_figma</code> error, obey <code>safeToRetryWithoutCanvasRead</code> (Rule 14): <code>true</code> → fix and retry; <code>false</code> → read the canvas, determine what changed, then make changes. Errors whose fix is already a Critical Rule are diagnosed there — <code>"not implemented"</code> (<code>figma.notify</code>, Rule 3), the <code>layoutSizing*</code> HUG/FILL rejections (Rules 12, 12b), <code>"Setting figma.currentPage is not supported"</code> (Rule 9), <code>componentPropertyDefinitions</code> on a variant (Rule 18), and <code>characters</code>/<code>description</code> on the wrong node type (Rules 3a, 3b). The rows below cover failures the contract doesn't name:</p>
+<table>
+<thead>
+<tr>
+<th>Error message</th>
+<th>Likely cause</th>
+<th>How to fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Property value out of range</td>
+<td>Color channel &gt; 1 (used 0–255 instead of 0–1)</td>
+<td>Divide by 255</td>
+</tr>
+<tr>
+<td><code>"Cannot read properties of null"</code></td>
+<td>Node doesn't exist (wrong ID, wrong page)</td>
+<td>Check page context, verify ID</td>
+</tr>
+<tr>
+<td>Script hangs / no response</td>
+<td>Infinite loop or unresolved promise</td>
+<td>Check for <code>while(true)</code> or missing <code>await</code>; ensure code terminates</td>
+</tr>
+<tr>
+<td><code>"The node with id X does not exist"</code></td>
+<td>Parent instance was implicitly detached by a child <code>detachInstance()</code>, changing IDs</td>
+<td>Re-discover nodes by traversal from a stable (non-instance) parent frame</td>
+</tr>
+</tbody>
+</table>
+<h3>When the script succeeds but the result looks wrong</h3>
+<p>Call <code>get_metadata</code> for structural correctness (hierarchy, counts, positions) and <code>get_screenshot</code> for visual correctness — look closely for cropped/clipped text (line heights cutting off content) and overlapping elements, which are common and easy to miss. Identify whether the discrepancy is structural or visual, then write a <strong>targeted</strong> fix script that modifies only the broken parts — don't recreate everything.</p>
+<blockquote>
+<p>For the full validation workflow, see <a href="references/validation-and-recovery.md">Validation &amp; Error Recovery</a>.</p>
+</blockquote>
+<h2>8. Pre-Flight Checklist</h2>
+<p>Before submitting ANY <code>use_figma</code> call, re-read the script against the operating contract in <a href="#1-critical-rules">Section 1</a>. Every gate that used to be enumerated here now lives there — a script that violates any of these is not ready to submit:</p>
+<ul>
+<li>[ ] <strong>Output</strong> — uses <code>return</code> (not <code>figma.closePlugin()</code>), not wrapped in an async IIFE, no <code>console.log()</code> as output; <code>return</code>s structured data with ALL created/mutated node IDs (Rules 1, 2, 4, 15)</li>
+<li>[ ] <strong>Color &amp; fills</strong> — 0–1 range; paint <code>color</code> is <code>{r, g, b}</code> only (no <code>a</code>); fills/strokes reassigned as new arrays (Rules 6, 7)</li>
+<li>[ ] <strong>Type narrowing</strong> — <code>characters</code>, <code>description</code>, and <code>componentPropertyDefinitions</code> guarded/narrowed before access (Rules 3a, 3b, 18)</li>
+<li>[ ] <strong>Pages</strong> — switches use <code>await figma.setCurrentPageAsync(page)</code>, at most once per call (Rule 9)</li>
+<li>[ ] <strong>Layout &amp; sizing</strong> — related children in <code>figma.createAutoLayout()</code>; top-level nodes positioned away from (0,0); <code>HUG</code>/<code>FILL</code> set after <code>appendChild</code>; <code>resize()</code> before sizing modes; wrapping TEXT uses <code>textAutoResize='HEIGHT'</code> + FIXED width (Rules 12, 12a, 12b, 12c, 13)</li>
+<li>[ ] <strong>Text</strong> — canonical font recipe with style names verified via <code>listAvailableFontsAsync()</code>; <code>lineHeight</code>/<code>letterSpacing</code> as <code>{unit, value}</code>; <code>FONT_FAMILY</code> variables load every mode's value first (Rule 8)</li>
+<li>[ ] <strong>Async &amp; state</strong> — every Promise <code>await</code>ed; multi-step IDs passed as string literals (Rules 15, 17)</li>
+</ul>
+<h2>9. Discover Conventions Before Creating</h2>
+<p><strong>Always inspect the Figma file before creating anything.</strong> Different files use different naming conventions, variable structures, and component patterns. Your code should match what's already there, not impose new conventions.</p>
+<p>When in doubt about any convention (naming, scoping, structure), check the Figma file first, then the user's codebase. Only fall back to common patterns when neither exists.</p>
+<h3>Quick inspection scripts</h3>
+<p><strong>List all pages and top-level nodes:</strong></p>
+<pre><code class="language-js">const pages = figma.root.children.map(p =&gt; `${p.name} id=${p.id} children=${p.children.length}`);
+return pages.join('\n');
+</code></pre>
+<p><strong>List existing components across all pages:</strong></p>
+<p><code>search_design_system</code> is an option for published components. For on-canvas components, use the two-step fan-out — <strong>don't loop pages inside one script.</strong></p>
+<p>Step 1: one read-only <code>use_figma</code> to get page IDs:</p>
+<pre><code class="language-js">return figma.root.children.map(p =&gt; ({ id: p.id, name: p.name }));
+</code></pre>
+<p>Step 2: in the <strong>next assistant turn, emit one <code>use_figma</code> per page in parallel</strong> (a single message containing N tool-use blocks). Each runs:</p>
+<pre><code class="language-js">const page = await figma.getNodeByIdAsync(PAGE_ID);
+await figma.setCurrentPageAsync(page);
+// findAllWithCriteria uses an indexed type lookup — hundreds of times faster
+// than the findAll(n =&gt; n.type === '…') side-effect-in-predicate antipattern.
+const matches = page.findAllWithCriteria({ types: ['COMPONENT', 'COMPONENT_SET'] });
+return matches.map(n =&gt; ({ page: page.name, name: n.name, type: n.type, id: n.id }));
+</code></pre>
+<p><strong>List existing variable collections and their conventions:</strong></p>
+<pre><code class="language-js">const collections = await figma.variables.getLocalVariableCollectionsAsync();
+const results = collections.map(c =&gt; ({
+  name: c.name, id: c.id,
+  varCount: c.variableIds.length,
+  modes: c.modes.map(m =&gt; m.name)
+}));
+return results;
+</code></pre>
+<h2>10. Reference Docs</h2>
+<p>Load these as needed based on what your task involves:</p>
+<table>
+<thead>
+<tr>
+<th>Doc</th>
+<th>When to load</th>
+<th>What it covers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="references/gotchas.md">gotchas.md</a></td>
+<td>Before any <code>use_figma</code></td>
+<td>Every known pitfall with WRONG/CORRECT code examples — start with the <a href="references/gotchas.md#canonical-text-edit-recipe-font-load--await--mutate--return-ids">canonical text-edit recipe</a></td>
+</tr>
+<tr>
+<td><a href="references/common-patterns.md">common-patterns.md</a></td>
+<td>Need working code examples</td>
+<td>Script scaffolds: shapes, text, auto-layout, variables, components, multi-step workflows</td>
+</tr>
+<tr>
+<td><a href="references/plugin-api-patterns.md">plugin-api-patterns.md</a></td>
+<td>Creating/editing nodes</td>
+<td>Fills, strokes, Auto Layout, effects, grouping, cloning, styles</td>
+</tr>
+<tr>
+<td><a href="references/api-reference.md">api-reference.md</a></td>
+<td>Need exact API surface</td>
+<td>Node creation, variables API, core properties, what works and what doesn't</td>
+</tr>
+<tr>
+<td><a href="references/validation-and-recovery.md">validation-and-recovery.md</a></td>
+<td>Multi-step writes or error recovery</td>
+<td><code>get_metadata</code> vs <code>get_screenshot</code> workflow, mandatory error recovery steps</td>
+</tr>
+<tr>
+<td><a href="references/component-patterns.md">component-patterns.md</a></td>
+<td>Creating components/variants</td>
+<td>combineAsVariants, component properties, INSTANCE_SWAP, variant layout, discovering existing components, metadata traversal</td>
+</tr>
+<tr>
+<td><a href="references/variable-patterns.md">variable-patterns.md</a></td>
+<td>Creating/binding variables</td>
+<td>Collections, modes, scopes, aliasing, binding patterns, discovering existing variables</td>
+</tr>
+<tr>
+<td><a href="references/text-style-patterns.md">text-style-patterns.md</a></td>
+<td>Creating/applying text styles</td>
+<td>Type ramps, font discovery via <code>listAvailableFontsAsync</code>, listing styles, applying styles to nodes</td>
+</tr>
+<tr>
+<td><a href="references/effect-style-patterns.md">effect-style-patterns.md</a></td>
+<td>Creating/applying effect styles</td>
+<td>Drop shadows, listing styles, applying styles to nodes</td>
+</tr>
+<tr>
+<td><a href="references/plugin-api-standalone.index.md">plugin-api-standalone.index.md</a></td>
+<td>Need to understand the full API surface</td>
+<td>Index of all types, methods, and properties in the Plugin API</td>
+</tr>
+<tr>
+<td><a href="references/plugin-api-standalone.d.ts">plugin-api-standalone.d.ts</a></td>
+<td>Need exact type signatures</td>
+<td>Full typings file — grep for specific symbols, don't load all at once</td>
+</tr>
+</tbody>
+</table>
+<h2>11. Snippet examples</h2>
+<p>You will see snippets throughout documentation here. These snippets contain useful plugin API code that can be repurposed. Use them as is, or as starter code as you go. If there are key concepts that are best documented as generic snippets, call them out and write to disk so you can reuse in the future.</p></div></div><button class="expand-btn">Show more</button></div></div>
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>The Alignment page is built, its assets are committed, and the docs are updated.</p>
+<p><strong>Figma page:</strong> https://www.figma.com/design/jtYi1LQf1fVyUAUfAgthP5/Astrophotography-Explainer?node-id=73-2 (page "P6 Alignment", frame "P6 · Alignment — A").</p>
+<p><strong>What the page contains, top to bottom</strong>
+- TopBar set to Alignment, then the page head with the lede.
+- The illustration slot holds a drawn two-panel chart: random noise falling as 1/√N, and signal-to-noise ratio rising as √N, marked at 1, 4, 16 and 64 exposures. Vectors and text only, theoretical as you asked.
+- "The problem you can see" with the middle of the naive average in the 440×330 slot, and prose defining stack and reference frame.
+- "Why collect more than one photograph?" prose, followed by the square-root aside as a Why callout, always open.
+- "Averaged as they are": frame 5, frame 14, and their pixel-for-pixel average in a dark box. The galaxy and every star appear twice.
+- "Averaged after alignment": frame 5 as the reference, frame 14 moved onto it, and their average. Three alignment stars are circled in red on the two input tiles. No numbers are quoted; the captions ask the reader to look.
+- BottomNav: "← Flats, continued" / "Algorithms →".</p>
+<p><strong>Assets and command.</strong> Six PNGs and <code>stats.json</code> in <code>assets/alignment/</code>, generated by:</p>
+<pre><code>uv run tools/assets/alignment_page.py
+</code></pre>
+<p>Both frames are fully calibrated (dark, 50% flat with dark flats), frame 14 is normalized onto frame 5, and the warp uses the precomputed alignment matrices with scipy cubic interpolation on the crop. The stretch matches Flats-1. <code>uv run pytest tools</code> passes.</p>
+<p><strong>Committed</strong> on <code>section/alignment</code> as commit 705f4a9. The shared checkout was on another agent's branch, so I committed through a temporary worktree and left the shared tree's branch alone. Your prose was tightened rather than pasted verbatim, as you allowed; the three items I flagged earlier were resolved in the rewrite.</p>
+<p><strong>Placeholders left:</strong> none. Every well holds a real crop.</p>
+<p><strong>Reconciliation items recorded in design-notes §5, items 14 to 19</strong>
+- SPEC P6's interactive toggle and 1/√2 noise readout are replaced by the two static boxes.
+- Frame pair is f05 + f14 instead of SPEC's f02 + f05, and the meridian flip is never mentioned.
+- The aligned tiles use cubic interpolation, so the "matches pipeline golden output" acceptance criterion cannot be checked yet.
+- Measured background spread: by a robust measure both averages drop to roughly 0.7 of a single frame, the aligned one slightly lower because the warp smooths frame 14 a little. The prose only claims the aligned average is smoother than a single exposure, which the numbers support.
+- Red circles use <code>red/600</code>, which the colour table reserves for dark signal. Captions carry the meaning, so colour is not the only carrier. Ochre is the alternative if you want red kept for darks.
+- Eyebrow reads "Chapter 5 · Alignment", following Bias's "Chapter 4 · Calibration". Worth confirming the numbering across pages.</p>
+<p><strong>Open questions:</strong> none blocking. Two of the three circled stars are fairly faint. If you'd rather circle brighter ones, say so and I'll swap them.</p>
+<p><strong>Library requests:</strong> none, so <code>TODO.md</code> is unchanged.</p></div></div><button class="expand-btn">Show more</button></div></div>
+</div></div>
+<div class="index-item"><a href="page-001.html#msg-2026-09-24T19-47-25-879Z"><div class="index-item-header"><span class="index-item-number">#4</span><time datetime="2026-09-24T19:47:25.879Z" data-timestamp="2026-09-24T19:47:25.879Z">2026-09-24T19:47:25.879Z</time></div><div class="index-item-content"><p><pasted_content id="41a1">
+Make the following changes:
+* The graphs need to be rename, the left one is "Random noise present in final image" and the one on the right is "Signal from galaxy in the image"
+* The problem you can see  and averaged as they are should be moved together. One row shows frame 5 + frame 14 = Average without alignment, then the following row should be the same with alignment stars selected and the real averaged value present. You sample image of without alignment is not misaligned. Correct this.
+* This lesson bounces around SNR benefits of more than one image -&gt; misalignment -&gt; back to why to collect more than one image -&gt; back to alignment
+* Again the lesson below does not show misalignment in the misaligned image.
+</pasted_content id="41a1"></p></div></a><div class="index-item-stats"><span>10 bash · 3 mcp__plugin_figma_figma__use_figma · 1 mcp__plugin_figma_figma__upload_assets</span>
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>Understood. Four changes: rename the chart panels, merge the problem and stacking examples into two equation-style rows, reorder the lesson so SNR comes first and alignment second, and make the misalignment actually visible. On the last point: frame 14 is rotated relative to frame 5, so its "twins" land far away and read as extra stars, not as doubled stars. I'll check which frame is the farthest from frame 5 without that rotation and use it instead.</p></div></div><button class="expand-btn">Show more</button></div></div>
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>All four changes are done and committed on <code>section/alignment</code> as commit fb35db3. Same Figma page and frame: https://www.figma.com/design/jtYi1LQf1fVyUAUfAgthP5/Astrophotography-Explainer?node-id=73-2</p>
+<p><strong>What changed</strong>
+- <strong>Chart titles</strong> are now "Random noise present in final image" (left) and "Signal from galaxy in the image" (right), your wording.
+- <strong>One block for the problem.</strong> "The problem you can see" now holds the prose and one dark box with two equation rows: Frame 5 + Frame 2 = Average, not aligned, then the same row with the three alignment stars circled in red and the real aligned average. The separate 440×330 slot and the two example sections are gone.
+- <strong>Order is now one direction.</strong> Page head → chart → "Why collect more than one photograph?" → square-root aside → the problem and its fix. The lede was rewritten to introduce the page in that order.
+- <strong>The misalignment is now visible.</strong> This needed a frame change, which I want to flag plainly. Frame 14 is rotated about 180° relative to frame 5, so in the naive average each star's twin landed on the far side of the galaxy and the picture read as "more stars" rather than doubled stars. I replaced it with frame 2, the exposure farthest from frame 5 without that rotation, about 49 px away, which is also the pair SPEC P6 names. Every star now shows as a close pair and the galaxy core is doubled. The page still never mentions the meridian flip. If you want frame 14 back, say so, but it cannot show a visible shift.</p>
+<p><strong>Assets</strong> were regenerated with the same command:</p>
+<pre><code>uv run tools/assets/alignment_page.py
+</code></pre>
+<p>Outputs are frame05, frame02, frame02_aligned, both averages and stats.json in <code>assets/alignment/</code>. The problem_naive.png crop is still generated but no longer placed on the page.</p>
+<p><strong>Docs.</strong> The design-notes §5 items 14 and 15 were rewritten to record the merged layout, the one-direction order and the frame-2 substitution. The figma-state file lists the new node ids. One note on the repo: another agent's branch already carries my first round of doc edits from the shared checkout, so those files will show near-identical hunks when the section branches merge.</p>
+<p><strong>Open question:</strong> none blocking. The measured background spread by a robust measure drops to about 0.72 of a single frame for the naive average and 0.68 for the aligned one, so the aligned tile is smoother as you expected, though the two are close. No number is quoted on the page.</p></div></div><button class="expand-btn">Show more</button></div></div>
+</div></div>
+<div class="index-item"><a href="page-001.html#msg-2026-09-24T20-23-38-924Z"><div class="index-item-header"><span class="index-item-number">#5</span><time datetime="2026-09-24T20:23:38.924Z" data-timestamp="2026-09-24T20:23:38.924Z">2026-09-24T20:23:38.924Z</time></div><div class="index-item-content"><p>Float the why to the right</p></div></a><div class="index-item-stats"><span>2 bash · 1 mcp__plugin_figma_figma__use_figma</span>
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>Done. The "Where the square root comes from" callout now sits to the right of the "Why collect more than one photograph?" paragraphs, at 440 wide with the prose at 680, matching the prose-plus-callout row on Noise &amp; Defects. The chart above and the problem section below are unchanged.</p>
+<p>Recorded in <code>docs/figma-state.json</code> and committed on <code>section/alignment</code> as commit b140808.</p></div></div><button class="expand-btn">Show more</button></div></div>
+</div></div>
+<div class="index-item"><a href="page-002.html#msg-2026-09-24T20-27-48-846Z"><div class="index-item-header"><span class="index-item-number">#6</span><time datetime="2026-09-24T20:27:48.846Z" data-timestamp="2026-09-24T20:27:48.846Z">2026-09-24T20:27:48.846Z</time></div><div class="index-item-content"><p>Check the screenshot of the why, it's not rendering properly</p></div></a><div class="index-item-stats"><span>4 mcp__plugin_figma_figma__get_screenshot · 3 mcp__plugin_figma_figma__use_figma</span>
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>I re-rendered the whole page fresh from Figma and checked the callout instance against the library component. I can't reproduce a rendering problem, so I need you to tell me what you see.</p>
+<p>What I verified:</p>
+<ul>
+<li><strong>The Why callout</strong> renders as the library's Why variant: card fill, 1 px ink border, "WHY?" eyebrow, title, body with "√N" and "÷" glyphs, 440 wide, height hugging its text. It sits to the right of the prose with a 48 px gap, and nothing overlaps the chart above or the problem section below.</li>
+<li><strong>Instance vs component:</strong> fills, stroke, padding, text styles and sizing all match the library's Why variant exactly. The only differences are the title and body text and the 440 width, which the Note callout on Noise &amp; Defects also uses.</li>
+<li>The earlier inline screenshot I took was a half-scale thumbnail, which looks soft, but the full-resolution render is clean.</li>
+</ul>
+<p>Which of these matches what you're seeing?</p>
+<ol>
+<li>The body text spills outside the box or the box is the wrong height.</li>
+<li>The "√" or "÷" characters show as boxes or a fallback font.</li>
+<li>The callout is not beside the prose on your canvas (still below it, or overlapping).</li>
+<li>Something else, in which case a word or two on what looks wrong is enough.</li>
+</ol>
+<p>One more thing I noticed and left alone: you've rewritten "The problem you can see" to a single paragraph in Figma, and that version stands.</p></div></div><button class="expand-btn">Show more</button></div></div>
+</div></div>
+<div class="index-item"><a href="page-002.html#msg-2026-09-24T20-28-10-607Z"><div class="index-item-header"><span class="index-item-number">#7</span><time datetime="2026-09-24T20:28:10.607Z" data-timestamp="2026-09-24T20:28:10.607Z">2026-09-24T20:28:10.607Z</time></div><div class="index-item-content"><p>It's gone now that I refreshed the page. Seperate the two examples in the problem you can see with this prose: # Use the stars to bring the views together</p>
+<p>The red circles mark three examples of the same stars in the two photographs. Alignment software compares patterns of matching stars across the image, then shifts and rotates each exposure onto a shared grid. This process is also called registration. Now a given position refers to the same piece of sky in both images, so averaging reinforces the galaxy and its stars in the right places.</p></div></a><div class="index-item-stats"><span>1 mcp__plugin_figma_figma__use_figma · 1 bash</span>
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>Done. The page now reads: "The problem you can see" with its paragraph and the not-aligned row in one dark box, then a new section headed "Use the stars to bring the views together" with your paragraph verbatim, followed by a second dark box holding the aligned row with the red circles and the aligned average.</p>
+<p>Recorded in <code>docs/figma-state.json</code> and committed on <code>section/alignment</code> as commit e9bc082.</p></div></div><button class="expand-btn">Show more</button></div></div>
+</div></div>
+        
+
+<div class="pagination">
+<span class="current">Index</span>
+<span class="disabled">&larr; Prev</span>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-001.html">Next &rarr;</a>
+</div>
+
+
+        <dialog id="search-modal">
+            <div class="search-modal-header">
+                <input type="text" id="modal-search-input" placeholder="Search..." aria-label="Search transcripts">
+                <button id="modal-search-btn" type="button" aria-label="Search">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+                </button>
+                <button id="modal-close-btn" type="button" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+                </button>
+            </div>
+            <div id="search-status"></div>
+            <div id="search-results"></div>
+        </dialog>
+        <script>
+(function() {
+    var totalPages = 2;
+    var searchBox = document.getElementById('search-box');
+    var searchInput = document.getElementById('search-input');
+    var searchBtn = document.getElementById('search-btn');
+    var modal = document.getElementById('search-modal');
+    var modalInput = document.getElementById('modal-search-input');
+    var modalSearchBtn = document.getElementById('modal-search-btn');
+    var modalCloseBtn = document.getElementById('modal-close-btn');
+    var searchStatus = document.getElementById('search-status');
+    var searchResults = document.getElementById('search-results');
+
+    if (!searchBox || !modal) return;
+
+    // Hide search on file:// protocol (doesn't work due to CORS restrictions)
+    if (window.location.protocol === 'file:') return;
+
+    // Show search box (progressive enhancement)
+    searchBox.style.display = 'flex';
+
+    // Gist preview support - detect if we're on gisthost.github.io or gistpreview.github.io
+    var hostname = window.location.hostname;
+    var isGistPreview = hostname === 'gisthost.github.io' || hostname === 'gistpreview.github.io';
+    var gistId = null;
+    var gistOwner = null;
+    var gistInfoLoaded = false;
+
+    if (isGistPreview) {
+        // Extract gist ID from URL query string like ?78a436a8a9e7a2e603738b8193b95410/index.html
+        var queryMatch = window.location.search.match(/^\?([a-f0-9]+)/i);
+        if (queryMatch) {
+            gistId = queryMatch[1];
+        }
+    }
+
+    async function loadGistInfo() {
+        if (!isGistPreview || !gistId || gistInfoLoaded) return;
+        try {
+            var response = await fetch('https://api.github.com/gists/' + gistId);
+            if (response.ok) {
+                var info = await response.json();
+                gistOwner = info.owner.login;
+                gistInfoLoaded = true;
+            }
+        } catch (e) {
+            console.error('Failed to load gist info:', e);
+        }
+    }
+
+    function getPageFetchUrl(pageFile) {
+        if (isGistPreview && gistOwner && gistId) {
+            // Use raw gist URL for fetching content
+            return 'https://gist.githubusercontent.com/' + gistOwner + '/' + gistId + '/raw/' + pageFile;
+        }
+        return pageFile;
+    }
+
+    function getPageLinkUrl(pageFile) {
+        if (isGistPreview && gistId) {
+            // Use gistpreview URL format for navigation links
+            return '?' + gistId + '/' + pageFile;
+        }
+        return pageFile;
+    }
+
+    function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function escapeRegex(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function openModal(query) {
+        modalInput.value = query || '';
+        searchResults.innerHTML = '';
+        searchStatus.textContent = '';
+        modal.showModal();
+        modalInput.focus();
+        if (query) {
+            performSearch(query);
+        }
+    }
+
+    function closeModal() {
+        modal.close();
+        // Update URL to remove search fragment, preserving path and query string
+        if (window.location.hash.startsWith('#search=')) {
+            history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+    }
+
+    function updateUrlHash(query) {
+        if (query) {
+            // Preserve path and query string when adding hash
+            history.replaceState(null, '', window.location.pathname + window.location.search + '#search=' + encodeURIComponent(query));
+        }
+    }
+
+    function highlightTextNodes(element, searchTerm) {
+        var walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+        var nodesToReplace = [];
+
+        while (walker.nextNode()) {
+            var node = walker.currentNode;
+            if (node.nodeValue.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
+                nodesToReplace.push(node);
+            }
+        }
+
+        nodesToReplace.forEach(function(node) {
+            var text = node.nodeValue;
+            var regex = new RegExp('(' + escapeRegex(searchTerm) + ')', 'gi');
+            var parts = text.split(regex);
+            if (parts.length > 1) {
+                var span = document.createElement('span');
+                parts.forEach(function(part) {
+                    if (part.toLowerCase() === searchTerm.toLowerCase()) {
+                        var mark = document.createElement('mark');
+                        mark.textContent = part;
+                        span.appendChild(mark);
+                    } else {
+                        span.appendChild(document.createTextNode(part));
+                    }
+                });
+                node.parentNode.replaceChild(span, node);
+            }
+        });
+    }
+
+    function fixInternalLinks(element, pageFile) {
+        // Update all internal anchor links to include the page file
+        var links = element.querySelectorAll('a[href^="#"]');
+        links.forEach(function(link) {
+            var href = link.getAttribute('href');
+            link.setAttribute('href', pageFile + href);
+        });
+    }
+
+    function processPage(pageFile, html, query) {
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(html, 'text/html');
+        var resultsFromPage = 0;
+
+        // Find all message blocks
+        var messages = doc.querySelectorAll('.message');
+        messages.forEach(function(msg) {
+            var text = msg.textContent || '';
+            if (text.toLowerCase().indexOf(query.toLowerCase()) !== -1) {
+                resultsFromPage++;
+
+                // Get the message ID for linking
+                var msgId = msg.id || '';
+                var pageLinkUrl = getPageLinkUrl(pageFile);
+                var link = pageLinkUrl + (msgId ? '#' + msgId : '');
+
+                // Clone the message HTML and highlight matches
+                var clone = msg.cloneNode(true);
+                // Fix internal links to include the page file
+                fixInternalLinks(clone, pageLinkUrl);
+                highlightTextNodes(clone, query);
+
+                var resultDiv = document.createElement('div');
+                resultDiv.className = 'search-result';
+                resultDiv.innerHTML = '<a href="' + link + '">' +
+                    '<div class="search-result-page">' + escapeHtml(pageFile) + '</div>' +
+                    '<div class="search-result-content">' + clone.innerHTML + '</div>' +
+                    '</a>';
+                searchResults.appendChild(resultDiv);
+            }
+        });
+
+        return resultsFromPage;
+    }
+
+    async function performSearch(query) {
+        if (!query.trim()) {
+            searchStatus.textContent = 'Enter a search term';
+            return;
+        }
+
+        updateUrlHash(query);
+        searchResults.innerHTML = '';
+        searchStatus.textContent = 'Searching...';
+
+        // Load gist info if on gistpreview (needed for constructing URLs)
+        if (isGistPreview && !gistInfoLoaded) {
+            searchStatus.textContent = 'Loading gist info...';
+            await loadGistInfo();
+            if (!gistOwner) {
+                searchStatus.textContent = 'Failed to load gist info. Search unavailable.';
+                return;
+            }
+        }
+
+        var resultsFound = 0;
+        var pagesSearched = 0;
+
+        // Build list of pages to fetch
+        var pagesToFetch = [];
+        for (var i = 1; i <= totalPages; i++) {
+            pagesToFetch.push('page-' + String(i).padStart(3, '0') + '.html');
+        }
+
+        searchStatus.textContent = 'Searching...';
+
+        // Process pages in batches of 3, but show results immediately as each completes
+        var batchSize = 3;
+        for (var i = 0; i < pagesToFetch.length; i += batchSize) {
+            var batch = pagesToFetch.slice(i, i + batchSize);
+
+            // Create promises that process results immediately when each fetch completes
+            var promises = batch.map(function(pageFile) {
+                return fetch(getPageFetchUrl(pageFile))
+                    .then(function(response) {
+                        if (!response.ok) throw new Error('Failed to fetch');
+                        return response.text();
+                    })
+                    .then(function(html) {
+                        // Process and display results immediately
+                        var count = processPage(pageFile, html, query);
+                        resultsFound += count;
+                        pagesSearched++;
+                        searchStatus.textContent = 'Found ' + resultsFound + ' result(s) in ' + pagesSearched + '/' + totalPages + ' pages...';
+                    })
+                    .catch(function() {
+                        pagesSearched++;
+                        searchStatus.textContent = 'Found ' + resultsFound + ' result(s) in ' + pagesSearched + '/' + totalPages + ' pages...';
+                    });
+            });
+
+            // Wait for this batch to complete before starting the next
+            await Promise.all(promises);
+        }
+
+        searchStatus.textContent = 'Found ' + resultsFound + ' result(s) in ' + totalPages + ' pages';
+    }
+
+    // Event listeners
+    searchBtn.addEventListener('click', function() {
+        openModal(searchInput.value);
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            openModal(searchInput.value);
+        }
+    });
+
+    modalSearchBtn.addEventListener('click', function() {
+        performSearch(modalInput.value);
+    });
+
+    modalInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            performSearch(modalInput.value);
+        }
+    });
+
+    modalCloseBtn.addEventListener('click', closeModal);
+
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    // Check for #search= in URL on page load
+    if (window.location.hash.startsWith('#search=')) {
+        var query = decodeURIComponent(window.location.hash.substring(8));
+        if (query) {
+            searchInput.value = query;
+            openModal(query);
+        }
+    }
+})();
+        </script>
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>

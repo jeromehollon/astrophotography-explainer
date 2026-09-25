@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 1</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 1/1</h1>
+        
+
+<div class="pagination"><a href="index.html" class="index-link">Index</a></div>
+
+        
+<div class="message user" id="msg-2026-09-24T18-28-37-750Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-09-24T18-28-37-750Z" class="timestamp-link"><time datetime="2026-09-24T18:28:37.750Z" data-timestamp="2026-09-24T18:28:37.750Z">2026-09-24T18:28:37.750Z</time></a></div><div class="message-content">
+<div class="user-content"><p>In a minute I'll sign off on the design for the flats. Using anthropics best practices, help me write a prompt to instruct a new agent to implement a different page. Leave a placeholder for the name of the page and leave a placeholder for any of my guidence for that specific page</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-28-43-568Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-28-43-568Z" class="timestamp-link"><time datetime="2026-09-24T18:28:43.568Z" data-timestamp="2026-09-24T18:28:43.568Z">2026-09-24T18:28:43.568Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-28-44-318Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-28-44-318Z" class="timestamp-link"><time datetime="2026-09-24T18:28:44.318Z" data-timestamp="2026-09-24T18:28:44.318Z">2026-09-24T18:28:44.318Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>I'll take a quick look at the repo so the prompt points at the right files (spec, Figma state, asset scripts, memory rules), then draft it.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-28-46-263Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-28-46-263Z" class="timestamp-link"><time datetime="2026-09-24T18:28:46.263Z" data-timestamp="2026-09-24T18:28:46.263Z">2026-09-24T18:28:46.263Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01A1dDVg4g1MMgoJwhxsERnq">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">List repo layout, recent commits, and spec headings</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd &#34;/mnt/c/Users/Jerome Hollon/Documents/claude/astrophotography-explainer&#34; &amp;&amp; ls &amp;&amp; ls docs docs/* tools tools/precompute 2&gt;/dev/null | head -60 &amp;&amp; git log --oneline -8 &amp;&amp; grep -n &#34;^#&#34; SPEC.md | head -50</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T18-28-49-647Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T18-28-49-647Z" class="timestamp-link"><time datetime="2026-09-24T18:28:49.647Z" data-timestamp="2026-09-24T18:28:49.647Z">2026-09-24T18:28:49.647Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>AGENTS.md
+CLAUDE.md
+SPEC.md
+assets
+data
+docs
+pyproject.toml
+source_images
+tools
+uv.lock
+docs/copy.md
+docs/design-notes.md
+docs/figma-state.json
+
+docs:
+copy.md
+design-notes.md
+figma-state.json
+knowledge
+
+docs/knowledge:
+wbpp.md
+
+tools:
+__pycache__
+assets
+astro.py
+precompute
+test_astro.py
+test_precompute.py
+
+tools/precompute:
+README.md
+__pycache__
+flat_check.py
+frames_manifest.py
+histograms.py
+integrate.py
+masters.py
+normalization.py
+run_stage_a.sh
+run_stage_b.sh
+star_metrics.py
+verify_geometry.py
+472aa33 Note that Flats-1 removed tiles show the difference in every state
+cd95d09 Rework Flats-1 difference tiles and experiment 2 assets
+c2661bb Record optical-path illustration rebuild in Figma state
+ce2e713 Add Flats-1 lesson assets: real flat, before/after frame, ROI tiles
+abd53b7 Add stage A/B precompute: metrics, masters, normalization
+00ad8a0 Add product spec and WBPP pipeline knowledge for the explainer
+2e530ae Set up astro image tooling and agent guide for the explainer
+36c94d4 Initial commit
+1:# SPEC: Stacking Explainer (hackathon POC)
+9:## 1. Product
+19:## 2. Scope
+31:## 3. Dataset
+51:## 4. Architecture
+70:### 4.1 Coordinate spaces (contract)
+77:### 4.2 Runtime data (`/data`, produced by `tools/precompute`, git-ignored, baked into the image)
+86:### 4.3 ROI API (the one endpoint)
+96:### 4.4 Client pipeline (`src/shared/pipeline`, pure TS, runs in workers)
+114:### 4.5 Display
+123:### 4.6 Routing, state, export
+131:### 4.7 Build and run
+135:## 5. Precompute (Python, `tools/precompute/`, outputs in `data/derived/`)
+146:## 6. Processing semantics (WBPP-faithful)
+150:### 6.1 Calibration choice and WBPP master selection
+162:### 6.2 Calibration formula (sensor space, float32, DN)
+165:### 6.3 Master frames (precomputed, Stage B)
+170:### 6.4 Registration
+179:### 6.5 Normalization (precomputed)
+185:### 6.6 Integration
+202:### 6.7 Deliberate deviations from WBPP (approved 2026-09-24; the goal is low complexity and low CPU time)
+213:## 7. Pages
+268:## 8. Milestones and stories
+296:## 9. Language rules for prose and UI copy
+301:## 10. Orchestration (autonomous implementation and validation)
+321:## 11. Deferred items and risks
+331:## 12. Decision log</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-28-54-223Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-28-54-223Z" class="timestamp-link"><time datetime="2026-09-24T18:28:54.223Z" data-timestamp="2026-09-24T18:28:54.223Z">2026-09-24T18:28:54.223Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01SMUNxrhkdz5gDTuzdpXVvb">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Read spec pages section, design notes, copy, Figma state, assets, and memory rules</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd &#34;/mnt/c/Users/Jerome Hollon/Documents/claude/astrophotography-explainer&#34; &amp;&amp; sed -n 213,268p SPEC.md &amp;&amp; sed -n 296,320p SPEC.md &amp;&amp; head -60 docs/design-notes.md &amp;&amp; head -40 docs/copy.md &amp;&amp; head -c 1500 docs/figma-state.json &amp;&amp; ls assets assets/* | head -40 &amp;&amp; cat ~/.claude/projects/-mnt-c-Users-Jerome-Hollon-Documents-claude-astrophotography-explainer/memory/{lesson-page-rules,only-specified-changes,illustrations-no-prose,design-editorial-brief,plain-words-in-copy,figma-parallel-pages}.md</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T18-28-55-964Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T18-28-55-964Z" class="timestamp-link"><time datetime="2026-09-24T18:28:55.964Z" data-timestamp="2026-09-24T18:28:55.964Z">2026-09-24T18:28:55.964Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>## 7. Pages
+
+Each page lists its goal, its problem → fix interaction, the data it uses, and acceptance criteria (AC). Layout, prose and art come from Figma. The ROI sizes and positions below are **placeholders until Figma**.
+
+**P0 Welcome.** The emotional hook: one 300 s sub → WBPP master → final colour image, with a clear line that these are real images from Stella Venator Observatory in Lexington, KY. Data: Stage D static images. AC: renders in under 2 s on localhost; Start goes to `#/noise`.
+
+**P1 Noise &amp; Defects.** What makes up a light frame: target and sky signal, random noise, bias offset, dark signal and hot pixels, uneven response (vignetting, dust), and non-hardware problems (clouds, tracking, satellites, planes). Also why we stack, and what &quot;calibration frames&quot; means. Interactive: the **system SVG** (telescope → camera → sensor → sensor PCB with op-amp and ADC) with colour-coded noise layers. Selecting a layer highlights where it comes from. Also a &quot;why stack&quot; control that averages 1 → N frames on a background ROI to show noise falling. AC: every layer is selectable, and the N-frame noise readout falls roughly as 1/√N.
+
+**P2 Bias.** Problem: every pixel sits on an offset added by the readout electronics. Fix: subtract the bias. Interactive: a bias toggle on a light ROI, with its histogram and a sample pixel&#x27;s brightness moving (for example about 1,060 → 900). The master bias is shown with its own stretch, and the op-amp/ADC layer peels away in the SVG. AC: the histogram shift equals the master bias median to within 1 ADU.
+
+**P3 Darks.** Problem: hot pixels (and amp glow on some cameras). Fix: subtract a dark taken at the same exposure time and temperature as the lights. Interactive: an ROI rich in hot pixels, toggling none → bias only → dark. When the dark is on, the bias shows as &quot;already inside the dark&quot; (§6.1). The old-camera dark is shown only to illustrate amp glow. The page notes that this dark was taken colder than the lights (−15 °C vs −4 °C), which is acceptable here, and that on this camera the dark is mostly bias plus hot pixels. AC: visible hot pixels disappear only with the dark applied.
+
+**P4 Flats.** Problem: vignetting and dust shadows. Fix: divide by a flat, and calibrate that flat with dark flats. Interactive: a dust-mote ROI and a bin-8 full-field view; toggle the flat, then toggle dark flats (and bias) to show what an uncalibrated flat does, which is over-correction toward the corners. *Candidate for Figma:* a difference view showing what the dark flats change in the corrected result. The difference view is needed, not optional, because the effect is too small to see directly:
+- At 50%, the flat&#x27;s pedestal (about 160 DN) is 0.5% of its 33k level, so the vignetting residual only moves from 0.962 to 0.961.
+- At 10% the pedestal is 2.5% of the level, so the effect is larger there.
+- Likely also visible: a flat calibrated with bias instead of dark flats keeps its own hot pixels, because the 50% flats were shot at +1 to +3 °C and the master&#x27;s maximum rises from 38.8k to 49.6k DN. Those print as dark specks in the light. Verify this in design.
+
+AC: the mote and vignetting vanish with the 50% flat calibrated by dark flats.
+
+**P5 Flats–Continued.** Why the histogram target matters. Interactive: choose the 10%, 50% or 85% flat, see each flat&#x27;s histogram, and see the dust-mote ROI corrected with each. The full-well discussion is now the core explanation, not an aside: the 85% flats look healthy on a histogram (peak at 78%) but the pixels are full, so the flat is featureless and corrects nothing. The 10% flat corrects the mote and vignetting as well as the 50% one on these metrics. Its drawbacks (a 0.11 s exposure that approaches bias speed, and fewer photons per flat) don&#x27;t show up in the numbers; how to present them is the product owner&#x27;s call. AC: the mote contrast shown for each level matches `flat_check.json`.
+
+**P6 Alignment.** How frames are brought together and why that raises SNR. Interactive: f02 + f05 (about 47 px apart, same pier side) averaged **without alignment**, which doubles the stars. The trio of stars used for alignment is highlighted, with offset vectors taken from the Stage A catalogues. Toggle align and the stars merge. Then attention turns to the **background**, where the noise readout shows about a 1/√2 drop. AC: the naive stack clearly shows doubled stars; the aligned stack matches the pipeline golden output.
+
+**P7 Algorithms.** How each algorithm decides what an outlier is, explained with high-school maths (&quot;standard deviation&quot;, never &quot;sigma&quot;). Interactive: a 5-frame stack that includes f03, shown with average and median side by side on the satellite ROI. There is guidance on which algorithm suits which frame count (from §6). AC: the trail is visible with average and gone with median.
+
+**P8 Light Frames.** Choosing good frames. FWHM, star counts and histograms are tools, and judgement still matters. The data shows this directly:
+- The tracking error is invisible in FWHM (8.57 px vs 8.21 for its original). It shows up in the star count, 74 vs 179, because trailed stars fail detection.
+- Clouds barely move the star count (163 → 153) but widen the histogram (background spread 108–114 vs 63–80).
+- f03 has middling metrics for reasons unrelated to its satellite trail.
+
+No single number catches every defect; looking at the frame does. A lighter version of the workbench: every frame with its thumbnail, metrics and histogram; average or median; one galaxy ROI; full calibration applied and locked; a teaser for the other algorithms. AC: selection changes update the ROI in under 1 s.
+
+**P9 Workbench.** Layout is designed together in Figma. Order of interaction:
+1. Calibration panel: bias, dark, flat (none / 10 / 50 / 85%) and dark flats, following the WBPP rules in §6.1. Selecting a calibration frame shows it with the correct stretch.
+2. Frame list (all 24 entries, each with metrics and a histogram; select or deselect; set as reference).
+3. Algorithm and parameters.
+4. Scenario buttons.
+5. Reference view with the 4 ROI markers, and the ROI tiles updating live at bin 2.
+6. **Stack full image** (bin 1, progress, cancel), then the result view, then export as FITS or PNG.
+
+Default ROIs, in canonical space, with positions and sizes set in Figma: (1) the satellite trail in f03, (2) the central galaxy including faint outer structure, (3) the galaxy group just above it, (4) the dust mote on the left.
+*Teaching note:* the dust mote and hot pixels are fixed to the **sensor**. Because of the meridian flip, East-side frames place the mote at the opposite side of the sky. In a stack the mote only comes from the West frames, which is why median and rejection weaken it even without flats.
+
+**Scenarios** (defined in `src/sections/workbench/scenarios.ts`):
+
+| Scenario | Frames | Algorithm | Calibration |
+|---|---|---|---|
+| Default | The 20 raw frames, i.e. all except the synthetic variants (f03 is included) | median | full (per §6) |
+| Naive | All 24 entries | average | full |
+| Satellite Trail Challenge | f03 + f02, f04, f05, f07 (the best West-side frames by FWHM) | average | full |
+| Cloud Challenge | f14_cloud, f15_cloud, f16_cloud + f09, f13 (best by FWHM and stars, excluding the originals of the cloud frames) | average | full |
+| Tracking Error Challenge | f11_tracking + f09, f13 | average | full |
+
+AC: each button sets the full state in one click, and the ROIs update in under 1 s.
+
+## 8. Milestones and stories
+## 9. Language rules for prose and UI copy
+- Say &quot;pixel brightness&quot;, not ADU. Say &quot;standard deviation&quot;, not sigma. Say &quot;dark frames taken with the same exposure time and temperature as your lights&quot;, not &quot;matched darks&quot;.
+- Define every term the first time it appears: light, bias, dark, flat, dark flat, stack, master, reference frame.
+- No asides that don&#x27;t serve the current step. One idea per paragraph.
+
+## 10. Orchestration (autonomous implementation and validation)
+
+**Ownership and models**
+
+| Role | Model / effort | Owns |
+|---|---|---|
+| Orchestrator (main session) | Opus, high | SPEC.md, AGENTS.md, contracts (§4.1–4.4 types), merges to `main`, gates, reviews |
+| Foundation | Opus, high | M1-01, M1-04, `src/shared/` UI primitives and tokens. **Lands first**; everyone else branches from it. |
+| Data + server | Sonnet, medium | `tools/precompute/` stages C–D, `server/`, M1-02 |
+| Pipeline | Opus, high | `src/shared/pipeline/`, golden fixtures, M2-01/02/04, M4 algorithms |
+| Workbench UI | Sonnet, medium | `src/sections/workbench/`, M1-05, M2-03 integration, scenarios |
+| Lesson UI (2–3 agents) | Sonnet, medium | `src/sections/&lt;page&gt;/`, split by page group: [welcome, noise], [bias, darks, flats, flats-2], [alignment, algorithms, light-frames] |
+| Validator | Sonnet, medium | Runs gates and Playwright screenshot tours after every merge, compares them with the Figma frames, files issues in `TODO.md` |
+
+**Rules**
+- Code agents run in git worktrees on `section/&lt;name&gt;`, `asset/&lt;name&gt;` or `core/&lt;name&gt;`. Worktrees don&#x27;t contain `source_images/` or `data/`, so they read runtime data through `ASTRO_DATA=&lt;abs path to main&gt;/data/derived/runtime`.
+- An agent receives this spec, its section brief and the contracts, not the chat history. An agent touches only the files it owns. A cross-boundary change becomes a request in `TODO.md`.
+- Agents rebase onto `main` and run the gates. The orchestrator merges. Commit messages follow AGENTS.md.
+- **Waves:** (0) precompute and research → (1) Foundation alone → (2) Data+server, Pipeline, Workbench UI and Lesson skeletons in parallel → (3) M2 integration → (4) M3 lessons ‖ M4 algorithms → polish.
+
+# Design notes: interaction, state, and reconciliation log
+
+Working document for the Figma phase. Companion to `docs/copy.md` (prose) and `docs/figma-state.json` (node and token ids). Sections 3–5 become the handoff.
+
+Figma file: https://www.figma.com/design/jtYi1LQf1fVyUAUfAgthP5/Astrophotography-Explainer
+
+## 1. Approved direction (2026-09-24)
+
+- Light theme on cream (`surface/page` = cream/100 #F2EBE0); space-themed Bauhaus: geometric primitives, cobalt / red / ochre pulled toward space, violet for &quot;outside the camera&quot;, ink rules. No gradients, no glow.
+- Type: Jost (headings, SemiBold/Medium), Public Sans (body 16/24, lede 18/28, 680 px measure), IBM Plex Mono (every number the pipeline produces).
+- Wizard: one hash route per page, browser back/forward work. Page order per SPEC §7: Welcome → Noise &amp; Defects → Bias → Darks → Flats (2) → Alignment → Algorithms → Light Frames (2) → Workbench.
+- Page skeleton: TopBar → reading (page head, full-width illustration, section 1 with an ROI image, further prose) → 6 px ink rule → dark &quot;Try it&quot; stage → BottomNav.
+- Teaching rules: one idea per page; ROIs only until the workbench; calibration pages show raw / corrected / what-was-removed; nothing collapses; no page counters; no binning labels; no success signal.
+- Voice: neutral narrator, conversational blend of enthusiastic expert and textbook; no pithy declaratives; Figma text is authoritative and the owner edits it directly.
+
+## 2. Colour and shape semantics (never colour alone)
+
+| Meaning | Token | Shape | Where it appears |
+|---|---|---|---|
+| Bias | `source/bias` cobalt | circle | badge, illustration, toggle label icon |
+| Dark signal / hot pixels | `source/dark` red | square | badge, illustration |
+| Flat-field response | `source/flat` ochre | triangle | badge, illustration, reference-frame star |
+| Random noise | `source/noise` grey | diamond | badge, illustration |
+| Outside the camera | `source/external` violet | pentagon | badge, frame notes |
+| Light frame | `ink/shape` | 4-point star | badge |
+
+## 3. Interaction and state-preservation notes
+
+- **One store, two views.** Lesson pages and the workbench read and write the same state: `calibration` (bias, dark, darkFlat, flat level), `frames[]`, `reference`, `algorithm` + params, and the four ROI ids. Lesson pages show a subset of controls; controls a page does not show keep their current value. Entering the workbench never resets anything.
+- **Lesson pages lock what they do not teach.** E.g. Flats-1 forces `bias=false, dark=true`? — no: it applies whatever calibration the store holds *except* it forces `flat=50` on and off with the toggle and `darkFlat` with the second toggle. See §5 for the open question on defaults.
+- **Stale vs pending.** Changing any input marks ROI tiles *Pending* until the worker returns (`ROITile State=Pending`, message &quot;Result pending&quot;). The full-image result is invalidated separately and shows &quot;Result pending — press Stack&quot;.
+- **Keyboard.** Tab order per page: top bar (brand, chapters, workbench) → reading-column links/callouts (none focusable) → stage controls in reading order (toggles, chip groups as one radio-group tab stop with arrow keys, sliders with arrow/PageUp/PageDown) → bottom nav. Focus ring: 3 px `border/strong` outside on cream; 3 px `accent/focus-on-stage` (ochre) outside on the stage. Toggle: Space. Chips: arrows. Scenario buttons: plain buttons.
+- **Full stack.** Button → ProgressBar (percent, frames done, Cancel keeps focus) → result view → export buttons. Cancel returns to the previous result if any.
+- **Export.** FITS (float32, linear, header per SPEC §4.6) and PNG (8-bit, current stretch). Filename pattern `ngc7331_stack_&lt;n&gt;f_&lt;method&gt;_&lt;calib&gt;.&lt;ext&gt;`.
+
+## 4. Placeholders in the design
+
+| Where | Placeholder | Real source |
+|---|---|---|
+| ROITile image wells on P4 Flats-1 | real crops from `assets/flats-1/` (script `tools/assets/flats_page1.py`) | `/api/roi` crops at runtime; the Figma crops define the stretch (STF target bg 0.30, clip −1.8 MADN) |
+| Every other ROITile image well | &quot;PLACEHOLDER · real ROI crop&quot; | `/api/roi` crops, reference-frame STF (SPEC §4.5) |
+| P4 full-field flat and before/after frame | `assets/flats-1/flat_full.png`, `frame_before.png`, `frame_after.png` (binned ×5) | Stage D static art |
+| Histogram and Histogram/Mini | &quot;PLACEHOLDER&quot; bar shape | `histograms.json` |
+| FrameCard thumbnail | solid navy rect | bin-8 thumbnails |
+| Flats-1 stage | none (readouts removed) | — |
+| Copy numbers marked `[PLACEHOLDER: …]` in `docs/copy.md` | FWHM, star counts, background spreads, noise ratios | `stars.json`, `histograms.json`, pipeline |
+| Illustration stars | drawn dots | none (illustrative, labelled so) |
+
+## 5. Proposed spec changes and items to reconcile
+
+1. **P4 Flats-1 layout (owner direction, 2026-09-24).** Reading column: intro on the optical path → the real master flat, full field → &quot;Reading the flat as a correction map&quot; with a one-pixel side panel (600 ÷ 0.75 = 800) → whole-image before/after → why the flat needs dark flats. So this page does show two full-field views (the flat, and the frame before/after); ROIs-only still applies to the Try-it tiles. Tiles are **Raw / Computed / What was removed**; every tile is populated in every toggle state and carries an owner-written caption. Experiment 2&#x27;s tiles are the same light-frame ROI: Raw = divided by the flat as shot, Computed = divided by the dark-flat-calibrated flat, removed = their difference (about 0.4 DN at the mote core; the raw noise cancels because both tiles divide the same frame, so on its own symmetric stretch it shows a clean donut much like experiment 1&#x27;s; `stats.json` has the numbers). The optical-path SVG and its prose share a cream bounding box with the real flat to its right; the before/after pair sits in a dark box. The &quot;bias only&quot; flat variant (`flat_50_bias`) is not exposed on this page. The &quot;bias only&quot; flat variant (`flat_50_bias`) is not exposed on this page; it remains available in the workbench.
+2. **&quot;What was removed&quot; view.** Lesson stages show `computed − raw` centred on mid grey (lighter = the correction added brightness, darker = it removed some); the tile shows that difference in every toggle state; only the Computed tile follows the switch. This is a display-side computation not in `StackResult`; the pipeline or the section needs a difference helper. SPEC P4 already lists a difference view as a candidate.
+3. **Under- vs over-correction with an uncalibrated flat.** SPEC P4 says over-correction toward the corners; with a dark-subtracted light and the flat&#x27;s own offset left in, the expected effect is under-correction (the map is flatter than the truth). Verify the sign with `flat_check.json` before the caption ships.
+4. **Top bar shows sub-steps** (4 in Calibration, 2 in Light frames). The shell needs the section registry to expose chapter → pages so markers can be drawn. The page counter was removed on purpose.
+5. **Lesson ROI tiles carry no readout and no bin tag.** SPEC §4.5&#x27;s noise readout stays a workbench feature (NoiseReadout component) and, per copy, appears in the Alignment lesson under the average tile. Decide whether Noise &amp; Defects shows a number (SPEC P1 AC expects a readout falling as 1/√N).
+6. **FrameCard columns** are checkbox · number · thumbnail · histogram · FWHM · note. Star count is not shown in the list; it is quoted in the Light Frames prose. If the owner wants it back, add a column.
+7. **Illustrations are full width (1200×360)** above the first section; a 440×330 ROI image slot sits beside &quot;The problem you can see&quot; on every lesson page. Stage D (static art) should produce those ROI crops at 2× for the illustration slot.
+8. **Amp-glow example** on Darks (display-only old-camera dark) conflicts with &quot;ROIs only&quot;. Owner decision pending (see copy.md P3).
+9. **Prototype flow across Figma pages.** Prototype links cannot cross pages, so the final flow is assembled on the &quot;Prototype&quot; page by moving one frame per app page there and wiring Next/Previous. Page agents build on their own pages first.
+
+# Lesson copy
+
+The lesson prose lives **in the Figma file** (*Astrophotography Explainer*), where the product owner edits it directly. This Markdown document is generated from the Figma text at handoff and is not edited by hand before then.
+
+Until handoff this file is intentionally empty of prose.
+{
+ &quot;runId&quot;: &quot;astro-explainer-lib-2026-09-24&quot;,
+ &quot;fileKey&quot;: &quot;jtYi1LQf1fVyUAUfAgthP5&quot;,
+ &quot;phase&quot;: &quot;phase3&quot;,
+ &quot;step&quot;: &quot;representative-section-review&quot;,
+ &quot;fonts&quot;: {
+  &quot;heading&quot;: {
+   &quot;family&quot;: &quot;Jost&quot;,
+   &quot;styles&quot;: [
+    &quot;SemiBold&quot;,
+    &quot;Medium&quot;,
+    &quot;Regular&quot;
+   ]
+  },
+  &quot;body&quot;: {
+   &quot;family&quot;: &quot;Public Sans&quot;,
+   &quot;styles&quot;: [
+    &quot;Regular&quot;,
+    &quot;Medium&quot;,
+    &quot;SemiBold&quot;,
+    &quot;Italic&quot;
+   ]
+  },
+  &quot;mono&quot;: {
+   &quot;family&quot;: &quot;IBM Plex Mono&quot;,
+   &quot;styles&quot;: [
+    &quot;Regular&quot;,
+    &quot;Medium&quot;
+   ]
+  }
+ },
+ &quot;plan&quot;: {
+  &quot;collections&quot;: {
+   &quot;Primitives&quot;: [
+    &quot;cream/50 #F7F2EA&quot;,
+    &quot;cream/100 #F2EBE0&quot;,
+    &quot;cream/200 #E7DCCB&quot;,
+    &quot;cream/300 #D5C6AE&quot;,
+    &quot;ink/900 #1C1A17&quot;,
+    &quot;ink/700 #3E3A34&quot;,
+    &quot;ink/500 #6B655C&quot;,
+    &quot;ink/300 #A39C90&quot;,
+    &quot;space/900 #0F1220&quot;,
+    &quot;space/800 #181C2E&quot;,
+    &quot;space/700 #2A3050&quot;,
+    &quot;cobalt/700 #173A85&quot;,
+    &quot;cobalt/600 #1F4AA8&quot;,
+    &quot;cobalt/400 #4A78D6&quot;,
+    &quot;cobalt/200 #C7D6F2&quot;,
+    &quot;red/600 #C8321F&quot;,
+    &quot;red/400 #E0604B&quot;,
+    &quot;red/200 #F3CDC5&quot;,
+    &quot;ochre/500 #E3A81E&quot;,
+    &quot;ochre/300 #F2CE6B&quot;,
+    &quot;ochre/200 #F7E6B5&quot;,
+    &quot;violet/600 #6B3FA0&quot;,
+    &quot;violet/400 #9A72CC&quot;,
+    &quot;violet/200 #DCCDEF&quot;,
+    &quot;grey/500 #8B8B8B&quot;,
+    &quot;grey/300 #C4C4C4&quot;,
+    &quot;white #FFFFFF&quot;
+   ],
+   &quot;Color (semantic, 1 mode Light)&quot;: [
+    &quot;surface/page\u2192cream/100&quot;,
+    &quot;surface/panel\u2192cream/200&quot;,
+    &quot;surface/card\u2192cream/50&quot;,
+    &quot;surface/stage\u2192space/900&quot;,
+    &quot;surface/stage-raised\u2192space/800&quot;,
+    &quot;text/primary\u2192ink/900&quot;,
+    &quot;text/secondary\u2192ink/500&quot;,
+    &quot;text/assets:
+flats-1
+
+assets/flats-1:
+flat_full.png
+frame_after.png
+frame_before.png
+roi_computed_flat-as-shot.png
+roi_computed_flat-darkflat.png
+roi_exp2_removed.png
+roi_raw.png
+roi_removed_flat-as-shot.png
+roi_removed_flat-darkflat.png
+roi_removed_none.png
+stats.json
+---
+name: lesson-page-rules
+description: &quot;Product-owner rules for every lesson page (one idea per page, ROIs only, raw/corrected/removed tiles, no collapsibles, no counters)&quot;
+metadata:
+  node_type: memory
+  type: feedback
+  originSessionId: e9e5fdf6-6e3c-44b4-b2cd-7bd410812f47
+  modified: 2026-09-24T16:48:22.363Z
+---
+
+Rules given 2026-09-24 after reviewing the Flats-1 representative section:
+
+- **One idea per page.** Teach one thing, not a series. Histograms, bias, other darks etc. stay off pages they don&#x27;t belong to.
+- **ROIs only** until the workbench; the only full-field views are the Welcome teaser and the workbench reference view. No bin-8 &quot;whole field&quot; tiles in lessons.
+- **Calibration pages show three tiles:** raw, corrected, what was removed. Flats-1 has two experiments: flat alone, then dark-corrected flat.
+- **Remove distractions:** no &quot;Page X of Y&quot;, no expand/collapse on &quot;Why?&quot; asides (everything fixed), no binning-level labels, no noise readout on lesson ROI tiles.
+- **Top nav must show sub-steps** (Calibration has 4, Light frames has 2); &quot;Noise&quot; is &quot;Noise &amp; Defects&quot;.
+- **FrameCard columns:** checkbox (selected row gets a background tint), frame number, thumbnail (30% larger), raw histogram, FWHM, notes. No star count.
+- Illustrations are full-width; keep a side slot in &quot;The problem you can see&quot; for a real ROI image.
+- Buttons: a few more px of corner radius. Toggle knob must fit inside its track.
+
+**Why:** the owner wants a focused Park Tool-style page and cut everything that competes with the single lesson.
+
+**How to apply:** give these rules verbatim to every page agent; check each frame against them before review. Related: [[design-editorial-brief]], [[figma-parallel-pages]].
+
+**Illustrations (added after the light-path rejection, 2026-09-24):** one image per lesson, named for its lesson; every visible element must be nameable by a beginner from its label; no symbol glyphs, badge legends, or parts we don&#x27;t teach (filters, windows, corrector plates); follow `source_images/inspiration.jpg`&#x27;s level of detail for the light path. Top nav: two constant-height rows (chapters incl. Workbench as the last tab; pages of the current chapter), no pips, no workbench button. Light-frames pages are &quot;Image Worthiness&quot; and &quot;Review the Exposures&quot;.
+---
+name: only-specified-changes
+description: Make only the changes the user specified; never invent requirements or extra states; copy goes straight into Figma; no screenshot narration
+metadata:
+  node_type: memory
+  type: feedback
+  originSessionId: 378b1adf-00d9-4404-a691-159b6df660d6
+  modified: 2026-09-24T17:10:46.731Z
+---
+
+From the second Flats review (2026-09-24), after the user rejected a repair round:
+
+- **Do not invent requirements.** If the user lists six columns, build six. No extra markers (e.g. a reference star), no extra states (e.g. &quot;Excluded&quot;), no extra affordances (scale bars, readouts, tags) unless asked. When a spec item is ambiguous, ask; don&#x27;t add.
+- **Only the specified change.** &quot;Selected rows get a different background&quot; means background only — not background + border.
+- **Copy goes directly into Figma.** Don&#x27;t route prose through `docs/copy.md`; the Markdown copy doc is generated from Figma at handoff.
+- **No screenshot narration.** The user can see Figma; use screenshots for my own QA only and don&#x27;t describe them as evidence.
+- **No work on unauthorized pages.** Only the pages the user has explicitly authorized (so far: library and Flats-1).
+- Navigation: users must always see which page they are on and be able to click back to it; pips alone are not navigation. Sub-pages (Calibration ×4, Light frames ×2) get a second nav row. Links must look clickable.
+
+**Why:** the user&#x27;s words: &quot;Do not invent requirements&quot;, &quot;Correct this to only specified changes&quot;, &quot;You are not authorized to develop other pages yet.&quot;
+
+**How to apply:** before sending an agent brief or making a change, diff it against the user&#x27;s literal request; strip anything not asked for. Related: [[lesson-page-rules]], [[design-editorial-brief]].
+---
+name: illustrations-no-prose
+description: Illustration components carry no eyebrow/title/caption; lesson pages own prose; internal labels must be plain, not pithy declaratives
+metadata:
+  type: feedback
+---
+
+Illustration (SVG) components in the Figma file hold only the drawing and its part labels. No eyebrow, title or caption inside the component; the lesson page supplies all prose. Canvas notes (&quot;For lesson: X&quot;) stay as organisation only. Labels inside a drawing are plain nouns (&quot;Layered Camera Sensor&quot;, &quot;Pixel Grid&quot;), never pithy declaratives (&quot;one part, three layers&quot;). Highlight what a lesson is about with a full-height soft-colour bar (source/*-soft) behind the relevant part, not just a stroke on the box.
+
+**Why:** owner direction on 2026-09-24 while revising the optical-path illustrations; pithy declaratives are forbidden by the editorial brief and captions duplicated page copy.
+**How to apply:** when making or editing illustrations, delete/omit top and bottom text, keep part labels, use bars for emphasis. See [[design-editorial-brief]] and [[only-specified-changes]].
+---
+name: design-editorial-brief
+description: &quot;Approved-direction preferences for the explainer&#x27;s Figma design and prose (cream Bauhaus, wizard, neutral narrator, no success signal, Figma text wins)&quot;
+metadata:
+  node_type: memory
+  type: feedback
+  originSessionId: e9e5fdf6-6e3c-44b4-b2cd-7bd410812f47
+  modified: 2026-09-24T18:24:17.090Z
+---
+
+Design/editorial direction given 2026-09-24 for the stacking explainer:
+
+- **Page order follows SPEC §7**: Algorithms comes *before* Light Frames. I proposed the reverse once and was corrected (&quot;Defer to spec&quot;).
+- **Visual:** light theme on cream leaning brown; space-themed Bauhaus (geometric primitives, primaries pulled toward space). Blocky low-detail SVG; a stylised EdgeHD is fine.
+- **Layout:** shared library first (top bar nav, 1–2 columns, lesson prose → colour transition into &quot;Try it&quot; → bottom prev/next). Wizard with one page per lesson (Flats and Light Frames get two); browser back button must work. Workbench and Light Frames share a layout.
+- **Teaching:** Park Tool pattern; challenges never announce success — the learner eyeballs it, because stacking is tradeoffs.
+- **Voice:** neutral narrator; conversational blend of impassioned expert and textbook; avoid short pithy declaratives and LLM tropes / engagement hacks.
+- **Figma text is authoritative.** The user edits prose in Figma personally; if the text differs from what I last wrote, use the new value.
+
+**Why:** the user has strong personal taste on design and prose and is the editor of record.
+
+**Owner prose edits happen in frame A only** (2026-09-24: &quot;If I&#x27;ve updated any prose it is in the first example only, and you should apply it to the rest&quot;). On Flats-1 the owner rewrote the Try-it instructions, experiment titles (&quot;Correcting the light&quot;, &quot;Calibrating the flat&quot;), help text and every tile caption; state variants B and C must be rebuilt as clones of A, changing only toggle states, tile images and the state-dependent captions (&quot;With a flat - Flat toggled on&quot;, &quot;Dark Flats On&quot;).
+
+**How to apply:** re-read frame A&#x27;s text before touching B/C or regenerating any copy doc; never overwrite owner prose with mine; don&#x27;t restyle toward dark UI; keep illustration detail low. Related: [[planning-means-planning]], [[hackathon-dataset-facts]].
+---
+name: plain-words-in-copy
+description: &quot;Lesson copy must use plain words a beginner knows (\&quot;removed\&quot;, not \&quot;divided out\&quot;); Figma prose is edited by the owner mid-session&quot;
+metadata:
+  node_type: memory
+  type: feedback
+  originSessionId: 84dfec30-bf94-4646-a98b-87d4611fba53
+  modified: 2026-09-24T18:10:34.401Z
+---
+
+Prose on lesson pages must use words a first-time reader understands. On 2026-09-24 the user said: &quot;A user isn&#x27;t going to understand &#x27;divided out&#x27; replace it with &#x27;removed&#x27;.&quot; Jargon like &quot;divided out&quot;, &quot;normalised&quot;, &quot;master&quot; needs either a plain substitute or an explanation in the same sentence.
+
+**Why:** the audience is beginners; the owner reads every line and rejects pipeline jargon.
+
+**How to apply:** before writing copy into Figma, scan for pipeline verbs and replace them with plain ones; when the user hands me prose blocks, copy them verbatim. Related: [[design-editorial-brief]], [[only-specified-changes]].
+---
+name: figma-parallel-pages
+description: &quot;use_figma calls may run concurrently when each targets a different Figma page; don&#x27;t serialize them&quot;
+metadata:
+  node_type: memory
+  type: feedback
+  originSessionId: e9e5fdf6-6e3c-44b4-b2cd-7bd410812f47
+  modified: 2026-09-24T16:27:36.431Z
+---
+
+Concurrent `use_figma` calls are fine as long as each one edits a **different page** of the Figma file. The figma-generate-library skill&#x27;s &quot;never parallelize use_figma&quot; rule is wrong for this workflow; only same-page writes must be sequential.
+
+**Why:** The user interrupted a serialized library build on 2026-09-24: &quot;Your information on use_figma is wrong. We can execute concurrent use_figma as long as it is on separate pages of the figma design.&quot; Wall-clock time is the scarce resource in the hackathon.
+
+**How to apply:** Organise Figma work one page per parallel track (library sub-pages, one page per app section), then fan out one `use_figma` per page in a single message. Related: [[design-editorial-brief]].</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-29-15-347Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-29-15-347Z" class="timestamp-link"><time datetime="2026-09-24T18:29:15.347Z" data-timestamp="2026-09-24T18:29:15.347Z">2026-09-24T18:29:15.347Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-29-41-291Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-29-41-291Z" class="timestamp-link"><time datetime="2026-09-24T18:29:41.291Z" data-timestamp="2026-09-24T18:29:41.291Z">2026-09-24T18:29:41.291Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Here is a brief for a page agent, written for the Figma phase (that is where Flats-1 was built, and code implementation is not yet authorized). It uses <code>{{PAGE_NAME}}</code> and <code>{{OWNER_GUIDANCE}}</code> as placeholders. Paste it as the agent's first message.</p>
+<pre><code class="language-markdown"># Design the {{PAGE_NAME}} page in Figma
+
+## Who you are and what you are doing
+You are a section agent on the Astrophotography Explainer (a single-page web app that
+teaches image stacking and calibration frames to beginners). Your job is to design
+**one lesson page, {{PAGE_NAME}}**, in the Figma file *Astrophotography Explainer*
+(https://www.figma.com/design/jtYi1LQf1fVyUAUfAgthP5/Astrophotography-Explainer),
+on its own Figma page, using the shared library, plus generate the real image assets
+that page needs. You are authorized to work on {{PAGE_NAME}} and nothing else.
+
+The product owner has just signed off on the **P4 Flats-1** page. It is the reference
+for quality, layout, voice and process. Match it.
+
+## Read these first, in this order, before touching Figma
+1. `AGENTS.md` (repo rules, tooling, commit rules)
+2. `SPEC.md` §7 entry for {{PAGE_NAME}}, plus §3 (dataset), §6 (processing semantics), §9 (language rules)
+3. `docs/design-notes.md` (approved direction, colour/shape semantics, placeholders, open items)
+4. `docs/figma-state.json` (library node ids, tokens, fonts, what has been built)
+5. `.claude/skills/astro-image/SKILL.md` and `tools/assets/flats_page1.py` (how Flats-1 assets were made)
+6. The Flats-1 page in Figma: open it, study frame A and its Try-it stage, and reuse its structure.
+7. Load the `figma:figma-use` skill before any `use_figma` call.
+
+## Owner guidance for this page
+{{OWNER_GUIDANCE}}
+
+If anything above conflicts with SPEC.md or design-notes.md, the owner guidance wins.
+Record the conflict in `docs/design-notes.md` §5 so the spec can be reconciled later.
+
+## Rules that are not negotiable
+These come from the owner's reviews of Flats-1. Check every frame against them before you report.
+
+**Scope**
+- Build only what SPEC §7 and the owner guidance ask for. Do not invent requirements,
+  extra states, extra markers, readouts, scale bars, tags, legends or affordances.
+  If an item is ambiguous, ask; do not add.
+- Edit only your own Figma page. Never edit library components. If you need a library
+  change, write the request in `TODO.md` and work around it with an instance override.
+- Do not touch other app pages in Figma, and do not touch other agents' files in the repo.
+
+**Teaching**
+- One idea per page. Anything that belongs to another lesson stays off this page.
+- ROIs only. No full-field or bin-8 views in a lesson (the only exceptions are the
+  Welcome teaser, the workbench reference view, and the Flats-1 full-field flat the owner approved).
+- Calibration pages show three tiles: **Raw / Computed / What was removed**. Every tile is
+  populated in every toggle state; only the Computed tile follows the switch; the removed
+  tile shows `computed − raw` centred on mid grey.
+- No &quot;Page X of Y&quot;, no expand/collapse asides, no binning labels, no noise readout on lesson
+  ROI tiles, no success signal. The learner eyeballs the result.
+- Page skeleton: TopBar → page head → full-width illustration (1200×360) → &quot;The problem you
+  can see&quot; with a 440×330 ROI image slot → further prose → 6 px ink rule → dark &quot;Try it&quot;
+  stage → BottomNav. Reuse the library components for all of these.
+
+**Prose**
+- Neutral narrator, a conversational blend of enthusiastic expert and textbook. No pithy
+  declaratives, no engagement hacks, no LLM tropes.
+- Plain words a first-time reader knows: &quot;removed&quot;, not &quot;divided out&quot;. Say &quot;pixel brightness&quot;,
+  not ADU; &quot;standard deviation&quot;, not sigma. Define light, bias, dark, flat, dark flat, stack,
+  master and reference frame the first time each appears on the page.
+- Write copy directly into Figma text nodes. Do not route it through `docs/copy.md`.
+- Figma text is authoritative. If the owner has edited text on your page, keep their version.
+  Owner edits happen in frame A only; rebuild state variants B, C… as clones of A, changing
+  only toggle states, tile images and state-dependent captions.
+
+**Illustrations**
+- One illustration per lesson, named for the lesson. It holds only the drawing and plain
+  noun labels (&quot;Pixel Grid&quot;). No eyebrow, title or caption inside the component.
+- Every visible element must be nameable by a beginner from its label. No symbol glyphs,
+  badge legends, or parts we do not teach. Emphasis is a full-height `source/*-soft` colour
+  bar behind the relevant part. Blocky, low detail. Colour is never the only carrier of
+  meaning (see the colour/shape table in design-notes §2).
+
+**Assets and numbers**
+- Every image is produced by `tools/astro.py` (or a script that calls it) from
+  `source_images/` or `data/derived/`, so every number shown is reproducible.
+- Put the generator in `tools/assets/&lt;page&gt;_page.py`, outputs in `assets/&lt;page&gt;/`, and a
+  `stats.json` next to them with the numbers your captions quote. Match the Flats-1 stretch
+  (STF target background 0.30, clip −1.8 MADN) unless the owner guidance says otherwise.
+- Any number you cannot yet produce is written as `[PLACEHOLDER: what it is]`, never guessed.
+
+## Process
+1. Plan first: post a short outline (sections, tiles, states, assets needed, open questions)
+   and wait for the owner's answer to any question before building. Ask questions in one batch.
+2. Generate assets and `stats.json`; run `uv run pytest tools` if you changed anything under `tools/`.
+3. Build frame A on your Figma page from library instances. Upload the real assets into the
+   image wells. Then build the state variants as clones of A.
+4. Self-review against every rule above and against the Flats-1 page. Fix before reporting.
+5. Update `docs/figma-state.json` (your page and node ids) and `docs/design-notes.md`
+   §4 (placeholders) and §5 (reconciliation items). Add library requests to `TODO.md`.
+6. Commit on branch `section/&lt;page&gt;` with a message that explains *why* and includes the
+   exact asset-generation command. Do not commit `source_images/`, `data/`, FITS or XISF.
+
+## Working with the owner
+- Do not narrate screenshots back to the owner; they can see Figma. Use screenshots only
+  for your own QA.
+- When the owner rejects something, correct only the specified change and nothing more.
+- You may run concurrent `use_figma` calls only when each targets a different Figma page.
+
+## Definition of done
+- The page passes the SPEC §7 acceptance criteria for {{PAGE_NAME}} as far as a static
+  design can show them.
+- Every rule in this brief is satisfied; every tile has a real crop or a clearly marked placeholder.
+- `docs/figma-state.json`, `docs/design-notes.md`, `assets/&lt;page&gt;/` and `tools/assets/` are
+  updated and committed on `section/&lt;page&gt;`.
+- Your final report lists: the Figma page link, the assets and the commands that made them,
+  every placeholder left, every open question, and any spec conflicts you recorded.
+</code></pre>
+<p>Two notes on how I shaped it. The brief front-loads the reference material and the owner's review rules because the memory from the Flats rounds shows those rules, not the spec, are where agents went wrong. It also asks for a plan and batched questions before building, since "Do not invent requirements" is easier to enforce at outline time than after a repair round.</p>
+<p>If you instead mean a coding agent for the React section, tell me and I will swap the Figma steps for the worktree, contracts and gate steps from SPEC §10.</p></div></div></div>
+        
+
+<div class="pagination"><a href="index.html" class="index-link">Index</a></div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>

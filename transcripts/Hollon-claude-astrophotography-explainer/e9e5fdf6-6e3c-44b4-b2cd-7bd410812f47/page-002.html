@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 2</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 2/4</h1>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-001.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<span class="current">2</span>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<a href="page-003.html">Next &rarr;</a>
+</div>
+
+        
+<div class="message user" id="msg-2026-09-24T16-04-15-100Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-09-24T16-04-15-100Z" class="timestamp-link"><time datetime="2026-09-24T16:04:15.100Z" data-timestamp="2026-09-24T16:04:15.100Z">2026-09-24T16:04:15.100Z</time></a></div><div class="message-content">
+<div class="user-content"><p><command-name>/effort</command-name>
+            <command-message>effort</command-message>
+            <command-args></command-args></p></div></div></div>
+<div class="message user" id="msg-2026-09-24T16-04-15-100Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-09-24T16-04-15-100Z" class="timestamp-link"><time datetime="2026-09-24T16:04:15.100Z" data-timestamp="2026-09-24T16:04:15.100Z">2026-09-24T16:04:15.100Z</time></a></div><div class="message-content">
+<div class="user-content"><p><local-command-stdout>Set effort level to high (saved as your default for new sessions): Comprehensive implementation with extensive testing and documentation</local-command-stdout></p></div></div></div>
+<div class="message user" id="msg-2026-09-24T16-04-33-165Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-09-24T16-04-33-165Z" class="timestamp-link"><time datetime="2026-09-24T16:04:33.165Z" data-timestamp="2026-09-24T16:04:33.165Z">2026-09-24T16:04:33.165Z</time></a></div><div class="message-content">
+<div class="user-content"><p><pasted_content id="ff06">
+You are my product-design and editorial partner for an astrophotography education app. Your deliverables are a Figma design and the first complete draft of the lesson’s prose. Treat interaction design, visual explanation, and writing as one coordinated task.</p>
+<p>We are in a time-limited hackathon. Prioritize a coherent, understandable experience that can be implemented quickly. Follow the approved requirements precisely where they are explicit; exercise judgment on styling and routine design choices.</p>
+<p>Review the documentation and spec present in this folder before beginning.</p>
+<p>Existing Figma file:
+https://www.figma.com/design/jtYi1LQf1fVyUAUfAgthP5/Astrophotography-Explainer?node-id=0-1&amp;m=dev&amp;t=jgR7VnB5SNSFt8Dk-1</p>
+<p>START WITH A CONVERSATION</p>
+<p>Consult with me before starting design production. I have substantial input on the design philosophy, visual style, teaching approach, and prose.</p>
+<p>Your first response should:
+1. Briefly summarize your understanding of the approved experience.
+2. Identify the design and editorial decisions we should make together.
+3. Ask a small number of focused questions, beginning with my own ideas and preferences.</p>
+<p>Then wait for my response. Do not create or modify Figma frames, generate visual alternatives, draft the full lesson, or implement application code yet. Reading the project documents is appropriate preparation.</p>
+<p>Work through our design plan and philosophy with me first. Discuss the visual atmosphere, information hierarchy, pacing, use of illustrations, balance of explanation and experimentation, and editorial voice. Offer recommendations with concrete tradeoffs, without deciding the direction for me.</p>
+<p>Conclude that discussion with a concise agreed design and editorial brief. Begin production only after I explicitly approve that direction. Approval of the functional spec is not approval of an unspecified visual design.</p>
+<p>PRODUCT AND STORY</p>
+<p>The audience is astrophotography beginners. The experience teaches through experimentation using real images from Jerome Hollon’s backyard observatory, Stella Venator. Clearly labeled synthetic variants introduce tracking and cloud problems.</p>
+<p>There are two connected modes:
+- A guided interactive infographic that progressively explains the process.
+- A compact workbench where learners can perform the same experiments without the surrounding lesson prose.</p>
+<p>Selections, reference image, ROI positions, and algorithm settings carry between modes. The learner should never feel that entering the workbench starts a different experiment.</p>
+<p>Preserve this sequence:
+1. One short introductory screenful explaining who the tool is for, our objectives, what learners will do, and what they will understand and be able to do afterward. Include the Stella Venator attribution.
+2. Sources of noise and other image defects.
+3. Calibration choices.
+4. A brief visual introduction to star alignment and averaging corresponding pixels.
+5. Light-frame selection and its consequences.
+6. Detailed algorithm explanations and comparisons.
+7. The workbench.</p>
+<p>The alignment-and-averaging primer gives learners enough context to choose frames intelligently. Save detailed rejection methods and parameters for the later algorithm chapter.</p>
+<p>Use the teaching pattern: one idea → one choice → one visible consequence. Let learners make poor choices, observe the result, and reverse them.</p>
+<p>DESIGN REQUIREMENTS</p>
+<p>Follow SPEC.md for the complete controls, scenarios, algorithms, dataset assumptions, and states.</p>
+<p>Use the specified ROI subjects: satellite trail, central galaxy and faint surrounding structure, nearby galaxy group, and left-side dust mote.</p>
+<p>Show how the learner progresses, experiments, revisits explanations, and enters the workbench. Include the important selection, comparison, pending-result, empty-selection, processing, and export states. Design the full-image action and FITS/PNG choice.</p>
+<p>Favor clear annotations and editable vector illustrations. Use color consistently, with labels or other cues so color is never the sole explanation. Include keyboard/focus considerations in the handoff.</p>
+<p>Respect the POC scope. Do not introduce features simply to make the design more elaborate.</p>
+<p>PROSE IS A REQUIRED DELIVERABLE</p>
+<p>Write actual first-pass copy directly into the design. Do not use lorem ipsum or leave substantive areas labeled “explanation goes here.”</p>
+<p>Cover:
+- Introductory audience, objectives, expectations, attribution, and takeaways.
+- Chapter headings, explanations, and transitions.
+- Calibration-frame descriptions and diagram annotations.
+- Alignment and averaging primer.
+- Frame-selection guidance and measurement explanations.
+- All five algorithm explanations.
+- Challenge introductions, prompts, and relevant feedback.
+- Control labels, concise help, processing states, and export language.
+- The transition into independent workbench experimentation.</p>
+<p>Use plain, welcoming language without talking down to beginners. Define unfamiliar terms when first needed. Connect explanations to an observable image change. Use progressive disclosure for detail rather than filling every screen with caveats.</p>
+<p>The copy must fit the design at realistic reading sizes. Refine wording and layout together. Keep the text editable in Figma and provide a companion Markdown copy document for implementation.</p>
+<p>SCIENTIFIC ACCURACY</p>
+<p>Follow the scientific requirements in SPEC.md. In particular:
+- Calibration corrects repeatable components; it does not subtract away random noise.
+- Flats correct uneven response through division, so do not portray every correction as peeling away an additive layer.
+- Avoid double bias subtraction.
+- Treat the supplied master dark as matched for this lesson; do not surface its temperature exception.
+- Do not imply alignment repairs tracking blur.
+- Qualify square-root-of-N improvement appropriately and avoid inventing measured SNR.
+- Do not assume the 85% flats are saturated.
+- Use PixInsight/WBPP as the required Robust Chauvenet reference; flag unverified specifics rather than inventing an explanation.</p>
+<p>Use real prepared imagery where available. Coordinate around existing preparation work without changing its scripts or source data. Any temporary image or metric placeholder must be identifiable as such. Do not fabricate results or use generated astronomy imagery as evidence of actual processing.</p>
+<p>PRODUCTION WORKFLOW AFTER OUR AGREEMENT</p>
+<p>Load the relevant installed Figma skills before using tools that require them. Inspect the supplied file and reuse suitable existing components and styles. If it is empty, establish only the small set of reusable styles and components needed for this POC.</p>
+<p>Begin with a representative lesson section containing real draft prose, an illustration, controls, and ROI comparisons. Review it with me before extending the treatment across the whole lesson.</p>
+<p>Then work in parallel agents through the guided experience and workbench. Use an new page in the figma design for each page and assign that page to an agent to prevent edits from overlapping. 
+Use an agent for generating all SVG imagry for each lesson since the images should largely be reused with different emphasis.
+Agents should be executing with medium effort.
+Use review checkpoints for meaningful decisions; handle routine details independently within the agreed brief.</p>
+<p>Inspect rendered frames for text overflow, readable typography, hierarchy, contrast, and realistic desktop fit. Distinguish prototype behavior from actual image computation.</p>
+<p>Do not implement the application or silently revise approved scope. Record any design discoveries that imply a specification or story-plan change so we can reconcile them afterward.</p>
+<p>HANDOFF</p>
+<p>Deliver:
+- Links to the relevant Figma frames and prototype flow.
+- Complete first-pass lesson prose in editable Figma text and a companion Markdown document.
+- Concise interaction and state-preservation notes.
+- A list of remaining placeholders, unresolved decisions, and proposed spec changes.</p>
+<p>Start now by reading the project documents, summarizing the experience, and opening the design-philosophy conversation. Wait for my input before beginning production.
+</pasted_content id="ff06"></p></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-04-35-225Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-04-35-225Z" class="timestamp-link"><time datetime="2026-09-24T16:04:35.225Z" data-timestamp="2026-09-24T16:04:35.225Z">2026-09-24T16:04:35.225Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-04-35-725Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-04-35-725Z" class="timestamp-link"><time datetime="2026-09-24T16:04:35.725Z" data-timestamp="2026-09-24T16:04:35.725Z">2026-09-24T16:04:35.725Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>I'll read the project documents first, then come back with a summary and questions.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-04-37-843Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-04-37-843Z" class="timestamp-link"><time datetime="2026-09-24T16:04:37.843Z" data-timestamp="2026-09-24T16:04:37.843Z">2026-09-24T16:04:37.843Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01LznQWWFiGrNPxPKN9Js6kr">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">List project files and doc sizes</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd &#34;/mnt/c/Users/Jerome Hollon/Documents/claude/astrophotography-explainer&#34; &amp;&amp; ls -la &amp;&amp; ls docs docs/* tools tools/precompute 2&gt;/dev/null &amp;&amp; wc -l SPEC.md docs/**/*.md TODO.md 2&gt;/dev/null</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T16-04-39-394Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T16-04-39-394Z" class="timestamp-link"><time datetime="2026-09-24T16:04:39.394Z" data-timestamp="2026-09-24T16:04:39.394Z">2026-09-24T16:04:39.394Z</time></a></div><div class="message-content"><div class="tool-result tool-error"><div class="truncatable"><div class="truncatable-content"><pre>Exit code 1
+total 92
+drwxrwxrwx 1 jerome jerome  4096 Sep 24 11:50 .
+drwxrwxrwx 1 jerome jerome  4096 Sep 24 09:51 ..
+drwxrwxrwx 1 jerome jerome  4096 Sep 24 10:22 .claude
+drwxrwxrwx 1 jerome jerome  4096 Sep 24 11:50 .git
+-rwxrwxrwx 1 jerome jerome  2658 Sep 24 10:22 .gitignore
+drwxrwxrwx 1 jerome jerome  4096 Sep 24 10:19 .pytest_cache
+-rwxrwxrwx 1 jerome jerome     5 Sep 24 10:16 .python-version
+drwxrwxrwx 1 jerome jerome  4096 Sep 24 10:16 .venv
+-rwxrwxrwx 1 jerome jerome 10847 Sep 24 11:37 AGENTS.md
+-rwxrwxrwx 1 jerome jerome    11 Sep 24 10:22 CLAUDE.md
+-rwxrwxrwx 1 jerome jerome 35634 Sep 24 11:59 SPEC.md
+drwxrwxrwx 1 jerome jerome  4096 Sep 24 11:34 data
+drwxrwxrwx 1 jerome jerome  4096 Sep 24 11:44 docs
+-rwxrwxrwx 1 jerome jerome   462 Sep 24 10:17 pyproject.toml
+drwxrwxrwx 1 jerome jerome  4096 Sep 24 10:19 source_images
+drwxrwxrwx 1 jerome jerome  4096 Sep 24 11:50 tools
+-rwxrwxrwx 1 jerome jerome 37864 Sep 24 10:17 uv.lock
+docs:
+knowledge
+
+docs/knowledge:
+wbpp.md
+
+tools:
+__pycache__
+astro.py
+precompute
+test_astro.py
+test_precompute.py
+
+tools/precompute:
+README.md
+__pycache__
+flat_check.py
+frames_manifest.py
+histograms.py
+integrate.py
+masters.py
+normalization.py
+run_stage_a.sh
+run_stage_b.sh
+star_metrics.py
+verify_geometry.py
+  339 SPEC.md
+  388 docs/knowledge/wbpp.md
+  727 total</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-04-41-017Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-04-41-017Z" class="timestamp-link"><time datetime="2026-09-24T16:04:41.017Z" data-timestamp="2026-09-24T16:04:41.017Z">2026-09-24T16:04:41.017Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01KExPjdA32HLEh9ZhYv5PJY"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/mnt/c/Users/Jerome Hollon/Documents/claude/astrophotography-explainer/SPEC.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T16-04-41-192Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T16-04-41-192Z" class="timestamp-link"><time datetime="2026-09-24T16:04:41.192Z" data-timestamp="2026-09-24T16:04:41.192Z">2026-09-24T16:04:41.192Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# SPEC: Stacking Explainer (hackathon POC)
+2	
+3	This is the source of truth for what we build and how agents build it. `AGENTS.md` covers repo conventions and tooling. `docs/knowledge/wbpp.md` covers the PixInsight WBPP pipeline that we replicate. When the three disagree, this file wins; fix the other two.
+4	
+5	Status: **draft v1**. The spec is re-evaluated after Figma (phase 3). Decisions made with the product owner are logged in §12.
+6	
+7	---
+8	
+9	## 1. Product
+10	
+11	An interactive, desktop-only lesson followed by a workbench. It teaches beginners how to choose **calibration frames** (bias, darks, flats, dark flats) and **light frames**, and how **stacking algorithms** deal with outliers. Everything runs on real data from **Stella Venator Observatory** (Lexington, Kentucky): NGC 7331, EdgeHD 11 at 2800 mm, AP26MC, Red filter, 20 × 300 s.
+12	
+13	Contest theme 1, *Exploration &amp; Understanding*. The judges score execution and polish, depth of knowledge, and creativity. One flow done well beats breadth.
+14	
+15	**Teaching method (Park Tool style).** Every lesson step follows the same loop: explain the concept briefly → show a real problem in the data → the learner adjusts controls until the problem goes away → they can bring it back and fix it again. Every step has an interactive element with a tight feedback loop.
+16	
+17	**Voice.** The prose sits between a textbook and an expert who is excited to share. Avoid short, pithy declarative sentences. The product owner edits all prose in Figma. See the plain-language rules in §9.
+18	
+19	## 2. Scope
+20	
+21	**In**
+22	- Lesson pages: Welcome, Noise &amp; Defects, Calibration (Bias, Darks, Flats, Flats–Continued), Alignment, Algorithms, Light Frames.
+23	- Workbench: calibration choices, then frame selection with precomputed metrics, then algorithm and parameters, then reference frame, 4 fixed ROIs that update live, full-image stack on demand, and FITS/PNG export.
+24	- Five scenario presets: Default, Naive, Satellite Trail Challenge, Cloud Challenge, Tracking Error Challenge.
+25	- Pixel combination: average, median, kappa-sigma clipping, winsorized sigma clipping, robust Chauvenet rejection (RCR).
+26	- Calibration in WBPP order, with every flat variant precomputed.
+27	- One Docker container: a Node server that serves the SPA plus **one** ROI API endpoint.
+28	
+29	**Out (cutting floor):** mobile, touch, Safari, accessibility, auth, persistence across refreshes, drizzle, colour or debayering, user-movable ROIs, computing registration ourselves (we use PixInsight&#x27;s matrices), sky flats, and flat exposures other than the 10/50/85% sets. Also out, unless §6 finds WBPP depends on them: local normalization, cosmetic correction, subframe weighting.
+30	
+31	## 3. Dataset
+32	
+33	| Asset | Details |
+34	|---|---|
+35	| Lights | `source_images/light/*FRAME_00NN*.xisf`, NN = 00–19. 6224×4168 UInt16 mono, 300 s, gain 100, offset 160, about −4 °C. Frames 00–07 were shot with the telescope on the **West** side of the pier, 08–19 on the **East** side. The meridian flip rotates the image about 180°. |
+36	| Defects | f03: real **satellite trail** (faint, lower right). f11: synthetic **tracking error** (trailed stars). f14–f16: synthetic **patchy cloud**. |
+37	| Synthetic files | `source_images/light_synthetic_disaster/*.fits`. These are **vertically flipped** relative to the raw XISF (FITS stores rows bottom-up). Flip them once at conversion time. They use the alignment matrix of their untouched raw frame. |
+38	| Registration | `light_registered/*_r.xdrz` `AlignmentMatrix` is a 3×3 homography that maps **reference coordinates (f07) → raw-frame coordinates**. The `_r.xisf` files are registered but **not calibrated**. We use them only as a test oracle for our warp. |
+39	| Masters (from WBPP) | `masterBias` and `masterDark` (300 s) are Float32 in [0,1]; multiply by 65535 to get ADU. The master dark **includes the bias pedestal** (median ≈ 161 vs 160.5), so dark current is negligible and the dark mainly carries hot pixels. |
+40	| Flats | Raw flats at 10% (0.11 s), 50% (2.24 s) and 85% (10 s) histogram levels, 25 each, plus matching dark flats. A quick test showed the 50% flat removes the left-side dust mote and the 85% flat does not. |
+41	| Old-camera dark | `darkFromOlderCamera.fits`: ASI294MM Pro, 8288×5644, 600 s. **Display only** (amp-glow example). Never applied. |
+42	| Final | `final/masterLight_*.xisf` (WBPP master, 6094×4092 autocrop) and `final/NGC7331.png` (colour composite). Used on the Welcome page. |
+43	
+44	Pixel scale 0.277″/px. Registration offsets within one pier side are up to about 47 px (f02/f03 vs f05).
+45	
+46	**Frame list.** In the workbench and the Light Frames lesson, learners see **all 24 entries**: the 20 raw frames plus the 4 synthetic defect variants (f11_tracking, f14_cloud, f15_cloud, f16_cloud). Each variant is labelled as a variant of its original. Selecting both an original and its variant stacks the same exposure twice, and that choice is left to the learner.
+47	
+48	## 4. Architecture
+49	
+50	```
+51	┌──────────────── Docker container (node:22-slim) ─────────────────┐
+52	│ server/  Fastify                                                   │
+53	│   GET /            → dist/ (built SPA, static)                     │
+54	│   GET /data/*.json → precomputed JSON (static)                     │
+55	│   GET /api/roi     → the ONE API: a pixel region of one asset      │
+56	│ /data   baked in: raw pixel files + bin pyramid + JSON             │
+57	└────────────────────────────────────────────────────────────────────┘
+58	Browser: React + TS + Vite + Tailwind SPA. A Web Worker pool runs
+59	         calibrate → warp → normalize → integrate. Nothing heavy runs
+60	         on the server.
+61	```
+62	
+63	- **Frontend:** React 19, TypeScript, Vite, Tailwind v4, `react-router` with `HashRouter`, and zustand for state. React plus Tailwind matches the Figma MCP&#x27;s code output. Charts and diagrams are hand-written SVG components with no chart library.
+64	- **Server:** Node 22 and Fastify with `@fastify/static`. It has no processing logic beyond 2×2 binning of the requested region.
+65	- **Orientation:** every image is shown in **canonical orientation**, which is the West-side sensor orientation (f07). East-side frames and stacks are rotated 180° for display. Calibration frames are sensor-space, which is already canonical.
+66	
+67	### 4.1 Coordinate spaces (contract)
+68	- **Sensor space of asset A:** pixel column x (rightwards) and row y (downwards). Row 0 is the first row of the XISF array. Calibration happens here.
+69	- **Canonical space:** f07&#x27;s sensor grid, which is the PixInsight registration reference. ROI definitions live here at bin 1.
+70	- `H_i`: the 3×3 matrix taken from the xdrz. It maps canonical to frame i&#x27;s sensor space. The **pixel-origin convention** (matrix applied to pixel centres at +0.5 or at integers) is fixed by `data/derived/precompute/geometry_check.json` (Stage A) and must be quoted in `src/shared/pipeline/geometry.ts`.
+71	- **Output grid for reference r:** M_{out→i} = H_i · H_r⁻¹ · F_r, where F_r is the identity for West frames and a 180° rotation about the image centre for East frames. The stack is aligned to r&#x27;s pixel grid but keeps the canonical orientation.
+72	- **Binning b ∈ {1,2,4,8}:** conjugate the matrices with the bin scale under the same origin convention. The pipeline tests cover b = 1 against PixInsight&#x27;s `_r.xisf` and b = 2 for consistency with b = 1.
+73	
+74	### 4.2 Runtime data (`/data`, produced by `tools/precompute`, git-ignored, baked into the image)
+75	- `manifest.json` lists every asset: id, kind (`light` | `master` | `flat` | `darkflat`), width, height, dtype, per-bin file paths, and for lights also pier side, defect, relative, header fields and `H` (9 floats).
+76	- Pixel files: raw little-endian, row-major, no header.
+77	  - Lights at b1 are `u16`. Masters are `f32` **in ADU**.
+78	  - Bins 2, 4 and 8 are precomputed `f32` means. The server never bins a whole frame at request time.
+79	  - Synthetic frames are stored already flipped.
+80	- Precomputed JSON: `stars.json`, `histograms.json`, `normalization.json` (per frame × `calState`; §6.5), `masters.json` (per-master statistics and flat scale `f_v`), and `flat_check.json`. The manifest also carries the recorded WBPP weights (display only).
+81	- Asset ids: lights `f00`…`f19`, `f11_tracking`, `f14_cloud`, `f15_cloud`, `f16_cloud`. Masters `bias`, `dark`, `darkflat_{10,50,85}`, and `flat_{10,50,85}_{darkflat,bias,none}` (9 master flats; the suffix is how the flat was calibrated).
+82	
+83	### 4.3 ROI API (the one endpoint)
+84	`GET /api/roi?id=&lt;assetId&gt;&amp;x=&lt;int&gt;&amp;y=&lt;int&gt;&amp;w=&lt;int&gt;&amp;h=&lt;int&gt;&amp;bin=&lt;1|2|4|8&gt;`
+85	- x, y, w and h are in the asset&#x27;s own **sensor space at bin 1**. For bin &gt; 1 they must be multiples of `bin`, and the response holds (w/bin)×(h/bin) samples.
+86	- The rectangle is clamped to the image. Response headers are `X-Roi: x,y,w,h` (the clamped rectangle, bin-1 units), `X-Width`, `X-Height` (sample dimensions) and `X-Dtype: u16|f32`. The body is raw little-endian samples, row-major.
+87	- **No size limit.** `x`, `y`, `w` and `h` are optional; leaving them out returns the whole image. The server **streams** rows straight from the file (positioned `fs.read` per block of rows) and sets `Content-Length`, so memory stays flat for any request size and the client can show download progress. Unknown id → 404; a malformed rectangle → 400. `Cache-Control: no-store`.
+88	- **Why sensor space and not canonical space.** Calibration has to happen *before* alignment, because dust, hot pixels and vignetting are fixed to the sensor (§6.2, §6.4).
+89	  - Requesting in sensor space gives the client exactly what it needs: the same sensor rectangle from the light and from each master, which it calibrates with plain element-wise maths before warping.
+90	  - A canonical-space API would force the server to resample, which is processing on the server. The server would also have to warp every master separately for every frame, which roughly quadruples the transfer. And the order would be wrong: flat division and Lanczos clamping don&#x27;t commute with warping.
+91	  - The one place that converts a canonical ROI into sensor rectangles is the client&#x27;s footprint function (§4.4). The server stays a dumb, streaming pixel reader.
+92	
+93	### 4.4 Client pipeline (`src/shared/pipeline`, pure TS, runs in workers)
+94	`stack(req: StackRequest) → StackResult`
+95	```ts
+96	type StackRequest = {
+97	  grid: { ref: FrameId; x: number; y: number; w: number; h: number; bin: 1|2|4|8 }; // canonical-oriented output rect
+98	  frames: FrameId[];                 // order-insensitive
+99	  calibration: CalibrationChoice;    // §6
+100	  algorithm: { name: &#x27;average&#x27;|&#x27;median&#x27;|&#x27;kappaSigma&#x27;|&#x27;winsorized&#x27;|&#x27;rcr&#x27;; params?: Record&lt;string, number&gt; };
+101	  align?: boolean;                   // default true; false = naive stack (Alignment lesson)
+102	};
+103	type StackResult = { data: Float32Array; w: number; h: number; noise: number; ms: number };
+104	```
+105	Per frame: **footprint** (map the output rectangle through M, pad by the interpolation radius, clamp) → **fetch** light and master crops for that sensor rectangle at the same bin → **calibrate** in sensor space (§6) → **warp** with PixInsight-equivalent interpolation (§6); pixels outside the frame become NaN and are excluded → **normalize** with precomputed coefficients (§6). Then, per output pixel over the finite samples: **integrate** with the chosen algorithm.
+106	
+107	- **Performance budget:** 4 workbench ROIs at bin 2 with 20 frames in **&lt; 1 s** total on a desktop. A full stack at bin 1 is processed in bands of about 256 rows, spread across `hardwareConcurrency − 1` workers, with progress reporting and cancel. Peak memory stays under 1.5 GB.
+108	- **Fetch cache:** in memory, keyed by (id, rect, bin), with a byte-capped LRU.
+109	- **Result cache:** in memory, keyed by the canonical JSON of `StackRequest` (frames sorted), with a byte-capped LRU. It clears on refresh. No localStorage.
+110	
+111	### 4.5 Display
+112	- **Lights and stacks:** PixInsight AutoSTF (target background 0.25, shadows clip −2.8·MADN, linked). The parameters come from the **reference frame&#x27;s** precomputed median and MADN for the active calibration combination, so every view in that state shares one stretch. The JS STF must match `tools/astro.py` (unit-tested against Python output).
+113	- **Bias, dark, dark flat:** each uses its own AutoSTF.
+114	- **Flats:** linear, no stretch. Map the 0.1–99.9 percentile range to display range.
+115	- **Reference view:** the reference frame at bin 4, calibrated, with markers for the 4 ROIs.
+116	- **Lesson ROI stretch override:** a lesson ROI may carry its own STF when the teaching point needs it. For example, the satellite ROI is stretched so the faint trail is plainly visible. The workbench always uses the reference stretch.
+117	- **ROI tiles:** the workbench shows ROIs of different sizes in one normalized tile form factor (layout set in Figma) with a scale indicator.
+118	- **Noise readout (per ROI):** robust standard deviation (MADN) of the ROI&#x27;s background pixels after clipping stars, in reference-normalized units, plus the ratio to a single reference frame (for example &quot;3.9× less noise than one frame&quot;). How SNR is presented is decided in Figma.
+119	
+120	### 4.6 Routing, state, export
+121	- **Hash routes**, one history entry per page: `#/welcome`, `#/noise`, `#/calibration/{bias,darks,flats,flats-2}`, `#/alignment`, `#/algorithms`, `#/light-frames`, `#/workbench`. The back and forward buttons work.
+122	- **Sections** live in `src/sections/&lt;name&gt;/` and register through one list, `src/shell/sections.ts`, one line each. Shared code lives in `src/shared/` and has one owner.
+123	- **Export** (full stack only):
+124	  - FITS: float32 BITPIX −32, linear, [0,1]. Header: `IMAGETYP=&#x27;Master Light&#x27;`, `NCOMBINE`, `EXPTIME`, `TOTEXP`, `REFFRAME`, `CALIB`, `ALGO` and parameters, `SOFTWARE`.
+125	  - PNG: 8-bit with the current stretch.
+126	  - The filename encodes the settings.
+127	
+128	### 4.7 Build and run
+129	- `npm run dev` runs Vite and the server together, with `/api` proxied. `npm run build`, `npm test` (vitest), `npm run e2e` (Playwright, Chromium + Firefox), `uv run pytest tools`.
+130	- `docker build -t stacking-explainer .` then `docker run -p 8080:8080 stacking-explainer`. The build is multi-stage (build the SPA, then a slim runtime). `.dockerignore` excludes `source_images/`, `.venv`, `node_modules`, and everything under `data/` except `data/derived/runtime`. The product owner handles `docker save` and the VPS.
+131	
+132	## 5. Precompute (Python, `tools/precompute/`, outputs in `data/derived/`)
+133	
+134	| Stage | Output | Depends on |
+135	|---|---|---|
+136	| A ✅ | `frames.json`, `geometry_check.json` (matrix direction, pixel origin, synthetic flip), `stars.json` + `stars/&lt;id&gt;.csv`, `histograms.json`. Stage C adds `ecc_p90` per frame from the CSVs. | none |
+137	| B | 3 master dark flats, 9 master flats (§6.3) + `masters.json`; `normalization.json` (24 frames × 30 `calState`s); `flat_check.json` (dust-mote contrast and vignetting residual per flat variant) | `docs/knowledge/wbpp.md` (running) |
+138	| C | `runtime/`: pixel files (b1 plus the b2/b4/b8 pyramid) and `manifest.json` | Stage B and §4.2 |
+139	| D | Static art: Welcome images (stretched single sub, stretched WBPP master, resized colour composite), the old-camera amp-glow image, Alignment star trio, golden test fixtures (§10) | Figma sizes |
+140	
+141	Every stage has one `run_stage_&lt;x&gt;.sh` so it can be regenerated, as AGENTS.md requires.
+142	
+143	## 6. Processing semantics (WBPP-faithful)
+144	
+145	Derived from WBPP 3.0.1&#x27;s own source code. `docs/knowledge/wbpp.md` has the references and full algorithm listings; the section numbers below point there.
+146	
+147	### 6.1 Calibration choice and WBPP master selection
+148	The learner selects calibration **frames**, and the rules WBPP uses to pick masters (wbpp §2.1, §1.2) then decide how each frame is used:
+149	```ts
+150	type CalibrationChoice = { bias: boolean; dark: boolean; darkFlat: boolean; flat: null | 10 | 50 | 85 };
+151	// derived, exactly as WBPP does it:
+152	lightSub  = dark ? &#x27;dark&#x27; : bias ? &#x27;bias&#x27; : &#x27;none&#x27;                  // D = MD | MB | 0
+153	flatCal   = darkFlat ? &#x27;darkflat&#x27; : bias ? &#x27;bias&#x27; : &#x27;none&#x27;          // selects flat_&lt;level&gt;_&lt;flatCal&gt;
+154	calState  = `${lightSub}|${flat ? `flat_${flat}_${flatCal}` : &#x27;none&#x27;}` // key into normalization.json (30 states)
+155	```
+156	- **The bias is not applied to lights when a dark is selected.** The master dark already contains the bias pedestal, and WBPP drops the bias for lights in that case (dark optimization is off by default). The UI shows the bias as &quot;already inside the dark&quot; for the lights and still used for the flats when dark flats are off. That&#x27;s a teaching moment on the Darks page, not a bug.
+157	- Dark flats always match the chosen flat level.
+158	
+159	### 6.2 Calibration formula (sensor space, float32, DN)
+160	`C = (L − D) / (MF_v / f_v)` when a flat is selected, otherwise `C = L − D`. Here `f_v` is the master flat&#x27;s 5% two-sided trimmed mean (precomputed), so the light&#x27;s overall level doesn&#x27;t change. No pedestal, no truncation (wbpp §2.2), and no automatic cosmetic correction (§6.6).
+161	
+162	### 6.3 Master frames (precomputed, Stage B)
+163	- The master bias and master dark are used as supplied (built by WBPP 2.8.8, averaged, winsorized 4/3). Facts to keep the prose accurate: the dark is made from **raw 300 s darks at −15 °C**, 11 °C colder than the lights. The product owner has accepted this. It slightly under-corrects hot pixels.
+164	- 3 master dark flats: average, no normalization, winsorized 4/3, cutoff 5.
+165	- 9 master flats `flat_&lt;10|50|85&gt;_&lt;darkflat|bias|none&gt;`: calibrate each flat (− dark flat, − bias, or nothing), then average with multiplicative normalization, rejection winsorized 4/3.
+166	
+167	### 6.4 Registration
+168	- Inverse warp into the output grid: `M = S_b⁻¹ · H_i · H_r⁻¹ · F_r · S_b`.
+169	  - PixInsight&#x27;s registration coordinates put pixel centres on **integers** (AlignmentOrigin 0.5 is the centre of the top-left pixel), and Stage A confirmed it: median residual 0.02 px, against 1.41 px for the half-pixel alternative on East-side frames.
+170	  - `S_b = [[b,0,(b−1)/2],[0,b,(b−1)/2],[0,0,1]]` maps a bin-b index to native coordinates.
+171	  - `F_r` is the 180° display rotation for East-side references: `x → W−1−x`, `y → H−1−y`.
+172	- Interpolation: **Lanczos-3 with clamping 0.3**, the StarAlignment default, implemented exactly as in wbpp §3.2 (6×6 separable taps, mirrored borders).
+173	- Samples whose source position falls outside `[0,W−1]×[0,H−1]` are **NaN**. That replaces WBPP&#x27;s range rejection of pixels ≤ 0.
+174	- Performance fallback, only if §4.4&#x27;s budget is missed: bicubic, with the change recorded in §12.
+175	
+176	### 6.5 Normalization (precomputed)
+177	- Global **scale + zero offset**: `y = (C − m_i)·(s_r/s_i) + m_r`. `m` is the median; `s` is √(biweight midvariance); `r` is the learner&#x27;s reference frame (wbpp §4.2–4.3).
+178	- The same normalized values feed both rejection and combination, as in WBPP without local normalization.
+179	- `normalization.json` holds `(m, s, madn)` for 24 frames × 30 `calState`s. They are computed on the calibrated sensor-space frame minus a 64 px border.
+180	- The display STF uses the reference frame&#x27;s `m` and `madn` for the current `calState`.
+181	
+182	### 6.6 Integration
+183	- **Average:** the mean of the finite samples. **Median:** the median of the finite samples. Neither rejects anything.
+184	- **Kappa-sigma clipping** (defaults: low 4, high 3), **winsorized sigma clipping** (4, 3, cutoff 5) and **RCR** (limit 0.1, the value WBPP sets) each reject first and then average the survivors, iterating as specified in wbpp §4.6. Implement them from that listing, down to the constants.
+185	- All weights are equal. The stack stops when fewer than 3 samples remain. If every sample is NaN or rejected, the output is NaN, which is shown in the background colour and written as 0 in the FITS export.
+186	- **Exposed parameters** (the workbench shows them in plain words; presentation is decided in Figma):
+187	  - Kappa-sigma and winsorized: &quot;too dark&quot; and &quot;too bright&quot; limits in standard deviations, 1.0–6.0, step 0.1.
+188	  - RCR: &quot;how unlikely is too unlikely&quot;, 0.01–0.5.
+189	- **Frame-count guidance for P7**, from WBPP&#x27;s own validity table:
+190	  - Kappa-sigma: 8–15 frames.
+191	  - Winsorized: 8 or more.
+192	  - RCR: 15 or more.
+193	  - Learners hear only about our five methods. Percentile, linear fit and ESD are never mentioned (out of scope for beginners).
+194	- **Teaching note (Satellite Challenge, P7):** with 5 frames, kappa-sigma at 3 **cannot** reject a single outlier, whatever its size.
+195	  - The outlier inflates the standard deviation it&#x27;s measured against. At most it can sit √n standard deviations from the median: 2.24 for 5 frames, or n/√(n−1) = 2.5 with the population formula. A high limit of 3 only starts working at about 8–10 frames, which matches WBPP&#x27;s &quot;8–15&quot; guidance.
+196	  - Winsorized and RCR use robust spreads, so they can reject it. So can median, at a cost in noise.
+197	  - This is the core puzzle of the challenge.
+198	
+199	### 6.7 Deliberate deviations from WBPP (approved 2026-09-24; the goal is low complexity and low CPU time)
+200	
+201	| WBPP default | Ours | Why |
+202	|---|---|---|
+203	| Local Normalization (on) | Global scale + zero offset (**approved**) | LN needs per-frame PSF photometry and multiscale background models, which is too heavy for the browser. Global is WBPP&#x27;s own non-LN path. Side effect: the clouds stay as structures, which is good for teaching rejection. |
+204	| PSF Signal Weight (the author&#x27;s master used PSF SNR) | Equal weights (**approved**) | No PSF photometry in the browser, and equal weights keep the algorithm comparisons clean. The recorded WBPP weights stay in the manifest and can be displayed. |
+205	| Automatic cosmetic correction (on) | Off (**approved for now**) | Hot pixels are a lesson topic, and rejection across dithered frames removes them, which is itself the teaching point. It may come back later as a workbench option: a precomputed hot-pixel map with a 3×3 median replacement. |
+206	| Linear-fit clipping for 25 flats | Winsorized 4/3 (**approved**) | Panel flats have essentially no outliers, so the difference is negligible. Master flats are precomputed, so this costs the learner nothing, and the winsorized code already exists for the dark flats. |
+207	| Linear fit and ESD available | Not offered and not mentioned (**approved**) | Out of scope for beginners. |
+208	| Autocrop | None (**approved**) | Edges stay NaN and uncropped, as the brief asks. It only matters in the final export (NaN is written as 0). |
+209	
+210	## 7. Pages
+211	
+212	Each page lists its goal, its problem → fix interaction, the data it uses, and acceptance criteria (AC). Layout, prose and art come from Figma. The ROI sizes and positions below are **placeholders until Figma**.
+213	
+214	**P0 Welcome.** The emotional hook: one 300 s sub → WBPP master → final colour image, with a clear line that these are real images from Stella Venator Observatory in Lexington, KY. Data: Stage D static images. AC: renders in under 2 s on localhost; Start goes to `#/noise`.
+215	
+216	**P1 Noise &amp; Defects.** What makes up a light frame: target and sky signal, random noise, bias offset, dark signal and hot pixels, uneven response (vignetting, dust), and non-hardware problems (clouds, tracking, satellites, planes). Also why we stack, and what &quot;calibration frames&quot; means. Interactive: the **system SVG** (telescope → camera → sensor → sensor PCB with op-amp and ADC) with colour-coded noise layers. Selecting a layer highlights where it comes from. Also a &quot;why stack&quot; control that averages 1 → N frames on a background ROI to show noise falling. AC: every layer is selectable, and the N-frame noise readout falls roughly as 1/√N.
+217	
+218	**P2 Bias.** Problem: every pixel sits on an offset added by the readout electronics. Fix: subtract the bias. Interactive: a bias toggle on a light ROI, with its histogram and a sample pixel&#x27;s brightness moving (for example about 1,060 → 900). The master bias is shown with its own stretch, and the op-amp/ADC layer peels away in the SVG. AC: the histogram shift equals the master bias median to within 1 ADU.
+219	
+220	**P3 Darks.** Problem: hot pixels (and amp glow on some cameras). Fix: subtract a dark taken at the same exposure time and temperature as the lights. Interactive: an ROI rich in hot pixels, toggling none → bias only → dark. When the dark is on, the bias shows as &quot;already inside the dark&quot; (§6.1). The old-camera dark is shown only to illustrate amp glow. The page notes that this dark was taken colder than the lights (−15 °C vs −4 °C), which is acceptable here, and that on this camera the dark is mostly bias plus hot pixels. AC: visible hot pixels disappear only with the dark applied.
+221	
+222	**P4 Flats.** Problem: vignetting and dust shadows. Fix: divide by a flat, and calibrate that flat with dark flats. Interactive: a dust-mote ROI and a bin-8 full-field view; toggle the flat, then toggle dark flats (and bias) to show what an uncalibrated flat does, which is over-correction toward the corners. *Candidate for Figma:* a difference view showing what the dark flats change in the corrected result. AC: the mote and vignetting vanish with the 50% flat calibrated by dark flats.
+223	
+224	**P5 Flats–Continued.** Why the histogram target matters. Interactive: choose the 10%, 50% or 85% flat, see each flat&#x27;s histogram, and see the dust-mote ROI corrected with each. An optional aside on full-well depth is the product owner&#x27;s call. AC: the mote contrast shown for each level matches `flat_check.json`.
+225	
+226	**P6 Alignment.** How frames are brought together and why that raises SNR. Interactive: f02 + f05 (about 47 px apart, same pier side) averaged **without alignment**, which doubles the stars. The trio of stars used for alignment is highlighted, with offset vectors taken from the Stage A catalogues. Toggle align and the stars merge. Then attention turns to the **background**, where the noise readout shows about a 1/√2 drop. AC: the naive stack clearly shows doubled stars; the aligned stack matches the pipeline golden output.
+227	
+228	**P7 Algorithms.** How each algorithm decides what an outlier is, explained with high-school maths (&quot;standard deviation&quot;, never &quot;sigma&quot;). Interactive: a 5-frame stack that includes f03, shown with average and median side by side on the satellite ROI. There is guidance on which algorithm suits which frame count (from §6). AC: the trail is visible with average and gone with median.
+229	
+230	**P8 Light Frames.** Choosing good frames. FWHM, star counts and histograms are tools, and judgement still matters. The data shows this directly:
+231	- The tracking error is invisible in FWHM (8.57 px vs 8.21 for its original). It shows up in the star count, 74 vs 179, because trailed stars fail detection.
+232	- Clouds barely move the star count (163 → 153) but widen the histogram (background spread 108–114 vs 63–80).
+233	- f03 has middling metrics for reasons unrelated to its satellite trail.
+234	
+235	No single number catches every defect; looking at the frame does. A lighter version of the workbench: every frame with its thumbnail, metrics and histogram; average or median; one galaxy ROI; full calibration applied and locked; a teaser for the other algorithms. AC: selection changes update the ROI in under 1 s.
+236	
+237	**P9 Workbench.** Layout is designed together in Figma. Order of interaction:
+238	1. Calibration panel (bias, dark, flat level and flat calibration). Selecting a calibration frame shows it with the correct stretch.
+239	2. Frame list (all 24 entries, each with metrics and a histogram; select or deselect; set as reference).
+240	3. Algorithm and parameters.
+241	4. Scenario buttons.
+242	5. Reference view with the 4 ROI markers, and the ROI tiles updating live at bin 2.
+243	6. **Stack full image** (bin 1, progress, cancel), then the result view, then export as FITS or PNG.
+244	
+245	Default ROIs, in canonical space, with positions and sizes set in Figma: (1) the satellite trail in f03, (2) the central galaxy including faint outer structure, (3) the galaxy group just above it, (4) the dust mote on the left.
+246	*Teaching note:* the dust mote and hot pixels are fixed to the **sensor**. Because of the meridian flip, East-side frames place the mote at the opposite side of the sky. In a stack the mote only comes from the West frames, which is why median and rejection weaken it even without flats.
+247	
+248	**Scenarios** (defined in `src/sections/workbench/scenarios.ts`):
+249	
+250	| Scenario | Frames | Algorithm | Calibration |
+251	|---|---|---|---|
+252	| Default | The 20 raw frames, i.e. all except the synthetic variants (f03 is included) | median | full (per §6) |
+253	| Naive | All 24 entries | average | full |
+254	| Satellite Trail Challenge | f03 + f02, f04, f05, f07 (the best West-side frames by FWHM) | average | full |
+255	| Cloud Challenge | f14_cloud, f15_cloud, f16_cloud + f09, f13 (best by FWHM and stars, excluding the originals of the cloud frames) | average | full |
+256	| Tracking Error Challenge | f11_tracking + f09, f13 | average | full |
+257	
+258	AC: each button sets the full state in one click, and the ROIs update in under 1 s.
+259	
+260	## 8. Milestones and stories
+261	
+262	Gates for every merge to `main`: `uv run pytest tools`, `npm run typecheck`, `npm test`, `npm run build`. At the end of each milestone, add `npm run e2e` (smoke) and a `docker build` plus container smoke test (`/` and one `/api/roi`).
+263	
+264	**Phase 1 (now):** this spec, WBPP knowledge, precompute stages A and B.
+265	**Phase 2:** Figma (library plus one page per section), with the product owner.
+266	**Phase 3:** re-evaluate this spec against the design and update §7 and §11.
+267	
+268	**M1: display and selection**
+269	- M1-01 Scaffold: Vite/React/TS/Tailwind, Fastify server, Dockerfile, npm scripts, vitest, Playwright, section registry, and design tokens taken from the Figma library.
+270	- M1-02 Runtime data (Stage C) and the ROI API with unit tests (clamping, binning, dtype, limits).
+271	- M1-03 Data client (typed fetch, fetch cache) and the JS STF, tested against Python.
+272	- M1-04 App shell: wizard navigation (previous, next, progress), hash routing, back button.
+273	- M1-05 Workbench shell: every control present. Frame list with metrics and histograms. Calibration frame viewer with the correct stretch. Reference view with ROI markers. ROI tiles that show crops of the reference frame as placeholders.
+274	- M1-06 Skeletons for every lesson page, using the Figma layouts with placeholder content.
+275	- AC: click through every light and calibration frame with the correct stretch and orientation; back button works; `docker run` serves the app.
+276	
+277	**M2: average and median, calibration, live ROIs**
+278	- M2-01 Pipeline core: footprint, calibrate, warp, normalize, average and median, NaN edges, worker pool.
+279	- M2-02 Golden tests: a numpy reference implementation of `stack()` for small ROIs, with fixtures compared in vitest within tolerance. Warp checked against PixInsight `_r.xisf` at b1.
+280	- M2-03 Live ROIs (4 × bin 2 in under 1 s), result cache, noise readout.
+281	- M2-04 Full stack: band streaming, progress, cancel, result view, FITS and PNG export.
+282	- AC: calibration is applied in WBPP order, and the ROIs update on every change.
+283	
+284	**M3: lessons.** Each page&#x27;s interactive element and Figma prose, per §7.
+285	**M4: all algorithms and scenarios.** Kappa-sigma, winsorized and RCR with their exposed parameters; the five scenarios.
+286	**Polish:** whatever is left of the 8 hours.
+287	
+288	## 9. Language rules for prose and UI copy
+289	- Say &quot;pixel brightness&quot;, not ADU. Say &quot;standard deviation&quot;, not sigma. Say &quot;dark frames taken with the same exposure time and temperature as your lights&quot;, not &quot;matched darks&quot;.
+290	- Define every term the first time it appears: light, bias, dark, flat, dark flat, stack, master, reference frame.
+291	- No asides that don&#x27;t serve the current step. One idea per paragraph.
+292	
+293	## 10. Orchestration (autonomous implementation and validation)
+294	
+295	**Ownership and models**
+296	
+297	| Role | Model / effort | Owns |
+298	|---|---|---|
+299	| Orchestrator (main session) | Opus, high | SPEC.md, AGENTS.md, contracts (§4.1–4.4 types), merges to `main`, gates, reviews |
+300	| Foundation | Opus, high | M1-01, M1-04, `src/shared/` UI primitives and tokens. **Lands first**; everyone else branches from it. |
+301	| Data + server | Sonnet, medium | `tools/precompute/` stages B–D, `server/`, M1-02 |
+302	| Pipeline | Opus, high | `src/shared/pipeline/`, golden fixtures, M2-01/02/04, M4 algorithms |
+303	| Workbench UI | Sonnet, medium | `src/sections/workbench/`, M1-05, M2-03 integration, scenarios |
+304	| Lesson UI (2–3 agents) | Sonnet, medium | `src/sections/&lt;page&gt;/`, split by page group: [welcome, noise], [bias, darks, flats, flats-2], [alignment, algorithms, light-frames] |
+305	| Validator | Sonnet, medium | Runs gates and Playwright screenshot tours after every merge, compares them with the Figma frames, files issues in `TODO.md` |
+306	
+307	**Rules**
+308	- Code agents run in git worktrees on `section/&lt;name&gt;`, `asset/&lt;name&gt;` or `core/&lt;name&gt;`. Worktrees don&#x27;t contain `source_images/` or `data/`, so they read runtime data through `ASTRO_DATA=&lt;abs path to main&gt;/data/derived/runtime`.
+309	- An agent receives this spec, its section brief and the contracts, not the chat history. An agent touches only the files it owns. A cross-boundary change becomes a request in `TODO.md`.
+310	- Agents rebase onto `main` and run the gates. The orchestrator merges. Commit messages follow AGENTS.md.
+311	- **Waves:** (0) precompute and research → (1) Foundation alone → (2) Data+server, Pipeline, Workbench UI and Lesson skeletons in parallel → (3) M2 integration → (4) M3 lessons ‖ M4 algorithms → polish.
+312	
+313	## 11. Open questions, proposals, risks
+314	
+315	**Deferred to Figma:** ROI sizes and positions, the normalized ROI tile form factor, page layouts, SVG art direction, and all prose.
+316	
+317	**Deferred (may revisit if time allows):** a live full-field stack at bin 8 in the reference view.
+318	
+319	**Risks**
+320	- A full-resolution stack pulls about 1.0 GB from the server. The product owner deferred this until it becomes a problem.
+321	- Lanczos warping cost in JS. Deferred until it becomes a problem; §6.4 names the fallback.
+322	
+323	## 12. Decision log
+324	- 2026-09-24:
+325	  - Lessons use native-resolution ROIs only. Workbench ROIs are 2×2 binned. The full stack runs at full resolution. Source images are never down-binned for delivery.
+326	  - One backend endpoint (ROI regions) is authorized. It has no request-size limit (a whole image may be requested), and it is addressed in each asset&#x27;s sensor space (§4.3).
+327	  - Deployment is via `docker save`, owned by the product owner.
+328	  - The old-camera dark is display-only.
+329	  - Normalization is authorized and precomputed.
+330	  - Changing the reference re-registers the stack to it, and images keep one canonical orientation.
+331	  - Cache is in memory only and clears on refresh.
+332	  - ROI sizes are deferred to Figma.
+333	  - All 9 flat masters are precomputed.
+334	  - Figma timeboxing is handled by the product owner with the design agent.
+335	  - Masters must follow PixInsight WBPP (knowledge in `docs/knowledge/wbpp.md`).
+336	  - The workbench and Light Frames lesson list all 24 entries (20 raw + 4 synthetic variants). Default selects the 20 raw frames; Naive selects all 24.
+337	  - Rejected: pixel-stack inspector, rejection-map overlay. Deferred: live bin-8 full-field stack, transfer size over the internet, Lanczos cost. The satellite trail is visible with the right stretch, so lessons may use a per-ROI stretch.
+338	  - WBPP deviations in §6.7 approved: global normalization and equal weights (for low complexity and CPU time); cosmetic correction off for now (it may return as a workbench option); linear fit and ESD are never explained to learners; no autocrop (it only matters at export).
+339	  - Master flats use winsorized clipping (lowest complexity; precomputed, so no CPU cost for the learner).
+340	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-04-41-771Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-04-41-771Z" class="timestamp-link"><time datetime="2026-09-24T16:04:41.771Z" data-timestamp="2026-09-24T16:04:41.771Z">2026-09-24T16:04:41.771Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01As31MqpN2Lxwxfh4F3jqPk"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/mnt/c/Users/Jerome Hollon/Documents/claude/astrophotography-explainer/docs/knowledge/wbpp.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T16-04-41-980Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T16-04-41-980Z" class="timestamp-link"><time datetime="2026-09-24T16:04:41.980Z" data-timestamp="2026-09-24T16:04:41.980Z">2026-09-24T16:04:41.980Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# PixInsight WBPP: how the reference pipeline works
+2	
+3	This file is local knowledge for implementing agents. It covers how PixInsight&#x27;s **WeightedBatchPreprocessing (WBPP)** script calibrates, registers, normalizes and integrates, which settings this dataset&#x27;s masters actually used, and what that means for our in-browser pipeline. The masters in `source_images/` were built with WBPP, and our pipeline replicates it where that&#x27;s practical.
+4	
+5	**Sources, in order of authority:**
+6	1. **WBPP 3.0.1 source**, installed locally at `C:/Program Files/PixInsight/src/scripts/BatchPreprocessing/`. This is the exact version that built our master light. Key files: `BPP-processing.js` (ImageCalibration and ImageIntegration setup), `BPP-CalibrationMatcher.js` (which masters calibrate what), `BPP-FrameGroup.js` (auto rejection), `BPP-global.js` (defaults), `BPP-StackEngine.js` (per-type rejection parameters).
+7	2. **PCL headers**, installed at `C:/Program Files/PixInsight/include/pcl/`: `RobustChauvenetRejection.h`, `WinsorizedSigmaClippingRejection.h`, `LanczosInterpolation.h`, `DrizzleData.h`.
+8	3. **PixInsight reference docs**: ImageCalibration and LocalNormalization are installed locally under `C:/Program Files/PixInsight/doc/tools/`. ImageIntegration is only online, archived at https://web.archive.org/web/20240419123811/https://pixinsight.com/doc/tools/ImageIntegration/ImageIntegration.html (the live URL returns 404).
+9	4. **Bernd Landmann**, *Guide to Preprocessing of Raw Data with PixInsight* (2023): https://sh-cosmiccanvas.s3.us-west-2.amazonaws.com/Resources/20230101_GuideToPreprocessingOfRawDataWithPixInsight.pdf
+10	5. PixInsight 1.8.9 release notes on RCR, PSF weights and the new LN: https://pixinsight.com/forum/index.php?threads/pixinsight-1-8-9-released.18148/ · Image weighting doc: https://pixinsight.com/doc/docs/ImageWeighting/ImageWeighting.html · Maples et al. 2018, *Robust Chauvenet Outlier Rejection*, ApJS 238, 2: https://arxiv.org/abs/1807.05276
+11	
+12	**UNVERIFIED** marks anything not confirmed from source code or the recorded headers. The docs render their equations as SVG images, so formulas marked *(reconstructed)* come from the surrounding prose and standard PixInsight practice, not from the equation images themselves.
+13	
+14	**Units.** PixInsight works in [0,1]. 16-bit DN = value × 65535. &quot;DN/ADU&quot; below is for our reference only. Prose shown to users says &quot;pixel brightness&quot;.
+15	
+16	---
+17	
+18	## 0. WBPP pipeline order (WBPP 3.0.1)
+19	
+20	WBPP runs these steps in order. Items marked *(off)* are disabled by default or don&#x27;t apply to mono data.
+21	
+22	1. Build master bias, master dark, master dark-flat and master flat.
+23	2. Calibrate lights (ImageCalibration). Automatic cosmetic correction runs inside this step.
+24	3. Linear defect correction *(off)*, then CosmeticCorrection process *(off)*, then Debayer *(mono: n/a)*.
+25	4. Measurements: PSF signal and noise estimates, FWHM, eccentricity. Then weights.
+26	5. Frame selection *(off)*, then pick the registration reference frame.
+27	6. Plate solve the reference, then register with StarAlignment (drizzle data generated).
+28	7. Build the LN reference (an integration of the best frames), then run LocalNormalization. This produces `.xnml` files.
+29	8. ImageIntegration, then drizzle *(if enabled)*, then autocrop.
+30	
+31	Source: Landmann §10, and the `doCalibrate`/integration code in `BPP-processing.js`.
+32	
+33	---
+34	
+35	## 1. Master calibration frames
+36	
+37	### 1.1 Bias and dark masters
+38	
+39	WBPP integrates the raw frames with **no pre-calibration**. The master dark is *not* bias-subtracted, so it contains the bias pedestal. WBPP 2.5.0 removed compatibility with pre-calibrated master darks: the code comment reads `IC.calibrateDark = engine.overscan.enabled || masterBiasEnabled; // compatibility with pre-calibrated master dark has been removed`.
+40	
+41	The ImageIntegration settings for bias and dark (`BPP-processing.js`, `default:` branch) are:
+42	- `combination = Average`
+43	- `normalization = NoNormalization`
+44	- `rejectionNormalization = NoRejectionNormalization`
+45	- `weightMode = DontCare` (all weights = 1)
+46	- `rangeClipLow/High = false`
+47	- Rejection: auto (§4.7). **Bias and darks always use Winsorized σ-clipping** when there are 6 or more frames, whatever the count. Parameters are σ low 4, σ high 3, and Winsorization cutoff 5.
+48	
+49	### 1.2 Flats and dark-flats
+50	
+51	A master dark-flat is just a master dark built at the flat&#x27;s exposure (the Dark image type), so it gets the §1.1 settings.
+52	
+53	`BPP-CalibrationMatcher.getCalibrationGroupsFor()` decides how each flat frame is calibrated:
+54	- WBPP looks up a master bias `mb` and a master dark `md` matching the flat&#x27;s exposure. When `mb` exists, an exact exposure match is required.
+55	- **The bias is dropped whenever a master dark (here, the dark-flat) is present and not optimized** (`optimizeDarks` defaults to `false`).
+56	
+57	So each flat is calibrated as:
+58	```
+59	F_cal = F − MDF      if a matching dark-flat exists
+60	F_cal = F − MB       else if a master bias exists
+61	F_cal = F            else (uncalibrated flats → vignetting UNDER-corrected later)
+62	```
+63	`IC.calibrateFlat = false` because each flat frame was already calibrated before integration.
+64	
+65	The master-flat integration settings (`case ImageType.Flat`) are:
+66	- `combination = Average`
+67	- `normalization = Multiplicative` (output)
+68	- `rejectionNormalization = EqualizeFluxes`
+69	- `weightMode = DontCare`
+70	- no range rejection
+71	- large-scale rejection off
+72	- Rejection: auto. With 25 flats that gives **Linear Fit clipping** (low 5, high 3.5), because n &gt; 15 and the frames are not the bias or dark type.
+73	
+74	The normalization formulas *(reconstructed; the doc gives these in prose)*, where `m` is the median of each whole frame and `0` is the reference (first) frame:
+75	- Multiplicative output: `y_i = x_i · m_0 / m_i`
+76	- Equalize fluxes (rejection): the same multiplicative form, used only when deciding which pixels to reject.
+77	
+78	### 1.3 Dark optimization (off by default; described for completeness)
+79	
+80	`BPP.Defaults.optimizeDarks = false`. When it&#x27;s enabled, ImageCalibration computes a factor `k` per frame by minimizing noise (a k-σ noise estimate) of the calibrated frame:
+81	```
+82	Cal = ((L − MB) − k·(MD − MB)) / MF · f
+83	```
+84	It is only relevant for cameras without cooling or with mismatched exposures. Amp glow often fails to calibrate out with it. Sources: IC doc §1.6 and Landmann §7.2.
+85	
+86	---
+87	
+88	## 2. Light calibration (ImageCalibration as WBPP configures it)
+89	
+90	### 2.1 Which masters apply
+91	
+92	`getCalibrationGroupsFor()`, with the code comment verbatim: *&quot;MasterBias is needed only when: 1. master dark is NOT present 2. master dark is present and optimized.&quot;* So **with dark optimization off (the default), the master bias is not used on lights whenever a master dark is present.**
+93	
+94	| User has | WBPP light formula | Notes |
+95	|---|---|---|
+96	| dark + flat (± bias) | `C = (L − MD) / (MF / f)` | Canonical case. Bias is ignored because MD already contains it. |
+97	| dark only (± bias) | `C = L − MD` | |
+98	| bias + flat | `C = (L − MB) / (MF / f)` | Hot pixels and amp glow remain. |
+99	| bias only | `C = L − MB` | |
+100	| flat only | `C = L / (MF / f)` | Pedestal not removed, so the flat **over**-corrects (inverse vignetting). Landmann §8.2. |
+101	| nothing | `C = L` | WBPP warns and skips calibration. |
+102	
+103	Here `f` is the **master-flat scaling factor**, a robust mean of the master flat. It&#x27;s a two-sided symmetric trimmed mean that drops 5% at each end (`IC.flatScaleClippingFactor = 0.05`; IC doc &quot;Scale clipping factor&quot;). Dividing by `MF/f` leaves the light&#x27;s mean level unchanged. For CFA data WBPP uses separate CFA factors; that doesn&#x27;t apply to our mono data.
+104	
+105	### 2.2 Output pedestal and truncation
+106	
+107	- `pedestalMode = Auto` and `pedestalLimit = 0.0001`. If more than 0.01% of a calibrated frame&#x27;s pixels are ≤ 0, IC adds a robust positive pedestal and writes the `PEDESTAL` keyword. Otherwise no pedestal is added. Our lights sit about 720 DN above the dark, so the pedestal is normally 0 (UNVERIFIED per frame).
+108	- IC truncates its output to [0,1] as the final step. `outputSampleFormat` is f32.
+109	
+110	### 2.3 Automatic cosmetic correction (on by default)
+111	
+112	`BPP.Defaults.ccEnabled = true` and `ccHighSigma = 10`. These map to `IC.cosmeticCorrectionHigh` and `IC.cosmeticHighSigma` in ImageCalibration. The tooltip says it *&quot;detects pixels with abnormally high or low values in the master dark frame using multiscale and statistical analysis&quot;*, flagging pixels more than 10σ above the median of a high-pass filtered master dark. Those pixels are *&quot;replaced with plausible values calculated from their local neighborhoods&quot;*.
+113	
+114	It requires a master dark whose exposure is within 15 s of the light&#x27;s. The separate CosmeticCorrection process is off (`cosmeticCorrection: false`). Whether the user&#x27;s WBPP run had auto-CC enabled isn&#x27;t recorded in the master light (UNVERIFIED).
+115	
+116	---
+117	
+118	## 3. Measurement, weighting, registration
+119	
+120	### 3.1 Subframe weights
+121	
+122	- Weighting is on by default. The WBPP default method is **PSF Signal Weight (PSFSW)**. The alternatives are PSF SNR, PSF Scale SNR, SNR estimate, or a custom formula written to a CSV file.
+123	- WBPP writes weights to the `WBPPWGHT` keyword. ImageIntegration then uses `weightScale = BWMV` and `minWeight = 0.05`.
+124	- **PSFSW** combines total PSF flux (`TFlux`) and mean PSF flux (`TMeanFlux`), from hybrid PSF/aperture photometry of detected stars, with noise `N*` and background `M*`, normalized by constants α and β. **PSF SNR** is a ratio-of-powers form built from the same flux terms and `N*²`.
+125	- The exact equations are SVG images (ImageWeighting doc eq. 16 and 18), so they are **UNVERIFIED** here.
+126	- Combination: `weighted average = Σ w_i·y_i / Σ w_i` over non-rejected pixels. Weights are relative to the reference image, which has weight 1 by convention (II doc).
+127	
+128	### 3.2 Registration (StarAlignment)
+129	
+130	WBPP defaults: `saPixelInterpolation = Auto`, `saClampingThreshold = 0.3`, `saDistortionCorrection = false` (a projective, 8-parameter homography), plate solving on, and drizzle data generated.
+131	- **Auto interpolation** selects Lanczos-3 for same-scale registration (https://pixinsight.com/doc/docs/InterpolationAlgorithms/InterpolationAlgorithms.html). Cubic filters (Mitchell–Netravali) are for strong downsampling only.
+132	- **Lanczos-3 with clamping** (`LanczosInterpolation.h`) works as follows:
+133	  - Kernel: `L(t) = sinc(t)·sinc(t/3)` for |t| &lt; 3.
+134	  - It uses a 6×6 neighbourhood. For a sample position `(x,y)`, `x0 = floor(x)`, `dx = x − x0` (same for y), and taps run over `x0−2 … x0+3`.
+135	  - Each tap contributes `s = v·w`, with separable weight `w = L(j − dx)·L(i − dy)`. Positive `s` accumulates into `sp, wp`; negative `s` into `sn += −s, wn += −w`.
+136	  - Clamping: `r = sn/sp`. If `r ≥ 1`, return `sp/wp`. If `r &gt; 0.3`, then `c = 1 − ((r − 0.3)/0.7)²` and `sn *= c, wn *= c`.
+137	  - Result: `(sp − sn)/(wp − wn)`.
+138	  - Border taps mirror the image (`f[−x]`, `f[2W−2−x]`).
+139	- StarAlignment sets output pixels that map outside the source to **0**. Integration later discards them through range rejection (§4.8).
+140	
+141	### 3.3 `.xdrz` alignment data: coordinate convention (verified)
+142	
+143	- `AlignmentMatrix` holds 9 numbers, row-major, forming the homography `H`. For an output pixel `(u,v)`: `[x&#x27;,y&#x27;,w]ᵀ = H·[u,v,1]ᵀ`, then `x = x&#x27;/w`, `y = y&#x27;/w`.
+144	- **`H` maps reference-frame coordinates to raw-frame coordinates.** That&#x27;s the inverse-warp direction: for each output pixel, it gives the position to sample in the raw frame.
+145	  - Reference frame: `FRAME_0007` (its matrix is the identity).
+146	  - Empirical check: frame 3 has `dx = −26.3`, and a star at raw x = 3056 appears at registered x = 3084.
+147	- `AlignmentOrigin = {0.5,0.5}`. From `DrizzleData.h`: *&quot;corresponds to image coordinates {0,0} in the coordinate system used for image registration… the center of the top-left pixel.&quot;* So in registration coordinates, pixel `(i,j)` has its centre at `(i,j)`. That matches PCL interpolation&#x27;s `x0 = floor(x)` convention, so `x` and `y` feed the Lanczos sampler directly, with no ±0.5 shift. Row 0 is the top row (XISF order).
+148	- To use another reference `r`, sample raw frame `i` at `H_i · H_r⁻¹ · p`, where `p` is a pixel in r&#x27;s raw grid.
+149	- **2×2 binned grids:** binned index `b` has its centre at native `2b + 0.5`. With `S = [[2,0,0.5],[0,2,0.5],[0,0,1]]`, use `H_bin(i←r) = S⁻¹ · H_i · H_r⁻¹ · S`.
+150	
+151	---
+152	
+153	## 4. Integration (ImageIntegration) — what WBPP sets for lights
+154	
+155	### 4.1 Light settings (WBPP 3.0.1 code, `case ImageType.Light`)
+156	
+157	- `combination = Average`
+158	- `weightMode = PSFSignalWeight` (default)
+159	- `weightScale = BWMV`
+160	- `minWeight = 0.05`
+161	- Without LN: `normalization = AdditiveWithScaling` and `rejectionNormalization = Scale` (&quot;scaling + zero offset&quot;).
+162	- With LN (**WBPP&#x27;s default**, `localnormalization: true`): both normalizations switch to `LocalNormalization` and `LocalRejectionNormalization`, and `subtractPedestals = false`.
+163	- `clipLow = clipHigh = true`
+164	- `rangeClipLow = true`, `rangeLow = 0`, `rangeClipHigh = false`
+165	- `truncateOnOutOfRange = false`
+166	- `largeScaleClipLow/High = false`
+167	- `winsorizationCutoff = 5`
+168	- Auto rejection (§4.7).
+169	
+170	### 4.2 Location and scale estimators
+171	
+172	- **Location:** `m` = median of the whole image. The exception is the IKSS scale estimator, which uses the IKSS location instead.
+173	- **Scale (WBPP: BWMV):** `s` = √(biweight midvariance), computed around the median `M`:
+174	  ```
+175	  y_k = (x_k − M) / (9·MAD);   a_k = 1 if |y_k| &lt; 1 else 0
+176	  BWMV = n · Σ a_k (x_k − M)² (1 − y_k²)⁴  /  ( Σ a_k (1 − y_k²)(1 − 5y_k²) )²
+177	  s = sqrt(BWMV)
+178	  ```
+179	  This is Wilcox §3.12, as quoted in the II doc. MAD is the raw median absolute deviation.
+180	
+181	### 4.3 Global normalization formulas *(reconstructed)*
+182	
+183	Here `0` is the reference image. In ImageIntegration that&#x27;s the first input image by convention (II doc).
+184	- **Scaling factor:** `k_i = s_0 / s_i`
+185	- **Scale + zero offset** (rejection normalization): `y_i = (x_i − m_i)·k_i + m_0`
+186	- **Additive:** `y_i = x_i − m_i + m_0`
+187	- **Multiplicative:** `y_i = x_i · m_0/m_i`
+188	- **Additive with scaling** (output): `y_i = (x_i − m_i)·k_i + m_0`, the same as scale + zero offset.
+189	- **Multiplicative with scaling:** `y_i = x_i · k_i · m_0/m_i`
+190	
+191	So for lights without LN, **one normalized stack serves both rejection and combination**.
+192	
+193	### 4.4 Local normalization (WBPP default; we do not replicate it)
+194	
+195	- Per-pixel form: `y = k(x,y)·(x − b_i(x,y)) + b_0(x,y)`. The `b` terms are local background models and `k` is a local scale.
+196	- WBPP settings:
+197	  - Method: PSF flux photometry (`localnormalizationMethod = PSFFlux`).
+198	  - `scale = min(W,H)/gridSize`, with gridSize 4. That&#x27;s about 1042 px here; LN supports discrete scales from 32 to 8192 (UNVERIFIED how it rounds).
+199	  - LN reference: an integration of the best frames (up to 20) by PSFSW. Low and high clipping levels are 4.5e-5 and 0.85.
+200	  - Reference rejection 3.0, target rejection 3.2.
+201	- LN tracks time-varying gradients and partly normalizes clouds. Sources: `BPP-processing.js` around line 540, LN doc §1–3.
+202	
+203	### 4.5 Combination
+204	
+205	- **Average:** `Σ w·y / Σ w` over the surviving pixels.
+206	- **Median:** the median of the surviving pixels. It gives about 20% lower SNR than the average for the same frames (II doc: the standard error of the median is √(π/2)≈1.25× that of the mean). Its value is implicit robustness to outliers.
+207	
+208	### 4.6 Rejection algorithms (per pixel stack, on normalized values)
+209	
+210	The PixInsight defaults are the ones WBPP sets (`BPP-StackEngine.js`). Every iterative method stops when nothing more is rejected or fewer than 3 pixels remain.
+211	
+212	- **Min/max** (context only): drop the `n_low` smallest and `n_high` largest values. It costs signal unconditionally. Not for production.
+213	  - *Plain:* always throw away the brightest and darkest few.
+214	- **Percentile clipping** (default p_low 0.2, p_high 0.1). A single pass: with `m` the stack median, reject `x` when `(m − x)/m &gt; p_low` or `(x − m)/m &gt; p_high` *(reconstructed)*. Use it for 3–6 frames.
+215	  - *Plain:* throw away anything more than a fixed percentage darker or brighter than the middle value.
+216	- **Sigma (kappa-sigma) clipping** (defaults σ_low 4, σ_high 3). Iterate:
+217	  1. `m` = median, `σ` = standard deviation of the current stack.
+218	  2. Reject `x` when `(m − x)/σ &gt; σ_low` or `(x − m)/σ &gt; σ_high`.
+219	  3. Repeat.
+220	
+221	  WBPP flags it outside 8–15 frames.
+222	  - *Plain:* find the middle value and how spread out the values normally are (the standard deviation), throw away anything too many spreads away, and repeat.
+223	- **Winsorized sigma clipping** (σ_low 4, σ_high 3, cutoff 5). This follows PCL `WinsorizedSigmaClippingRejection`. The II doc describes the same Huber scheme with 1.5, 1.134 and 0.0005; that II calls this exact class is UNVERIFIED. On the sorted stack, iterate:
+224	  1. Get robust parameters from a copy `v`:
+225	     - Start with `m = median(v)` and `σ = 1.1926·Sn(v)`. Sn is Rousseeuw–Croux: `lomed_i himed_j |x_i − x_j|`.
+226	     - Huber loop:
+227	       - Set `t0 = m − 1.5σ` and `t1 = m + 1.5σ`.
+228	       - On the **first outer iteration only** (the cutoff): values beyond `m ± 5σ` are replaced by `m`, and values between `t` and the cutoff are clamped to `t0`/`t1`. On later iterations, simply clamp to `[t0,t1]`.
+229	       - Update `σ = 1.134·stddev(v)` and `m = mean(v)`.
+230	       - Stop when `|Δσ|/σ &lt; 0.0005`, and only after at least 2 passes.
+231	  2. Reject from the low end while `(m − x)/σ &gt; σ_low` and from the high end while `(x − m)/σ &gt; σ_high`.
+232	  3. Repeat until no rejection.
+233	
+234	  WBPP needs at least 8 frames; the II doc calls it excellent from 15 frames up.
+235	  - *Plain:* before measuring the spread, pull wild values in to the edge of the normal range so a single satellite trail can&#x27;t inflate the spread. Then reject as in kappa-sigma.
+236	- **Averaged sigma clipping** (context only): IRAF AVSIGCLIP. It estimates σ from a Poisson gain model, for 10 or more frames.
+237	- **Linear fit clipping** (low 5, high 3.5, in average-absolute-deviation units). Fit a straight line to the *sorted* stack, minimizing average absolute deviation and maximizing inliers, then reject points far from the line. It is robust to gradients that vary from frame to frame. Best with 15–25 or more frames. **This is what the dataset&#x27;s master light used** (§5).
+238	  - *Plain:* line the values up from smallest to largest, draw the best straight line through them, and throw away points that sit far from the line.
+239	- **Generalized ESD** (context only; outliers fraction 0.3, significance 0.05, low relaxation 1). This is Rosner&#x27;s many-outlier test assuming a normal distribution. It tests the most extreme value repeatedly, up to 30% of the stack, and avoids masking. Good from 15 frames, and workable at 8–10.
+240	  - *Plain:* keep asking &quot;is the most extreme value too extreme to be chance?&quot; until the answer is no.
+241	- **Robust Chauvenet Rejection (RCR)**. WBPP sets the limit to **0.1**; the PCL default is 0.5, which is the classic Chauvenet criterion. Taken verbatim from `RobustChauvenetRejection.h`:
+242	  ```
+243	  sort(data); i=0; j=N
+244	  for phase in 0,1,2:
+245	    loop:
+246	      phase0: mean = median(data[i:j]); sigma = LineFitDeviation(...)
+247	      phase1: mean = median(data[i:j]); sigma = SampleDeviation(...)
+248	      phase2: mean = mean(data[i:j]);   sigma = stddev(data[i:j])
+249	      if 1+sigma == 1 or (j−i) &lt; 3: return
+250	      n = j − i
+251	      d0 = n·Q((mean − data[i])/sigma);  d1 = n·Q((data[j−1] − mean)/sigma)
+252	      if d0 &gt;= limit and d1 &gt;= limit: break        # both extremes plausible → next phase
+253	      if d1 &lt; d0: j −= 1 else: i += 1               # reject ONE most-improbable extreme
+254	  Q(z)   = 0.5·(1 − erf(z/√2))                       # one-sided normal tail probability
+255	  FN(N)  = 1 / (1 − 2.9442·N^(−1.073))               # small-sample correction
+256	  SampleDeviation  = FN(N) · (the ⌊0.683·N⌋-th smallest |x − mean|)
+257	  LineFitDeviation = if n&#x27; = int(0.683·N + 0.317) &lt; 8: SampleDeviation
+258	                     else: y = first n&#x27; of sorted |x − mean|;  x_k = √2·erfinv((k+1−0.317)/N), k=0..n&#x27;−1
+259	                           least-squares line y≈a+bx;  return FN(N)·(a + b·1)
+260	  ```
+261	  For N &gt; 30000, bulk rejection kicks in. It never applies to our stacks of 24 or fewer. WBPP asks for at least 15 frames.
+262	  - *Plain:* with this many frames, would a value this far from the middle be expected to turn up even once by chance? If not, remove the single most unlikely value and ask again. The questions get more precise over three rounds.
+263	
+264	### 4.7 WBPP auto rejection (`FrameGroup.bestRejectionMethod()`, verbatim logic)
+265	
+266	```
+267	n &lt; 6                                   → Percentile clipping
+268	n ≤ 15  OR  type is Bias or Dark         → Winsorized sigma clipping
+269	otherwise                               → Linear fit clipping
+270	```
+271	
+272	WBPP&#x27;s validity warnings (`BPP-FrameGroup.js` ~line 1276):
+273	- Percentile clipping: n ≤ 8.
+274	- Sigma clipping: 8 ≤ n ≤ 15.
+275	- Winsorized sigma clipping: n ≥ 8.
+276	- Averaged sigma clipping: 8–10.
+277	- Linear fit clipping: n ≥ 20.
+278	- ESD: n ≥ 25 is best.
+279	- RCR: n ≥ 15.
+280	
+281	This gives our frame-count guidance for the Algorithms page.
+282	
+283	### 4.8 Range rejection and out-of-frame pixels
+284	
+285	`rangeClipLow` rejects every pixel **≤ rangeLow (0)** before the statistical rejection runs. That&#x27;s how the black borders left by registration, and pixels truncated to zero, are excluded. Clip high (≥ 0.98) is available but off for lights.
+286	
+287	### 4.9 Large-scale rejection (off by default)
+288	
+289	When enabled, it grows rejected regions using multiscale structure: protected layers 2, growth 2. It is meant for big artifacts such as plane and satellite trails and cloud edges. The exact algorithm is UNVERIFIED.
+290	
+291	### 4.10 Autocrop (WBPP default on)
+292	
+293	It builds the low-rejection map, which is the fraction of frames rejected low at each pixel, and so marks where registration left borders. It then finds the largest axis-aligned rectangle where the map is ≤ 0.25 (`TOLERANCE = 0.25` in `getAutocropRegion`) and stores it in `WBPPCROP`.
+294	
+295	---
+296	
+297	## 5. What this dataset&#x27;s masters recorded (header XML → `PixInsight:ProcessingHistory`)
+298	
+299	| Master | Built by | Inputs | Integration settings |
+300	|---|---|---|---|
+301	| **Bias** `masterBias_BIN-1_6224x4168.xisf` | WBPP 2.8.8, 2025-06-27 | 100 raw bias frames, dark library 2025-03-07, gain 100, −11.9…−7.6 °C | Average; NoNormalization; **Winsorized σ-clip 4/3, cutoff 5**; DontCare weights; no range clip |
+302	| **Dark** `masterDark_…_EXPOSURE-300.00s.xisf` | WBPP 2.8.8, 2025-06-27 | **Raw** 300 s darks (12 listed, `numberOfImages = 11`), gain 100, **−14.9/−15.0 °C**, not bias-subtracted | Average; NoNormalization; **Winsorized σ-clip 4/3, cutoff 5**; DontCare |
+303	| **Light** `masterLight_…_autocrop.xisf` | **WBPP 3.0.1**, 2026-09-18 | All 20 frames `…_c_2_r.xisf` (calibrated `_c`, registered `_r`; the `_2` is UNVERIFIED), `.xnml` and `.xdrz` | Average; **weightMode PSFSNR** (user changed the PSFSW default), `WBPPWGHT`, BWMV, minWeight 0.05; **LocalNormalization** (output and rejection); **Linear fit clipping 5/3.5** (auto, n = 20); clipLow/High on; rangeClipLow ≤ 0 on; large-scale off; drizzle data on; Moffat4 PSF |
+304	
+305	- **Master light results:**
+306	  - Rejected low: 7,422,087 pixels (1.43% of 518.8 M), which includes the range-rejected borders.
+307	  - Rejected high: 2,227,887 (0.43%).
+308	  - Autocrop `WBPPCROP = (116,61)x(6210,4153)`, giving 6094×4092.
+309	  - Final MRS noise 1.268e-4, about 8.3 DN.
+310	  - Final location 9.53e-3, about 625 DN.
+311	- **Which bias, dark and flat calibrated the `_c` lights isn&#x27;t recorded** in the master light (UNVERIFIED). Given WBPP&#x27;s rules, the bias was not applied to lights if this master dark was used.
+312	- **The dark is 11 °C colder than the lights** (−15 °C vs −4 °C). Dark current grows with temperature, so the dark under-represents the lights&#x27; dark signal. On this sensor at 300 s the absolute amount is tiny: the master dark&#x27;s median is 161 DN against the bias&#x27;s 160.5. The mismatch mostly shows up as under-corrected hot pixels. The user has accepted this for teaching.
+313	- **Recorded WBPP weights** (PSFSNR, normalized so the maximum is 1), by frame:
+314	  - 0000–0003: .500 .503 .480 .525
+315	  - 0004–0007: .703 .685 .560 .742
+316	  - 0008–0011: .628 .845 .923 .914
+317	  - 0012–0015: .787 .770 **1.000** .879
+318	  - 0016–0019: .245 .322 .425 .400
+319	
+320	  The late frames 16–19 have the lowest weights and also the highest high-rejection counts (531 k for frame 16).
+321	
+322	---
+323	
+324	## 6. Implications for our browser pipeline
+325	
+326	### 6.1 Stage order (exact)
+327	
+328	For each selected frame `i`, over the sensor-space rectangle that the ROI (or tile) needs:
+329	
+330	1. **Load** the raw light crop in DN. Synthetic FITS frames must be `flipud` first; see AGENTS.md.
+331	2. **Calibrate in sensor space**, following WBPP&#x27;s master-selection rules (§2.1):
+332	   ```
+333	   D = MD            if dark ON
+334	       MB            else if bias ON
+335	       0             else
+336	   C = (L − D) / (MF_v / f_v)      if flat ON  (MF_v = chosen master-flat variant, f_v its 5%-trimmed mean)
+337	   C = (L − D)                     otherwise
+338	   ```
+339	   Keep the result as float32. Don&#x27;t truncate and don&#x27;t add a pedestal (§6.3).
+340	3. **Register:** inverse-warp into the output grid with `H_i·H_r⁻¹`, using the binned form `S⁻¹·…·S` for 2×2 ROIs (§3.3). Sample with Lanczos-3 and clamping 0.3. Output pixels whose source position falls outside `[0,W−1]×[0,H−1]` become **NaN**.
+341	4. **Normalize** with precomputed, reference-relative scale + zero offset: `y = (C − m_i)·(s_r/s_i) + m_r`. The same values feed both rejection and combination (§4.3).
+342	5. **Reject** per pixel over the non-NaN values. NaN plays the role of WBPP&#x27;s range rejection of ≤ 0. Use the §4.6 algorithms with WBPP defaults:
+343	   - kappa-σ 4/3
+344	   - winsorized 4/3, cutoff 5
+345	   - RCR limit 0.1
+346	   - percentile 0.2/0.1, if we expose it for small stacks
+347	6. **Combine:** equal-weight average or median of the survivors (§6.3 explains why weights are off). If all values are NaN or rejected, output NaN.
+348	7. **No autocrop.** Display NaN as the background colour.
+349	
+350	### 6.2 Replicated exactly
+351	
+352	- The master selection logic (the bias drops out when a dark is present).
+353	- The calibration formula and the 5%-trimmed-mean flat scale.
+354	- The master dark and master bias themselves, which are WBPP-built.
+355	- Master-flat construction per §1.2.
+356	- StarAlignment&#x27;s actual matrices and Lanczos-3 with clamping.
+357	- Median/BWMV estimators and the scale + zero offset / additive-with-scaling normalization.
+358	- The RCR, Winsorized and σ-clip algorithms and their defaults.
+359	- Range rejection of out-of-frame pixels.
+360	
+361	### 6.3 Simplified, with justification
+362	
+363	- **Local normalization → global.** LN needs PSF photometry and multiscale background models per frame, and it&#x27;s too heavy to justify in the browser. Global scale + zero offset is exactly what WBPP does when LN is off. All frames come from one night on one target.
+364	  - *Caveat:* LN would partly normalize cloud frames 14–16. With global normalization the clouds stay as structures, which is better for teaching rejection.
+365	- **Weights off (DontCare).** The dataset&#x27;s master used PSFSNR weights. PSF photometry in the browser is out of scope, and equal weights keep the average vs. median vs. rejection comparison clean.
+366	  - Keep the recorded WBPP weights (§5) in the frame manifest so they can be displayed.
+367	  - Weights could be re-enabled later from precomputed values. The synthetic frames would need a proxy weight from our star metrics, such as total star flux over noise².
+368	- **No pedestal or truncation.** Floats avoid clipping. For our lights at about 720 DN above the dark, WBPP&#x27;s auto-pedestal would be 0 in practice, so the results are the same except for a handful of clipped pixels.
+369	- **Auto cosmetic correction skipped.** Hot pixels are a lesson topic, and dithered stacks with rejection remove them, which is itself the teaching point. Optional later: a precomputed hot-pixel mask (&gt; 10σ above the median of a high-pass filtered master dark) replaced with a 3×3 median.
+370	- **Master flats use Winsorized instead of Linear-fit clipping.** WBPP&#x27;s auto rule picks Linear fit for 25 flats, but panel flats have essentially no outliers, so the difference is negligible. Implement Linear fit in the precompute only if time allows.
+371	- **Linear fit clipping and ESD in the browser:** not in the MVP algorithm list. RCR and Winsorized cover robust rejection. Mention Linear fit on the Algorithms page as &quot;what the author&#x27;s own master used&quot;.
+372	- **Normalization stats:** computed on the calibrated frame in sensor space, excluding a border of about 64 px, rather than on the registered frame. The median and BWMV are robust to the edge difference.
+373	
+374	### 6.4 Precompute this implies (Python, `tools/`)
+375	
+376	1. **Master dark-flats ×3** (10%, 50% and 85% exposures): average, no normalization, Winsorized 4/3 with cutoff 5.
+377	2. **Master flats ×9**, one per exposure {10,50,85} × calibration {`−MDF`, `−MB`, none}:
+378	   - Per-flat calibration as in §1.2.
+379	   - Integration: average, multiplicative normalization (median), equalize-fluxes rejection normalization, rejection per §6.3.
+380	   - Store each master with its **scale `f_v`** (5% two-sided trimmed mean).
+381	3. **Normalization stats.** Stats are needed for every frame (24 = 20 raw + 4 flipped synthetic) × every effective light-calibration state.
+382	   - The states: **{none, bias, dark} × {no flat, 9 flat variants} = 30**. Bias + dark is identical to dark, per WBPP.
+383	   - For each combination, store the median `m` and the BWMV scale `s` of `C`, in DN, over the sensor area minus a 64 px border.
+384	   - That&#x27;s 720 (m, s) pairs.
+385	   - STF display parameters for any reference and calibration state then come straight from these numbers: median plus MADN, or keep MADN too.
+386	4. The per-frame **alignment matrices** (already in `.xdrz`) and their inverses.
+387	5. The **recorded WBPP weights** and rejection counts per frame (§5), for display only.
+388	6. *(Optional)* A hot-pixel mask from the master dark (&gt; 10σ above the median of a high-pass filtered master dark), if we later emulate auto-CC.
+389	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-04-42-458Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-04-42-458Z" class="timestamp-link"><time datetime="2026-09-24T16:04:42.458Z" data-timestamp="2026-09-24T16:04:42.458Z">2026-09-24T16:04:42.458Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01CV4BWa4WAvvM5LWfMH1Jgi"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/mnt/c/Users/Jerome Hollon/Documents/claude/astrophotography-explainer/tools/precompute/README.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T16-04-42-499Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T16-04-42-499Z" class="timestamp-link"><time datetime="2026-09-24T16:04:42.499Z" data-timestamp="2026-09-24T16:04:42.499Z">2026-09-24T16:04:42.499Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# Stage-A precompute
+2	
+3	One-time precompute over the raw NGC 7331 dataset (see `AGENTS.md` › Data
+4	layout). Outputs are JSON/CSV in `data/derived/precompute/` (git-ignored,
+5	regenerable). Run everything with:
+6	
+7	```bash
+8	bash tools/precompute/run_stage_a.sh
+9	```
+10	
+11	or step by step, from the repo root, with `uv run tools/precompute/&lt;script&gt;.py`.
+12	Each script reads only `source_images/` and writes only under
+13	`data/derived/precompute/`.
+14	
+15	## 1. `frames_manifest.py` -&gt; `frames.json`
+16	
+17	One entry per light frame: the 20 raw subs (`f00`..`f19`) plus the 4 synthetic
+18	defect frames (`f11_tracking`, `f14_cloud`, `f15_cloud`, `f16_cloud`). Reads
+19	only header/XML metadata (XISF header block, `.xdrz` alignment XML, FITS
+20	header) - no pixel data is loaded, so it runs in well under a second.
+21	
+22	```
+23	{
+24	  &quot;frames&quot;: [
+25	    {
+26	      &quot;id&quot;: &quot;f03&quot;,                 # or &quot;f11_tracking&quot; for a synthetic entry
+27	      &quot;frame_index&quot;: 3,
+28	      &quot;kind&quot;: &quot;raw&quot; | &quot;synthetic&quot;,
+29	      &quot;source&quot;: &quot;source_images/light/....xisf&quot;,   # repo-relative
+30	      &quot;needs_flipud&quot;: false,       # true for synthetic FITS frames (bottom-up rows)
+31	      &quot;defect&quot;: &quot;none&quot; | &quot;satellite&quot; | &quot;tracking&quot; | &quot;cloud&quot;,
+32	      &quot;relative_of&quot;: null,         # synthetic frames point at their raw id, e.g. &quot;f11&quot;
+33	      &quot;pier_side&quot;: &quot;West&quot; | &quot;East&quot;,
+34	      &quot;date_obs&quot;: &quot;...&quot;, &quot;exptime&quot;: 300.0, &quot;ccd_temp&quot;: -3.9,
+35	      &quot;gain&quot;: 100, &quot;offset&quot;: 160, &quot;width&quot;: 6224, &quot;height&quot;: 4168,
+36	      &quot;alignment&quot;: {
+37	        &quot;reference&quot;: &quot;f07&quot;,
+38	        &quot;matrix_ref_to_frame&quot;: [ ...9 floats, row-major 3x3... ],
+39	        &quot;origin&quot;: [0.5, 0.5]
+40	      }
+41	    },
+42	    ...
+43	  ]
+44	}
+45	```
+46	
+47	`alignment.matrix_ref_to_frame` maps a point in the reference frame (f07)
+48	to this frame&#x27;s raw pixel coordinates - see `verify_geometry.py` for the
+49	confirmed convention. Synthetic entries reuse their raw relative&#x27;s
+50	`alignment` block (the FITS defect frames are geometrically identical to
+51	their raw counterpart, just flipped and with a defect added).
+52	
+53	Command: `uv run tools/precompute/frames_manifest.py`
+54	
+55	## 2. `verify_geometry.py` -&gt; `geometry_check.json`
+56	
+57	Two independent sanity checks on the facts asserted in `AGENTS.md`:
+58	
+59	**(a) Matrix direction / pixel-origin convention.** For each raw frame,
+60	finds ~10 bright, unsaturated, isolated stars in its registered (`_r.xisf`)
+61	image, intensity-weight-centroids them, maps each through
+62	`alignment.matrix_ref_to_frame`, and independently centroids the same star
+63	in the raw frame. Reports the median residual (px) for two conventions:
+64	
+65	- `direct`: apply the matrix to `(x, y)` as-is.
+66	- `half_pixel`: apply it to `(x+0.5, y+0.5)`, then subtract 0.5 from the result.
+67	
+68	**(b) Synthetic flip.** For each synthetic defect frame, confirms that
+69	`np.flipud`-ing it lines its bright stars up with its raw relative (small
+70	residual), and that leaving it un-flipped does not (large residual).
+71	
+72	```
+73	{
+74	  &quot;matrix_convention&quot;: {
+75	    &quot;per_frame&quot;: { &quot;f00&quot;: {&quot;n_candidates&quot;: 10, &quot;n_used&quot;: {...}, &quot;median_residual_px&quot;: {&quot;direct&quot;: 0.02, &quot;half_pixel&quot;: 0.02}}, ... },
+76	    &quot;overall_median_residual_px&quot;: {&quot;direct&quot;: 0.0199, &quot;half_pixel&quot;: 1.412},
+77	    &quot;winner&quot;: &quot;direct&quot;
+78	  },
+79	  &quot;synthetic_flip&quot;: {
+80	    &quot;f11_tracking&quot;: {&quot;median_residual_px_flipped&quot;: 0.0, &quot;median_residual_px_unflipped&quot;: 3.28, ...},
+81	    ...
+82	  },
+83	  &quot;runtime_s&quot;: 102.0
+84	}
+85	```
+86	
+87	Command: `uv run tools/precompute/verify_geometry.py`
+88	
+89	## 3. `star_metrics.py` -&gt; `stars.json` + `stars/&lt;id&gt;.csv`
+90	
+91	Runs `astro.measure_stars(img, model=&quot;moffat&quot;)` (default auto-iterating FWHM
+92	guess) on the **linear** raw data of all 24 frames (flipping the 4 synthetic
+93	FITS frames with `np.flipud` first, per `frames.json`). Frames are farmed out
+94	to a `ProcessPoolExecutor` (&lt;=6 workers - this is the CPU-bound stage, one
+95	frame per core is enough given 16 cores available).
+96	
+97	`stars.json`:
+98	
+99	```
+100	{
+101	  &quot;pixel_scale_arcsec_per_px&quot;: 0.277,
+102	  &quot;frames&quot;: {
+103	    &quot;f00&quot;: {
+104	      &quot;id&quot;: &quot;f00&quot;, &quot;n_stars&quot;: 108, &quot;fwhm_px_median&quot;: 8.9, &quot;fwhm_arcsec_median&quot;: 2.47,
+105	      &quot;ecc_median&quot;: 0.46, &quot;background&quot;: 0.0167, &quot;noise&quot;: 0.00067,
+106	      &quot;fwhm_guess_used_px&quot;: 9.2, &quot;runtime_s&quot;: 102.7
+107	    },
+108	    ...
+109	  },
+110	  &quot;runtime_s&quot;: ...
+111	}
+112	```
+113	
+114	`stars/&lt;id&gt;.csv`: one row per detected star with whatever fields
+115	`astro.measure_stars` returns per star (`x`, `y`, `flux`/`amp`, `fwhm`,
+116	`fwhm_major`, `fwhm_minor`, `ecc`, `beta`, `snr`, `ok`).
+117	
+118	Command: `uv run tools/precompute/star_metrics.py`
+119	
+120	## 4. `histograms.py` -&gt; `histograms.json`
+121	
+122	Per-item ADU statistics (16-bit scale, 0-65535) and two histograms, for all
+123	24 lights (`frames.json`) plus `masterBias`, `masterDark_300s`,
+124	`darkFromOlderCamera` and `masterLight_final`. `astro.load()` already
+125	normalizes every input (integer by dtype range, float calibration/master
+126	frames kept as-is) to float32 `[0,1]`, so ADU here is `pixel_value * 65535`.
+127	Parallelized with a `ProcessPoolExecutor` (&lt;=8 workers - this stage is I/O +
+128	numpy-bound, not CPU-fit-bound, so more workers than `star_metrics.py` pay off).
+129	
+130	```
+131	{
+132	  &quot;adu_max&quot;: 65535.0,
+133	  &quot;saturation_threshold_adu&quot;: 65000.0,
+134	  &quot;items&quot;: {
+135	    &quot;f00&quot;: {
+136	      &quot;id&quot;: &quot;f00&quot;, &quot;source&quot;: &quot;...&quot;, &quot;min&quot;:.., &quot;max&quot;:.., &quot;mean&quot;:.., &quot;median&quot;:..,
+137	      &quot;madn&quot;:.., &quot;p0_1&quot;:.., &quot;p99_9&quot;:.., &quot;saturated_fraction&quot;:..,
+138	      &quot;histogram_full&quot;: {&quot;lo&quot;: 0.0, &quot;hi&quot;: 65536.0, &quot;n&quot;: 512, &quot;counts&quot;: [...512 ints...]},
+139	      &quot;histogram_zoom&quot;: {&quot;lo&quot;: .., &quot;hi&quot;: .., &quot;n&quot;: 256, &quot;counts&quot;: [...256 ints...]},
+140	      &quot;runtime_s&quot;: ..
+141	    },
+142	    ...
+143	  },
+144	  &quot;runtime_s&quot;: ...
+145	}
+146	```
+147	
+148	`histogram_zoom` covers `[max(0, median - 10*madn), median + 30*madn]`, i.e.
+149	mostly background with the wide tail toward bright pixels.
+150	
+151	Command: `uv run tools/precompute/histograms.py`
+152	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-04-43-518Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-04-43-518Z" class="timestamp-link"><time datetime="2026-09-24T16:04:43.518Z" data-timestamp="2026-09-24T16:04:43.518Z">2026-09-24T16:04:43.518Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01EyX3rsNpMRn27qoLEifWAG"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/home/jerome/.claude/projects/-mnt-c-Users-Jerome-Hollon-Documents-claude-astrophotography-explainer/memory/planning-means-planning.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T16-04-43-539Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T16-04-43-539Z" class="timestamp-link"><time datetime="2026-09-24T16:04:43.539Z" data-timestamp="2026-09-24T16:04:43.539Z">2026-09-24T16:04:43.539Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	---
+2	name: planning-means-planning
+3	description: &quot;When asked to review/restate a plan, don&#x27;t run deep data or source-image investigations; restate and ask questions&quot;
+4	metadata:
+5	  node_type: memory
+6	  type: feedback
+7	  originSessionId: 33479da6-dcd1-4ed0-a9ea-71a5ec470ddd
+8	  modified: 2026-09-24T15:17:53.894Z
+9	---
+10	
+11	When the user asks to review a plan, restate it and ask questions, answer from the brief (a quick look at repo layout at most). Don&#x27;t run analysis scripts over the data.
+12	
+13	**Why:** On the hackathon kickoff (2026-09-24) I ran header dumps, previews and a flat-calibration test when asked to review the plan. The user interrupted: &quot;You&#x27;re to review this plan, not deeply inspect source images. We&#x27;re planning here.&quot; Wall-clock time is the scarcest resource in the hackathon ([[hackathon-dataset-facts]]).
+14	
+15	**How to apply:** In planning turns, list the investigations the spec needs as questions or proposed background-agent tasks, and let the user decide whether to run them.
+16	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-04-44-398Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-04-44-398Z" class="timestamp-link"><time datetime="2026-09-24T16:04:44.398Z" data-timestamp="2026-09-24T16:04:44.398Z">2026-09-24T16:04:44.398Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01KXvW6PzjK4pwsSA3pfm7Q9"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/home/jerome/.claude/projects/-mnt-c-Users-Jerome-Hollon-Documents-claude-astrophotography-explainer/memory/hackathon-dataset-facts.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T16-04-44-415Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T16-04-44-415Z" class="timestamp-link"><time datetime="2026-09-24T16:04:44.415Z" data-timestamp="2026-09-24T16:04:44.415Z">2026-09-24T16:04:44.415Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	---
+2	name: hackathon-dataset-facts
+3	description: Non-obvious facts about the NGC 7331 source_images dataset that the stacking pipeline must handle
+4	metadata:
+5	  node_type: memory
+6	  type: project
+7	  originSessionId: 33479da6-dcd1-4ed0-a9ea-71a5ec470ddd
+8	  modified: 2026-09-24T15:17:59.464Z
+9	---
+10	
+11	Found 2026-09-24 during the hackathon kickoff (8-hour POC, stacking explainer):
+12	
+13	- `light_registered/*_r.xisf` are registered but NOT calibrated (UInt16 raw). Calibration must happen in sensor space before warping.
+14	- `.xdrz` AlignmentMatrix is a 3x3 homography mapping reference coords -&gt; raw frame coords (pixel-centre origin 0.5). Reference frame is FRAME_0007 (identity).
+15	- Frames 0-7 PIERSIDE West, 8-19 East (~180° rotation). Largest same-side offset: frames 2/3 vs 5 (~47 px).
+16	- Synthetic FITS in `light_synthetic_disaster/` are vertically flipped (FITS bottom-up rows) relative to raw XISF. flipud before applying the untouched relative&#x27;s matrix.
+17	- Frame 11 synthetic = tracking error (trailed stars); frame 3 has a real faint satellite trail (lower-right); 14-16 synthetic clouds.
+18	- Master dark median ~161 vs master bias ~160.5, so the dark includes bias and dark current is negligible.
+19	- darkFromOlderCamera.fits is an ASI294MM Pro, 8288x5644, 600 s, gain 120. Different sensor size.
+20	- Quick test: the 50% flat removes the left-side dust mote (~sensor x700,y2400); the 85% flat leaves it visible.
+21	
+22	Related: [[planning-means-planning]]
+23	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-04-45-758Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-04-45-758Z" class="timestamp-link"><time datetime="2026-09-24T16:04:45.758Z" data-timestamp="2026-09-24T16:04:45.758Z">2026-09-24T16:04:45.758Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01RkEXFgQ6wfrsPaPRjX1jyi">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">List skills, derived data, and AGENTS.md diff</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd &#34;/mnt/c/Users/Jerome Hollon/Documents/claude/astrophotography-explainer&#34; &amp;&amp; ls -R .claude | head -50 &amp;&amp; ls data data/* 2&gt;/dev/null | head -40 &amp;&amp; git diff --stat AGENTS.md</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T16-04-47-328Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T16-04-47-328Z" class="timestamp-link"><time datetime="2026-09-24T16:04:47.328Z" data-timestamp="2026-09-24T16:04:47.328Z">2026-09-24T16:04:47.328Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>.claude:
+skills
+
+.claude/skills:
+astro-image
+
+.claude/skills/astro-image:
+SKILL.md
+data:
+derived
+
+data/derived:
+precompute
+ AGENTS.md | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-04-53-324Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-04-53-324Z" class="timestamp-link"><time datetime="2026-09-24T16:04:53.324Z" data-timestamp="2026-09-24T16:04:53.324Z">2026-09-24T16:04:53.324Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-04-53-326Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-04-53-326Z" class="timestamp-link"><time datetime="2026-09-24T16:04:53.326Z" data-timestamp="2026-09-24T16:04:53.326Z">2026-09-24T16:04:53.326Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Let me check one thing quickly — whether the Figma file already has content, since that changes one of the questions.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-04-53-844Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-04-53-844Z" class="timestamp-link"><time datetime="2026-09-24T16:04:53.844Z" data-timestamp="2026-09-24T16:04:53.844Z">2026-09-24T16:04:53.844Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01Fpc1fcKUUaW1QdZ32zDTeA"><div class="tool-header"><span class="tool-icon">⚙</span> ToolSearch</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;query&#34;: &#34;select:mcp__plugin_figma_figma__get_metadata&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T16-04-53-851Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T16-04-53-851Z" class="timestamp-link"><time datetime="2026-09-24T16:04:53.851Z" data-timestamp="2026-09-24T16:04:53.851Z">2026-09-24T16:04:53.851Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &quot;type&quot;: &quot;tool_reference&quot;,
+  &quot;tool_name&quot;: &quot;mcp__plugin_figma_figma__get_metadata&quot;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-04-56-382Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-04-56-382Z" class="timestamp-link"><time datetime="2026-09-24T16:04:56.382Z" data-timestamp="2026-09-24T16:04:56.382Z">2026-09-24T16:04:56.382Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01SXnkNUR2BByy4P4hFmmqEy"><div class="tool-header"><span class="tool-icon">⚙</span> mcp__plugin_figma_figma__get_metadata</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;fileKey&#34;: &#34;jtYi1LQf1fVyUAUfAgthP5&#34;,
+  &#34;nodeId&#34;: &#34;0:1&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T16-04-58-383Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T16-04-58-383Z" class="timestamp-link"><time datetime="2026-09-24T16:04:58.383Z" data-timestamp="2026-09-24T16:04:58.383Z">2026-09-24T16:04:58.383Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>&lt;canvas id=&quot;0:1&quot; name=&quot;Page 1&quot; x=&quot;0&quot; y=&quot;0&quot; width=&quot;0&quot; height=&quot;0&quot; /&gt;</pre><pre>IMPORTANT: After you call this tool, you MUST call get_design_context if trying to implement the design, since this tool only returns metadata. If you do not call get_design_context, the agent will not be able to implement the design.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-05-09-872Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-05-09-872Z" class="timestamp-link"><time datetime="2026-09-24T16:05:09.872Z" data-timestamp="2026-09-24T16:05:09.872Z">2026-09-24T16:05:09.872Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-05-37-409Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-05-37-409Z" class="timestamp-link"><time datetime="2026-09-24T16:05:37.409Z" data-timestamp="2026-09-24T16:05:37.409Z">2026-09-24T16:05:37.409Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>The Figma file is empty (one blank "Page 1"), so we'll be establishing the library from scratch. Here's where I've landed after reading SPEC.md, AGENTS.md, the WBPP notes, and the precompute README.</p>
+<h2>1. My understanding of the experience</h2>
+<p>A desktop-only, single-page lesson that teaches beginners how calibration and stacking turn twenty noisy 300 s subs of NGC 7331 into a clean master, using only real Stella Venator data (plus four clearly labelled synthetic defect variants). Every step runs the same loop: brief explanation → a real problem visible in the data → the learner turns a control until it goes away → they can bring it back.</p>
+<p>Two modes sharing one state (calibration choice, selected frames, reference frame, algorithm + parameters, the four fixed ROIs):</p>
+<ul>
+<li><strong>Guided lesson</strong>, in the fixed order: Welcome → Noise &amp; Defects → Calibration (bias, darks, flats, flats-continued) → Alignment &amp; averaging primer → Light-frame selection → Algorithms → Workbench. (Note: SPEC §7 numbers Algorithms as P7 and Light Frames as P8; your brief puts frame selection <em>before</em> algorithms with the primer giving just enough context to choose frames. I'm following your brief and will log the reorder as a spec change.)</li>
+<li><strong>Workbench</strong>: the same controls compacted, plus "Stack full image" with progress/cancel, result view, and FITS/PNG export. Five scenario presets, including three challenges whose puzzles are already known from the data (e.g. kappa-sigma at 3 physically cannot reject one trail in a 5-frame stack; tracking error is invisible in FWHM but halves the star count; clouds barely touch star count but widen the histogram).</li>
+</ul>
+<p>Scientific guardrails are clear: calibration removes repeatable patterns not random noise; flats <em>divide</em>; bias drops out of the light when a dark is used; the dark is treated as matched; alignment doesn't fix trailing; √N is a qualified idealization with measured noise readouts only where the pipeline actually computes them; 85% flats are not called saturated; RCR is explained as PixInsight/WBPP does it with unverified specifics flagged.</p>
+<h2>2. Decisions we should make together</h2>
+<p><strong>Visual atmosphere</strong>
+- Dark or light UI? Dark is the obvious astro choice and makes linear flats/masters read correctly, but it makes long-form reading harder and every illustration has to be built for dark. A light "paper" reading column with dark image wells is the alternative. Tradeoff: immersion vs. reading stamina across ~8 screens of prose.
+- How "scientific instrument" vs. "friendly explainer" the styling feels (mono numerics, thin rules, annotation callouts vs. rounded cards and warm accents).</p>
+<p><strong>Information hierarchy and layout</strong>
+- One layout skeleton for every lesson page (prose column + interactive stage, fixed proportions) vs. per-page layouts. Consistency makes agent fan-out and implementation much faster; the cost is some pages (Alignment, Algorithms) wanting more stage width.
+- Where the shared state lives visually so the lesson → workbench transition feels continuous: a persistent "your setup" strip, or only surfacing it at the handoff.</p>
+<p><strong>Pacing</strong>
+- Long-scroll per chapter (Ciechanowski style, explanation interleaved with the interactive) vs. one screenful per step with next/previous (SPEC §4.6 assumes hash routes, one per page). Scroll suits reading; steps suit "one idea → one choice → one consequence" and the progress affordance.</p>
+<p><strong>Illustrations</strong>
+- The system SVG (telescope → camera → sensor → PCB/op-amp/ADC) is the spine: introduced in Noise, then re-used with different emphasis in each calibration chapter. How literal vs. schematic should it be? Schematic (blocks and arrows) is faster and reuses cleanly; literal (an EdgeHD silhouette) is warmer and feels like <em>your</em> observatory.
+- Flats are division. Do we show that as a "response map" the light is divided by (a multiplicative shading overlay), rather than another peel-away layer? I think yes, and it should look visibly different from the subtractive bias/dark diagrams.</p>
+<p><strong>Balance of explanation and experimentation</strong>
+- Per page, I'd budget roughly 40% prose / 60% stage, with detail behind "Why?" disclosures. Is that the right ratio, or do you want prose leaner still?
+- Challenge feedback: does the app <em>tell</em> the learner they solved it (a measured criterion turning green), or just show the image and let them judge? Telling is more satisfying; judging is more honest and matches "no single number catches every defect."</p>
+<p><strong>Editorial voice</strong>
+- SPEC §1 says between textbook and an excited expert, avoiding short pithy declaratives. I'd add: second person, present tense, "we" for the observatory's choices, and every term defined in the sentence where it first appears. How much of <em>you</em> is in it — first-person asides ("on this camera I've found…") or a neutral narrator with a Stella Venator attribution?</p>
+<h2>3. Questions for you, starting with your ideas</h2>
+<ol>
+<li><strong>What's in your head already?</strong> Any reference visuals, a palette, a site you want this to feel like, or a strong no-go? Do you want a dark interface or a light reading surface with dark image wells?</li>
+<li><strong>Voice:</strong> first-person Jerome, or a neutral narrator crediting Stella Venator? And how playful can the challenge copy be?</li>
+<li><strong>Pacing:</strong> stepped screens with next/previous (matching the spec's routing) or scrolling chapters? If stepped, are you fine with a chapter having several steps, so a page like Flats can be two or three screens?</li>
+<li><strong>Illustration style:</strong> schematic block diagram or a recognisable EdgeHD/observatory silhouette? Colour-coding of the noise/defect sources: I'd propose one fixed hue per source (bias, dark/hot pixels, flat-field response, random noise, sky/external) carried through badges, diagram, histogram and prose. Any colour associations you already use?</li>
+<li><strong>Challenge resolution:</strong> an explicit "solved" signal, or image-only judgement?</li>
+<li><strong>Numbers on screen:</strong> are you comfortable with the noise readout being the <em>only</em> live metric (MADN and "n× less noise than one frame"), with FWHM/star count/background spread shown as precomputed per-frame values, and no SNR figure anywhere?</li>
+<li><strong>Time box:</strong> how many hours do you want to give the Figma + prose phase before implementation starts? That sets whether we aim for all nine lesson pages at full fidelity or a representative three plus wireframe-level for the rest.</li>
+</ol>
+<p>Once you've answered, I'll write a one-screen design and editorial brief for your approval, then build the first representative section (I'd propose <strong>Darks</strong>, since it has the cleanest problem → fix → "bias is already inside the dark" moment, a diagram, controls, and an ROI comparison).</p></div></div></div>
+<div class="message user" id="msg-2026-09-24T16-18-33-736Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-09-24T16-18-33-736Z" class="timestamp-link"><time datetime="2026-09-24T16:18:33.736Z" data-timestamp="2026-09-24T16:18:33.736Z">2026-09-24T16:18:33.736Z</time></a></div><div class="message-content">
+<div class="user-content"><p><pasted_content id="ff06">
+That ordering is incorrect, algorithms come before light frame selection. Defer to spec.</p>
+<p>Visual atmosphere:
+* We should use a light theme, but the background should be a cream white leaning to brown to offset the image without making it hard to read long form content.
+* Defer to the bauhaus styling for determining how the style feels.</p>
+<p>Information hierarchy and layout:
+* Shared styling
+    - Top bar navigation
+    - 1 to 2 column display except in rare cases where 3 columns are nessecary for something
+    - Colors, button styles, typography should all be shared
+    - Generic layout should be shared, i.e. top bar nav, lesson reading then color transition to the try it section, then bottom navigation to proceed or reverse.
+    - The workbench and light selection pages shoudl share most of the same layout.
+* Shared elements should be in the design library</p>
+<p>Pacing:
+* One page per lesson except flats and image selection, they can have two.</p>
+<p>Illustations:
+* Blocky low detail is ideal here. We don't want to distract the user, but we want it clear to the user what we're talking about, and it grounds the user. Use a stylized representation of an edgehd is fine.</p>
+<p>Balance of explanation and experimentation:
+* The ratio depends on the lesson. Use your judgement
+* Challenge feedback does not tell the user when they've succeeded. They should be eyeballing it, after all, stacking rarely has one exactly correct solution, it's all about tradeoffs.</p>
+<p>Editorial voice:
+* Neutral narrator</p>
+<p>Other notes:</p>
+<p>For look an feel. Let's plan out a space themed bauhaus inspired design. For the tutorial pages I wan clear separation between the lessons, maybe even treat this as a wizard with multiple pages. Permit the browser back button to work through these. Before we design a specific layout, we should create a design library so that we can remain consistent in all parts of the page.</p>
+<p>For explanation and discovery we should emulate Park Tool's repair guide philosophy. Introduce the problem, experiment until it disappears. For example, with the satellite trail image, we can present the user with that as our stack selection along with one other photo for averaging, and then show the resulting ROI stretched to show the satellite trail visibly. (PixInsight's auto algorithm for STF is very helpful here). We should show them what they could achieve, show them what is selected and how it introduces the problem and encourage them to add more images to the stack to hide the star trail (or change the algorithm). With flats it's an even easier example, show the option to enable/disable flats and show the ROI with the dust mote. Watch it mostly disappear with a flat alone, and then fully disappear with a flat + dark flat. Also demonstrate the histogram differences this way, show why the 50% illumination is better than the high and low illumination ones.</p>
+<p>For the prose we want to be largely conversational. Blend a voice that mixes an impassioned expert excited about the opportunity to explain astrophotography to a beginner with a textbook style voice. Avoid short pithy declarative statements, and other common LLM tropes in writing. We want a user to feel interested in our lesson and not turned off by trying to hammer their amygdala with engagement hacking. If what you write in the figma is different the next time you review it, use the new value. I've edited it personally and my judgement is the key here.
+</pasted_content id="ff06"></p></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-16-31-292Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-16-31-292Z" class="timestamp-link"><time datetime="2026-09-24T16:16:31.292Z" data-timestamp="2026-09-24T16:16:31.292Z">2026-09-24T16:16:31.292Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-17-00-855Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-17-00-855Z" class="timestamp-link"><time datetime="2026-09-24T16:17:00.855Z" data-timestamp="2026-09-24T16:17:00.855Z">2026-09-24T16:17:00.855Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Understood on the order — Algorithms before Light Frames, per the spec. Here's the brief as I now understand it. Two items at the bottom are still open.</p>
+<h2>Design and editorial brief (draft for your approval)</h2>
+<p><strong>Structure.</strong> A wizard: one hash route per page, browser back/forward works, and the top bar shows where you are. Pages in spec order: Welcome → Noise &amp; Defects → Bias → Darks → Flats (2 pages) → Alignment → Algorithms → Light Frames (2 pages) → Workbench. Workbench and Light Frames share one layout.</p>
+<p><strong>Page skeleton (shared, in the library).</strong> Top bar (title, chapter progress, "Open workbench") → lesson reading area on cream → a colour transition into the <strong>Try it</strong> stage, a deep-ink panel so images and histograms read correctly → bottom Previous/Next. One or two columns; three only where a comparison genuinely needs it (algorithm side-by-side, workbench ROI grid).</p>
+<p><strong>Atmosphere: space-themed Bauhaus on cream.</strong> Warm cream-to-brown paper (roughly <code>#F2EBE0</code> with a <code>#E7DCCB</code> tint for panels), near-black ink, and the Bauhaus primaries pulled toward space: a deep cobalt, a signal red, and an ochre-yellow, plus one violet for "things outside the camera" (clouds, satellites, tracking). Geometric primitives (circle, square, triangle, ruled lines) do the decorative work; no gradients, no glow, no photographic backgrounds. Type: a Futura-family geometric sans for headings (Jost), a humanist sans for long-form body (Public Sans or Inter, 17–18 px, ~70-character measure), and a monospace for every number the pipeline produces. Stars in illustrations are dots and four-point crosses, never rendered sparkle.</p>
+<p><strong>Colour as meaning, never alone.</strong> One fixed hue per source, carried through badges, the system diagram, histogram overlays, control labels and prose highlights: bias = cobalt, dark signal/hot pixels = red, flat-field response = ochre, random noise = neutral grey, external defects = violet. Every badge also has a shape (circle/square/triangle/diamond) and a text label, so the diagram and the badges still make sense in greyscale. Subtractive corrections are drawn as a layer sliding away; the flat is drawn as a <strong>response map the light is divided by</strong>, visually distinct so no one reads it as another peel-off.</p>
+<p><strong>Illustrations.</strong> Blocky, low-detail SVG with editable vectors. A single stylised EdgeHD → camera → sensor → PCB (op-amp, ADC) system diagram built once and reused on every page with a different element emphasised. Star trio for Alignment, sorted-stack "pixel column" for Algorithms, histogram shapes for Flats-2 and Light Frames.</p>
+<p><strong>Teaching pattern (Park Tool).</strong> Each page: a paragraph of why → the real problem visible in an ROI → a control that removes it → the learner can put it back. Challenges hand you a bad selection already loaded, show the goal image next to it, and encourage adding frames or changing method. <strong>No success signal.</strong> Readouts (noise, star count, FWHM, histogram spread) inform, the eye decides, and the copy says so plainly: stacking is tradeoffs, not a right answer.</p>
+<p><strong>Voice.</strong> Neutral narrator (Stella Venator credited, not first person). Conversational; an expert delighted to explain, held to textbook care. Full sentences that carry reasoning; no punchy one-liners, no rhetorical questions as hooks, no "Let's dive in", no tidy tricolons. Every term defined in the sentence it first appears (SPEC §9 rules: "pixel brightness", "standard deviation", "dark frames taken with the same exposure time and temperature as your lights"). Progressive disclosure for caveats. <strong>Figma text is the source of truth; if it differs from my last version, yours wins and the Markdown copy follows it.</strong></p>
+<p><strong>Science rails.</strong> Calibration removes repeatable patterns, not random noise. Flats divide. Bias drops out of the light when a dark is used ("already inside the dark"). The dark is presented as matched. Alignment doesn't fix trailing. √N is stated as the ideal for equal, independent frames, with the app's own measured noise ratio shown where the pipeline computes it and no invented SNR. 85% flats are "brighter than they need to be", not saturated. RCR follows PixInsight/WBPP; unverified details are flagged in the copy doc, not paraphrased into confidence.</p>
+<p><strong>Production plan after approval.</strong>
+1. Library page: tokens, type styles, buttons/toggles, frame-type badges, ROI tile with scale bar, image comparer, histogram, callout, noise readout, page skeleton, top/bottom nav.
+2. One representative section, <strong>Flats (page 1)</strong>, with real prose, the system diagram, flat/dark-flat toggles, the dust-mote ROI comparison and full-field view. Review with you.
+3. Fan out: one Figma page per app page, one agent each (medium effort), plus one agent owning all SVG illustrations, working from the library. Checkpoints at Welcome+Noise, the calibration set, Alignment+Algorithms, Light Frames+Workbench.
+4. Handoff: frame links, prototype flow, <code>docs/copy.md</code>, interaction/state notes, placeholders list, and proposed spec changes.</p>
+<h2>Still open</h2>
+<ol>
+<li><strong>Numbers on screen.</strong> Live noise readout only (MADN and "n× less noise than one frame"); FWHM, star count and background spread as precomputed per-frame values; no SNR number anywhere. OK?</li>
+<li><strong>Time box</strong> for the Figma + prose phase before implementation. That sets whether all pages get full fidelity or three get full fidelity and the rest get wireframe-level frames with complete prose.</li>
+</ol>
+<p>If the brief reads right, say so and answer those two, and I'll start with the library.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-17-09-985Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-17-09-985Z" class="timestamp-link"><time datetime="2026-09-24T16:17:09.985Z" data-timestamp="2026-09-24T16:17:09.985Z">2026-09-24T16:17:09.985Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01SFbiUrxWw1mPyrLod2rRrM">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">design-editorial-brief.md</span></div>
+<div class="file-tool-fullpath">/home/jerome/.claude/projects/-mnt-c-Users-Jerome-Hollon-Documents-claude-astrophotography-explainer/memory/design-editorial-brief.md</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content">---
+name: design-editorial-brief
+description: Approved-direction preferences for the explainer&#39;s Figma design and prose (cream Bauhaus, wizard, neutral narrator, no success signal, Figma text wins)
+metadata:
+  type: feedback
+---
+
+Design/editorial direction given 2026-09-24 for the stacking explainer:
+
+- **Page order follows SPEC §7**: Algorithms comes *before* Light Frames. I proposed the reverse once and was corrected (&#34;Defer to spec&#34;).
+- **Visual:** light theme on cream leaning brown; space-themed Bauhaus (geometric primitives, primaries pulled toward space). Blocky low-detail SVG; a stylised EdgeHD is fine.
+- **Layout:** shared library first (top bar nav, 1–2 columns, lesson prose → colour transition into &#34;Try it&#34; → bottom prev/next). Wizard with one page per lesson (Flats and Light Frames get two); browser back button must work. Workbench and Light Frames share a layout.
+- **Teaching:** Park Tool pattern; challenges never announce success — the learner eyeballs it, because stacking is tradeoffs.
+- **Voice:** neutral narrator; conversational blend of impassioned expert and textbook; avoid short pithy declaratives and LLM tropes / engagement hacks.
+- **Figma text is authoritative.** The user edits prose in Figma personally; if the text differs from what I last wrote, use the new value.
+
+**Why:** the user has strong personal taste on design and prose and is the editor of record.
+
+**How to apply:** re-read Figma text before regenerating any copy doc; don&#39;t restyle toward dark UI; keep illustration detail low. Related: [[planning-means-planning]], [[hackathon-dataset-facts]].
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T16-17-10-013Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T16-17-10-013Z" class="timestamp-link"><time datetime="2026-09-24T16:17:10.013Z" data-timestamp="2026-09-24T16:17:10.013Z">2026-09-24T16:17:10.013Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /home/jerome/.claude/projects/-mnt-c-Users-Jerome-Hollon-Documents-claude-astrophotography-explainer/memory/design-editorial-brief.md</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-17-11-598Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-17-11-598Z" class="timestamp-link"><time datetime="2026-09-24T16:17:11.598Z" data-timestamp="2026-09-24T16:17:11.598Z">2026-09-24T16:17:11.598Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01D222rMgMqCXc6jVYnSAzEg">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Add memory index entry</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd &#34;/home/jerome/.claude/projects/-mnt-c-Users-Jerome-Hollon-Documents-claude-astrophotography-explainer/memory&#34; &amp;&amp; echo &#34;- [Design &amp; editorial brief](design-editorial-brief.md) — cream Bauhaus, wizard, spec page order, neutral voice, Figma text wins&#34; &gt;&gt; MEMORY.md</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T16-17-12-755Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T16-17-12-755Z" class="timestamp-link"><time datetime="2026-09-24T16:17:12.755Z" data-timestamp="2026-09-24T16:17:12.755Z">2026-09-24T16:17:12.755Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Shell cwd was reset to /mnt/c/Users/Jerome Hollon/Documents/claude/astrophotography-explainer</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-17-14-702Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-17-14-702Z" class="timestamp-link"><time datetime="2026-09-24T16:17:14.702Z" data-timestamp="2026-09-24T16:17:14.702Z">2026-09-24T16:17:14.702Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Waiting on your approval of the brief and the two open items (numbers on screen; time box). Nothing else is needed from you before I start the library.</p></div></div></div>
+<div class="message user" id="msg-2026-09-24T16-19-01-975Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-09-24T16-19-01-975Z" class="timestamp-link"><time datetime="2026-09-24T16:19:01.975Z" data-timestamp="2026-09-24T16:19:01.975Z">2026-09-24T16:19:01.975Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Numbers on screen when they make sense to the end user. Remember they won't know much about astrophotography, so we'll probably only show FWHM and star counts in the later part. Timeboxing will be determined by me.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-19-08-020Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-19-08-020Z" class="timestamp-link"><time datetime="2026-09-24T16:19:08.020Z" data-timestamp="2026-09-24T16:19:08.020Z">2026-09-24T16:19:08.020Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-19-10-030Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-19-10-030Z" class="timestamp-link"><time datetime="2026-09-24T16:19:10.030Z" data-timestamp="2026-09-24T16:19:10.030Z">2026-09-24T16:19:10.030Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Noted: numbers appear only where a beginner can act on them — the noise readout in Noise and Alignment, histogram shape in Flats-2, and FWHM plus star count only from Light Frames onward, each defined on first use. I'll work at full fidelity and you call time.</p>
+<p>One formality before I touch Figma, since you asked for explicit approval of the direction:</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-19-12-226Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-19-12-226Z" class="timestamp-link"><time datetime="2026-09-24T16:19:12.226Z" data-timestamp="2026-09-24T16:19:12.226Z">2026-09-24T16:19:12.226Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01XqUSJGsA21SXbtGiGgxLnG"><div class="tool-header"><span class="tool-icon">⚙</span> AskUserQuestion</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;questions&#34;: [
+    {
+      &#34;question&#34;: &#34;Do you approve the design and editorial brief as written, so I can start the library page in Figma?&#34;,
+      &#34;header&#34;: &#34;Approval&#34;,
+      &#34;multiSelect&#34;: false,
+      &#34;options&#34;: [
+        {
+          &#34;label&#34;: &#34;Approved, start the library&#34;,
+          &#34;description&#34;: &#34;Build tokens, type, components and the page skeleton on a Library page, then the Flats-1 representative section for review.&#34;
+        },
+        {
+          &#34;label&#34;: &#34;Approved with notes&#34;,
+          &#34;description&#34;: &#34;Choose Other and add the changes you want before I begin.&#34;
+        }
+      ]
+    }
+  ]
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T16-19-16-837Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T16-19-16-837Z" class="timestamp-link"><time datetime="2026-09-24T16:19:16.837Z" data-timestamp="2026-09-24T16:19:16.837Z">2026-09-24T16:19:16.837Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Your questions have been answered: &quot;Do you approve the design and editorial brief as written, so I can start the library page in Figma?&quot;=&quot;Approved, start the library&quot;. You can now continue with these answers in mind.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-19-20-555Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-19-20-555Z" class="timestamp-link"><time datetime="2026-09-24T16:19:20.555Z" data-timestamp="2026-09-24T16:19:20.555Z">2026-09-24T16:19:20.555Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T16-19-20-998Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T16-19-20-998Z" class="timestamp-link"><time datetime="2026-09-24T16:19:20.998Z" data-timestamp="2026-09-24T16:19:20.998Z">2026-09-24T16:19:20.998Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01AgGAs8WXKTYsjxAwhSe6XN"><div class="tool-header"><span class="tool-icon">⚙</span> Skill</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;skill&#34;: &#34;figma:figma-use&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T16-19-21-055Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T16-19-21-055Z" class="timestamp-link"><time datetime="2026-09-24T16:19:21.055Z" data-timestamp="2026-09-24T16:19:21.055Z">2026-09-24T16:19:21.055Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Launching skill: figma:figma-use</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-001.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<span class="current">2</span>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<a href="page-003.html">Next &rarr;</a>
+</div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>

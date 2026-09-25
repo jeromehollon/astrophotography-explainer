@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 1</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 1/1</h1>
+        
+
+<div class="pagination"><a href="index.html" class="index-link">Index</a></div>
+
+        
+<div class="message user" id="msg-2026-09-24T20-46-43-690Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-09-24T20-46-43-690Z" class="timestamp-link"><time datetime="2026-09-24T20:46:43.690Z" data-timestamp="2026-09-24T20:46:43.690Z">2026-09-24T20:46:43.690Z</time></a></div><div class="message-content">
+<div class="user-content"><p>All changes to Pages 0 to 9 have been accepted commit them and push the changes</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T20-46-45-312Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T20-46-45-312Z" class="timestamp-link"><time datetime="2026-09-24T20:46:45.312Z" data-timestamp="2026-09-24T20:46:45.312Z">2026-09-24T20:46:45.312Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T20-46-45-704Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T20-46-45-704Z" class="timestamp-link"><time datetime="2026-09-24T20:46:45.704Z" data-timestamp="2026-09-24T20:46:45.704Z">2026-09-24T20:46:45.704Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>I'll review the working tree, then commit and push.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T20-46-47-352Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T20-46-47-352Z" class="timestamp-link"><time datetime="2026-09-24T20:46:47.352Z" data-timestamp="2026-09-24T20:46:47.352Z">2026-09-24T20:46:47.352Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_018GJZE9fEbFomk9cPCWuAR9">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Show working tree status and pending changes</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd &#34;/mnt/c/Users/Jerome Hollon/Documents/claude/astrophotography-explainer&#34; &amp;&amp; git status --short &amp;&amp; echo --- &amp;&amp; git diff --stat &amp;&amp; echo --- &amp;&amp; ls assets/alignment &amp;&amp; echo --- &amp;&amp; git log --oneline -3 &amp;&amp; git status -sb | head -1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T20-44-26-890Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T20-44-26-890Z" class="timestamp-link"><time datetime="2026-09-24T20:44:26.890Z" data-timestamp="2026-09-24T20:44:26.890Z">2026-09-24T20:44:26.890Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre> M assets/darks/dark_piece.png
+ M assets/darks/grain_light.png
+ M assets/darks/roi_computed_dark-off.png
+ M assets/darks/roi_computed_dark-on.png
+ M assets/darks/roi_raw.png
+ M assets/darks/stats.json
+ M tools/assets/darks_page.py
+?? assets/alignment/
+?? tools/assets/alignment_page.py
+---
+ assets/darks/dark_piece.png            | Bin 71660 -&gt; 71401 bytes
+ assets/darks/grain_light.png           | Bin 7085 -&gt; 6337 bytes
+ assets/darks/roi_computed_dark-off.png | Bin 7085 -&gt; 6337 bytes
+ assets/darks/roi_computed_dark-on.png  | Bin 7070 -&gt; 6317 bytes
+ assets/darks/roi_raw.png               | Bin 7085 -&gt; 6337 bytes
+ assets/darks/stats.json                |  60 ++++++++++++++++-----------------
+ tools/assets/darks_page.py             |  44 +++++++++++++-----------
+ 7 files changed, 55 insertions(+), 49 deletions(-)
+---
+aligned_average.png
+frame02.png
+frame02_aligned.png
+frame05.png
+naive_average.png
+problem_naive.png
+stats.json
+---
+11f957e Algorithms lesson: shade rejected values, legend, 3x2 closing grid
+69bfe64 Show a neutral grey removed tile when no flat is selected on Flats-2
+b59ddff Record two-column layout for Noise &amp; Defects problem section
+## section/algorithms</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T20-44-30-845Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T20-44-30-845Z" class="timestamp-link"><time datetime="2026-09-24T20:44:30.845Z" data-timestamp="2026-09-24T20:44:30.845Z">2026-09-24T20:44:30.845Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_012D3mCBkx6Ysmcgg5k3b9aa">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Inspect the darks diff and the new alignment script</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd &#34;/mnt/c/Users/Jerome Hollon/Documents/claude/astrophotography-explainer&#34; &amp;&amp; git diff tools/assets/darks_page.py assets/darks/stats.json &amp;&amp; echo ---ALIGN--- &amp;&amp; head -60 tools/assets/alignment_page.py &amp;&amp; echo ... &amp;&amp; grep -n &#34;^def \|^# \|argparse\|add_argument&#34; tools/assets/alignment_page.py | head -40 &amp;&amp; cat assets/alignment/stats.json &amp;&amp; git remote -v | head -1 &amp;&amp; git branch -r | grep algorithms</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T20-44-32-753Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T20-44-32-753Z" class="timestamp-link"><time datetime="2026-09-24T20:44:32.753Z" data-timestamp="2026-09-24T20:44:32.753Z">2026-09-24T20:44:32.753Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>diff --git a/assets/darks/stats.json b/assets/darks/stats.json
+index 4a4ab1d..d88f1b3 100644
+--- a/assets/darks/stats.json
++++ b/assets/darks/stats.json
+@@ -1,47 +1,47 @@
+ {
+- &quot;frame&quot;: &quot;f03&quot;,
++ &quot;frame&quot;: &quot;f13&quot;,
+  &quot;bias_applied_to_every_light_image&quot;: true,
+  &quot;region&quot;: {
+-  &quot;x&quot;: 106,
+-  &quot;y&quot;: 852,
++  &quot;x&quot;: 82,
++  &quot;y&quot;: 863,
+   &quot;w&quot;: 64,
+   &quot;h&quot;: 64,
+   &quot;zoom&quot;: 5,
+-  &quot;chosen_by&quot;: &quot;most well-removed, then most shared hot pixels among 64\u00d764 sky-only windows; centred on a well-removed pixel&quot;
++  &quot;chosen_by&quot;: &quot;centred on the brightest well-removed hot pixel whose 64\u00d764 window holds no stars and no dark-only pixels&quot;
+  },
+  &quot;hot_pixel_definition&quot;: {
+   &quot;dark_minus_bias_above_dn&quot;: 200.0,
+   &quot;light_minus_bias_above_background_madn&quot;: 10
+  },
+  &quot;hot_pixels_in_region&quot;: {
+-  &quot;in_dark&quot;: 9,
+-  &quot;shared_with_light&quot;: 7,
++  &quot;in_dark&quot;: 7,
++  &quot;shared_with_light&quot;: 5,
+   &quot;well_removed&quot;: 1
+  },
+- &quot;well_removed_definition&quot;: &quot;light \u2212 bias above background by &gt; 12 MADN, and light \u2212 dark within \u00b12 MADN of it&quot;,
++ &quot;well_removed_definition&quot;: &quot;light \u2212 bias above background by &gt; 15 MADN, and light \u2212 dark within \u00b12 MADN of it&quot;,
+  &quot;hot_pixels_in_frame&quot;: {
+   &quot;in_dark&quot;: 16761,
+-  &quot;shared_with_light&quot;: 11162
++  &quot;shared_with_light&quot;: 13653
+  },
+  &quot;dark_over_light_excess_ratio_percentiles&quot;: {
+-  &quot;p10&quot;: 0.3047675406134604,
+-  &quot;p50&quot;: 0.36968798747091053,
+-  &quot;p90&quot;: 0.42541170709789167
++  &quot;p10&quot;: 0.32898786959092324,
++  &quot;p50&quot;: 0.39252813907976747,
++  &quot;p90&quot;: 0.4469554753919499
+  },
+- &quot;residual_after_dark_madn_median&quot;: 11.355915784030348,
++ &quot;residual_after_dark_madn_median&quot;: 11.555056048034862,
+  &quot;circled_hot_pixel&quot;: {
+-  &quot;x_in_region&quot;: 8,
+-  &quot;y_in_region&quot;: 43,
+-  &quot;raw_dn&quot;: 2070.5298986588605,
+-  &quot;computed_dark_on_dn&quot;: 944.6362205408514,
++  &quot;x_in_region&quot;: 32,
++  &quot;y_in_region&quot;: 32,
++  &quot;raw_dn&quot;: 1886.5300207701512,
++  &quot;computed_dark_on_dn&quot;: 760.636342652142,
+   &quot;dark_minus_bias_dn&quot;: 1125.8936781180091,
+-  &quot;background_median_dn&quot;: 819.7500036237761
++  &quot;background_median_dn&quot;: 607.1307046513539
+  },
+  &quot;region_background&quot;: {
+-  &quot;raw_median_dn&quot;: 819.7500036237761,
+-  &quot;raw_madn_dn&quot;: 40.30419040671678,
+-  &quot;computed_dark_on_median_dn&quot;: 819.2272760043852,
+-  &quot;computed_dark_on_madn_dn&quot;: 40.43454030369117
++  &quot;raw_median_dn&quot;: 607.1307046513539,
++  &quot;raw_madn_dn&quot;: 35.03489422868611,
++  &quot;computed_dark_on_median_dn&quot;: 606.6515249514487,
++  &quot;computed_dark_on_madn_dn&quot;: 34.79618334481352
+  },
+  &quot;masters&quot;: {
+   &quot;bias_median_dn&quot;: 160.49495700979605,
+@@ -50,19 +50,19 @@
+  },
+  &quot;stretches&quot;: {
+   &quot;roi&quot;: {
+-   &quot;c0&quot;: 0.011401577779985964,
+-   &quot;m&quot;: 0.0025792058486332633,
+-   &quot;target_bg&quot;: 0.3,
+-   &quot;shadows_clip&quot;: -1.8
++   &quot;c0&quot;: 0.0071258257806301115,
++   &quot;m&quot;: 0.0032041675624767617,
++   &quot;target_bg&quot;: 0.4,
++   &quot;shadows_clip&quot;: -4.0
+   },
+   &quot;dark_piece&quot;: {
+-   &quot;c0&quot;: 0.0024335628915391865,
+-   &quot;m&quot;: 6.046401165966898e-05,
+-   &quot;target_bg&quot;: 0.3,
+-   &quot;shadows_clip&quot;: -1.8,
++   &quot;c0&quot;: 0.0024018901720643045,
++   &quot;m&quot;: 8.637765691758999e-05,
++   &quot;target_bg&quot;: 0.4,
++   &quot;shadows_clip&quot;: -4.0,
+    &quot;crop&quot;: {
+     &quot;x&quot;: 0,
+-    &quot;y&quot;: 758,
++    &quot;y&quot;: 769,
+     &quot;w&quot;: 376,
+     &quot;h&quot;: 252
+    }
+diff --git a/tools/assets/darks_page.py b/tools/assets/darks_page.py
+index 6d6bda4..82586be 100644
+--- a/tools/assets/darks_page.py
++++ b/tools/assets/darks_page.py
+@@ -8,10 +8,14 @@ region of the master dark. The bias is applied to every light-frame image on thi
+ Bias lesson already covered it; the Darks page never mentions it.
+ 
+ Region choice: the master dark is used exactly as supplied (owner decision 2026-09-24: &quot;trust the
+-master dark&quot;). It cancels most hot pixels only partly, so the window is chosen for the clearest removal:
+-among 64×64 sky-only windows (no stars, no pixel hotter in the dark than in the light) it holds the most
+-&quot;well removed&quot; hot pixels (clearly visible before, within the noise after), then the most shared hot
+-pixels. One well-removed pixel is circled on the page; its position is in stats.json.
++master dark&quot;). It cancels most hot pixels only partly (it carries about 37% of their excess in the
++lights), so the window is centred on the brightest &quot;well removed&quot; hot pixel in the frame: bright in the
++light (&gt; 15 MADN above the background) and within 2 MADN of the background after subtraction. In f13
++that is the pixel at (114, 895). (The frame&#x27;s saturated hot pixels cancel too, but overshoot by about
++3 MADN and print as dark holes, so they are excluded by the ±2 MADN rule.) The window must hold no
++stars and no pixel that is hotter in the dark than in the light. The ROI stretch is stronger than
++Flats-1&#x27;s (target background 0.40, shadows clip −4 MADN) so the grain reads evenly and a dimmed hot
++pixel still shows as dimmed. The circled pixel&#x27;s position and values are in stats.json.
+ 
+ Reading column:
+   grain_light.png     (L − B) on the region, one AutoSTF (target bg 0.30, clip −1.8 MADN), enlarged ×5
+@@ -46,12 +50,12 @@ PRE = REPO / &quot;data&quot; / &quot;derived&quot; / &quot;precompute&quot;
+ CAL = REPO / &quot;source_images&quot; / &quot;calibration&quot;
+ OUT = REPO / &quot;assets&quot; / &quot;darks&quot;
+ 
+-FRAME = &quot;f03&quot;
++FRAME = &quot;f13&quot;
+ DN = 65535.0
+ ROI = 64          # native pixels, square
+ ZOOM = 5          # nearest-neighbour enlargement for the page (64 × 5 = 320 px)
+ BORDER = 64       # keep the window away from the frame edge
+-ROI_STF = dict(target_bg=0.30, shadows_clip=-1.8)
++ROI_STF = dict(target_bg=0.40, shadows_clip=-4.0)
+ FRAME_STF = dict(target_bg=0.30, shadows_clip=-2.8)
+ HOT_DN = 200.0    # a hot pixel: dark − bias above this many pixel-brightness units (65535 = full scale)
+ 
+@@ -100,18 +104,20 @@ def main() -&gt; None:
+     star = bright &amp; (nb &gt;= 4)
+     dark_only = hot &amp; ((lb - sky_med) &lt; 0.5 * dark_excess)
+     shared = hot &amp; bright &amp; ~star
+-    good = shared &amp; (lb - sky_med &gt; 12 * sky_madn) &amp; (np.abs((L - D) - sky_med) &lt; 2 * sky_madn)
++    good = shared &amp; (lb - sky_med &gt; 15 * sky_madn) &amp; (np.abs((L - D) - sky_med) &lt; 2 * sky_madn)
+     ok = (box_sum(star, ROI) == 0) &amp; (box_sum(dark_only, ROI) == 0)
+-    score = np.where(ok, box_sum(good, ROI) * 1000 + box_sum(shared, ROI), -1)
+-    score[:BORDER] = -1
+-    score[-BORDER:] = -1
+-    score[:, :BORDER] = -1
+-    score[:, -BORDER:] = -1
+-    # among the best windows, take the one whose centre is closest to a well-removed pixel
+-    cands = np.argwhere(score == score.max())
+-    gy, gx = np.where(good)
+-    y0, x0 = min((tuple(c) for c in cands),
+-                 key=lambda c: np.min((gy - (c[0] + ROI / 2)) ** 2 + (gx - (c[1] + ROI / 2)) ** 2))
++    best = None
++    for gy, gx in np.argwhere(good):
++        wy = int(np.clip(gy - ROI // 2, BORDER, H - BORDER - ROI))
++        wx = int(np.clip(gx - ROI // 2, BORDER, W - BORDER - ROI))
++        if not ok[wy, wx]:
++            continue
++        key = (float(lb[gy, gx] - sky_med), int(box_sum(shared, ROI)[wy, wx]))
++        if best is None or key &gt; best[0]:
++            best = (key, wy, wx)
++    if best is None:
++        raise SystemExit(&quot;no well-removed hot pixel in a clean window&quot;)
++    _, y0, x0 = best
+     ys, xs = slice(y0, y0 + ROI), slice(x0, x0 + ROI)
+ 
+     raw = lb[ys, xs]                     # L − B
+@@ -154,12 +160,12 @@ def main() -&gt; None:
+         &quot;frame&quot;: FRAME,
+         &quot;bias_applied_to_every_light_image&quot;: True,
+         &quot;region&quot;: {&quot;x&quot;: int(x0), &quot;y&quot;: int(y0), &quot;w&quot;: ROI, &quot;h&quot;: ROI, &quot;zoom&quot;: ZOOM,
+-                   &quot;chosen_by&quot;: &quot;most well-removed, then most shared hot pixels among 64×64 sky-only windows; centred on a well-removed pixel&quot;},
++                   &quot;chosen_by&quot;: &quot;centred on the brightest well-removed hot pixel whose 64×64 window holds no stars and no dark-only pixels&quot;},
+         &quot;hot_pixel_definition&quot;: {&quot;dark_minus_bias_above_dn&quot;: HOT_DN,
+                                  &quot;light_minus_bias_above_background_madn&quot;: 10},
+         &quot;hot_pixels_in_region&quot;: {&quot;in_dark&quot;: int(hot_roi.sum()), &quot;shared_with_light&quot;: int(shared_roi.sum()),
+                                  &quot;well_removed&quot;: int(good_roi.sum())},
+-        &quot;well_removed_definition&quot;: &quot;light − bias above background by &gt; 12 MADN, and light − dark within ±2 MADN of it&quot;,
++        &quot;well_removed_definition&quot;: &quot;light − bias above background by &gt; 15 MADN, and light − dark within ±2 MADN of it&quot;,
+         &quot;hot_pixels_in_frame&quot;: {&quot;in_dark&quot;: int(hot.sum()), &quot;shared_with_light&quot;: int(shared.sum())},
+         &quot;dark_over_light_excess_ratio_percentiles&quot;: {
+             &quot;p10&quot;: float(np.percentile(ratio, 10)), &quot;p50&quot;: float(np.percentile(ratio, 50)),
+---ALIGN---
+#!/usr/bin/env python3
+&quot;&quot;&quot;Real image assets for the Alignment lesson.
+
+The page shows the first stack of the course: frames f05 and f02 averaged on the galaxy,
+first as they came off the camera (naive, pixel for pixel) and then after f02 has been
+aligned onto f05. f02 is the West-side exposure farthest from f05 (about 49 px at the
+galaxy), so the doubled stars are visible at tile size; East-side frames are rotated
+about 180 degrees relative to f05 and their twins land far away, which does not read as
+misalignment. Both frames are fully calibrated first (SPEC §6.2: minus the master dark,
+divided by the dark-flat-calibrated 50% flat), because alignment comes after calibration.
+
+Frame f05 is the reference frame for this lesson: f02 is warped onto f05&#x27;s pixel grid with
+the precomputed Stage A homographies (f05 &lt;- f07 reference &lt;- f02, SPEC §6.4). The warp uses
+scipy&#x27;s cubic spline on the crop only; the app pipeline will use Lanczos-3, so the aligned
+tiles are a design-time approximation (recorded in docs/design-notes.md §5). Before averaging,
+f02 is normalized to f05 with the global scale + offset rule (SPEC §6.5) using the
+precomputed statistics for the &#x27;dark|flat_50_darkflat&#x27; state.
+
+Outputs (assets/alignment/, 8-bit PNG, native pixels, one AutoSTF computed on the f05 crop
+with target bg 0.30 and shadows clip -1.8 MADN, shared by every tile):
+  frame05.png              f05 crop, calibrated
+  frame02.png              f02 crop at the same sensor pixels, calibrated and normalized
+  naive_average.png        (frame05 + frame02) / 2, pixel for pixel
+  frame02_aligned.png      f02 warped onto f05&#x27;s grid, calibrated and normalized
+  aligned_average.png      (frame05 + frame02_aligned) / 2
+  problem_naive.png        the middle 880x660 of naive_average.png (2x the 440x330 &#x27;problem&#x27; slot)
+  stats.json               crop position, STF, the alignment stars (crop coordinates, for the
+                           red circles drawn in Figma), the shift between the frames, and the
+                           background spread (standard deviation and MADN, in pixel brightness)
+                           of each tile in a star-free patch
+
+Usage:
+  uv run tools/assets/alignment_page.py            # writes assets/alignment/
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import csv
+import json
+import sys
+from pathlib import Path
+
+import numpy as np
+from scipy import ndimage
+
+REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO / &quot;tools&quot;))
+import astro  # noqa: E402
+
+PRE = REPO / &quot;data&quot; / &quot;derived&quot; / &quot;precompute&quot;
+CAL = REPO / &quot;source_images&quot; / &quot;calibration&quot;
+OUT = REPO / &quot;assets&quot; / &quot;alignment&quot;
+
+REF, OTHER = &quot;f05&quot;, &quot;f02&quot;
+CAL_STATE = &quot;dark|flat_50_darkflat&quot;
+FLAT_ID = &quot;flat_50_darkflat&quot;
+DN = 65535.0
+
+# Galaxy crop on f05: 3:2, the widest crop that fits the 1200 px page column at native scale.
+CROP_W, CROP_H = 1200, 800
+STF = dict(target_bg=0.30, shadows_clip=-1.8)
+...
+58:# Galaxy crop on f05: 3:2, the widest crop that fits the 1200 px page column at native scale.
+66:def save_gray(img: np.ndarray, path: Path) -&gt; None:
+70:def madn(x: np.ndarray) -&gt; float:
+74:def galaxy_centre(img: np.ndarray) -&gt; tuple[int, int]:
+87:def calibrated(frame: dict, dark: np.ndarray, flat_rel: np.ndarray) -&gt; np.ndarray:
+95:def main() -&gt; None:
+{
+ &quot;reference_frame&quot;: &quot;f05&quot;,
+ &quot;other_frame&quot;: &quot;f02&quot;,
+ &quot;calibration&quot;: &quot;dark|flat_50_darkflat&quot;,
+ &quot;crop&quot;: {
+  &quot;x&quot;: 2588,
+  &quot;y&quot;: 1716,
+  &quot;w&quot;: 1200,
+  &quot;h&quot;: 800,
+  &quot;galaxy_centre_px&quot;: [
+   3188,
+   2116
+  ]
+ },
+ &quot;problem_crop&quot;: {
+  &quot;x&quot;: 2748,
+  &quot;y&quot;: 1786,
+  &quot;w&quot;: 880,
+  &quot;h&quot;: 660
+ },
+ &quot;stf&quot;: {
+  &quot;c0&quot;: 0.01056659931898117,
+  &quot;m&quot;: 0.002566652625132309,
+  &quot;target_bg&quot;: 0.3,
+  &quot;shadows_clip&quot;: -1.8
+ },
+ &quot;normalization_of_other_onto_reference&quot;: {
+  &quot;median_dn&quot;: [
+   924.5214762026444,
+   749.2860519792885
+  ],
+  &quot;scale&quot;: 0.9105655257158733
+ },
+ &quot;warp&quot;: {
+  &quot;method&quot;: &quot;scipy map_coordinates cubic (design-time stand-in for Lanczos-3)&quot;,
+  &quot;f05_to_other_matrix&quot;: [
+   0.9996019447206702,
+   -0.0001479667205704102,
+   -31.524291007674115,
+   7.084728945432296e-05,
+   0.9996044140215345,
+   -35.11725573587727,
+   -2.093723793918391e-09,
+   -3.872560802341345e-09,
+   1.0000000448023272
+  ]
+ },
+ &quot;pixel_shift_between_frames_px&quot;: {
+  &quot;min&quot;: 48.38598080318112,
+  &quot;median&quot;: 48.65440396240657,
+  &quot;max&quot;: 48.91885699878028
+ },
+ &quot;alignment_stars_crop_px&quot;: [
+  {
+   &quot;x&quot;: 404.9,
+   &quot;y&quot;: 673.1,
+   &quot;fwhm_px&quot;: 8.03,
+   &quot;snr&quot;: 59.0
+  },
+  {
+   &quot;x&quot;: 245.9,
+   &quot;y&quot;: 411.6,
+   &quot;fwhm_px&quot;: 7.76,
+   &quot;snr&quot;: 11.1
+  },
+  {
+   &quot;x&quot;: 1064.2,
+   &quot;y&quot;: 673.6,
+   &quot;fwhm_px&quot;: 8.15,
+   &quot;snr&quot;: 10.7
+  }
+ ],
+ &quot;background_patch_crop_px&quot;: {
+  &quot;x&quot;: 95,
+  &quot;y&quot;: 205,
+  &quot;size&quot;: 160
+ },
+ &quot;background&quot;: {
+  &quot;frame05&quot;: {
+   &quot;std_dn&quot;: 56.043326271766944,
+   &quot;madn_dn&quot;: 36.86497803117854,
+   &quot;median_dn&quot;: 758.2675344665522
+  },
+  &quot;frame02&quot;: {
+   &quot;std_dn&quot;: 53.85389352052796,
+   &quot;madn_dn&quot;: 37.63631413325129,
+   &quot;median_dn&quot;: 759.8563456679766
+  },
+  &quot;naive_average&quot;: {
+   &quot;std_dn&quot;: 48.25317570551353,
+   &quot;madn_dn&quot;: 26.56093827658796,
+   &quot;median_dn&quot;: 759.2752491807641
+  },
+  &quot;frame02_aligned&quot;: {
+   &quot;std_dn&quot;: 56.21020360812596,
+   &quot;madn_dn&quot;: 33.649094675316434,
+   &quot;median_dn&quot;: 756.8140759919729
+  },
+  &quot;aligned_average&quot;: {
+   &quot;std_dn&quot;: 39.87318998583328,
+   &quot;madn_dn&quot;: 25.10394099759473,
+   &quot;median_dn&quot;: 757.4356402187116
+  }
+ },
+ &quot;expected_noise_ratio_two_frames&quot;: 0.7071067811865475,
+ &quot;measured_noise_ratio&quot;: {
+  &quot;naive_average_over_frame05&quot;: 0.8609977122257664,
+  &quot;aligned_average_over_frame05&quot;: 0.7114707965847537
+ }
+}origin	git@github.com:jeromehollon/astrophotography-explainer.git (fetch)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T20-44-35-775Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T20-44-35-775Z" class="timestamp-link"><time datetime="2026-09-24T20:44:35.775Z" data-timestamp="2026-09-24T20:44:35.775Z">2026-09-24T20:44:35.775Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T20-44-35-777Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T20-44-35-777Z" class="timestamp-link"><time datetime="2026-09-24T20:44:35.777Z" data-timestamp="2026-09-24T20:44:35.777Z">2026-09-24T20:44:35.777Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Two coherent changes here, so I'll make two commits: the Darks asset regeneration and the new Alignment assets. Then push the branch.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T20-47-13-954Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T20-47-13-954Z" class="timestamp-link"><time datetime="2026-09-24T20:47:13.954Z" data-timestamp="2026-09-24T20:47:13.954Z">2026-09-24T20:47:13.954Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_0117CPaD8ifmXRAFrMPePFqZ">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit darks and alignment assets, push branch</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd &#34;/mnt/c/Users/Jerome Hollon/Documents/claude/astrophotography-explainer&#34; &amp;&amp; git add assets/darks tools/assets/darks_page.py &amp;&amp; git commit -q -F - &lt;&lt;&#39;EOF&#39;
+Darks lesson: centre the ROI on the brightest well-removed hot pixel
+
+The previous window (f03, chosen by counting well-removed hot pixels
+per 64x64 sky-only window) put the circled pixel near the edge of the
+tile and the removal was hard to see at the page&#39;s stretch. The script
+now scans every well-removed hot pixel in the frame (light - bias more
+than 15 MADN above background, light - dark within 2 MADN of it) and
+takes the brightest one whose window holds no stars and no dark-only
+pixels, then centres the 64x64 window on it. On f13 that is the pixel
+at (114, 895), so the circle sits at the tile centre.
+
+The ROI stretch is stronger than before (target background 0.40,
+shadows clip -4 MADN) so the grain reads evenly and a dimmed hot pixel
+still shows as dimmed rather than vanishing. Saturated hot pixels
+overshoot after subtraction by about 3 MADN and print as dark holes,
+which the +-2 MADN rule excludes on purpose.
+
+Regenerated: uv run tools/assets/darks_page.py
+
+Co-Authored-By: Claude Fable 5.1 &lt;noreply@anthropic.com&gt;
+Claude-Session: https://claude.ai/code/session_01J4C3JsDwFZV1V9RFg1HzMv
+EOF
+git add assets/alignment tools/assets/alignment_page.py &amp;&amp; git commit -q -F - &lt;&lt;&#39;EOF&#39;
+Add real image assets for the Alignment lesson
+
+The Alignment page needs the first stack of the course: two calibrated
+subs averaged pixel for pixel (doubled stars) and again after one has
+been warped onto the other&#39;s grid. tools/assets/alignment_page.py
+builds them from f05 (reference) and f02, the West-side frame farthest
+from f05 at the galaxy (about 49 px), which makes the doubling visible
+at tile size. East-side frames are rotated about 180 degrees relative
+to f05, so their twins land far away and do not read as misalignment.
+
+Both frames are calibrated with the master dark and the dark-flat-
+calibrated 50% flat (SPEC 6.2), f02 is normalized onto f05 with the
+global scale + offset rule (SPEC 6.5), and the warp chains the Stage A
+homographies f05 &lt;- f07 &lt;- f02 (SPEC 6.4). The warp uses scipy&#39;s cubic
+spline on the crop only; the app will use Lanczos-3, so the aligned
+tiles are a design-time approximation (docs/design-notes.md section 5).
+
+Outputs in assets/alignment/: the f05 and f02 crops, the naive and
+aligned averages, the aligned f02, an 880x660 problem crop, and
+stats.json with the crop position, shared STF, alignment stars for the
+Figma circles, the measured shift, and the background noise of each
+tile. Measured noise ratio for the aligned average is 0.71 of a single
+frame, matching the expected 1/sqrt(2); the naive average only reaches
+0.86.
+
+Generated: uv run tools/assets/alignment_page.py
+
+Co-Authored-By: Claude Fable 5.1 &lt;noreply@anthropic.com&gt;
+Claude-Session: https://claude.ai/code/session_01J4C3JsDwFZV1V9RFg1HzMv
+EOF
+git push -u origin section/algorithms 2&gt;&amp;1 | tail -5 &amp;&amp; git status -sb | head -1 &amp;&amp; git log --oneline -2</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T20-47-20-255Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T20-47-20-255Z" class="timestamp-link"><time datetime="2026-09-24T20:47:20.255Z" data-timestamp="2026-09-24T20:47:20.255Z">2026-09-24T20:47:20.255Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>remote:      https://github.com/jeromehollon/astrophotography-explainer/pull/new/section/algorithms        
+remote: 
+To github.com:jeromehollon/astrophotography-explainer.git
+ * [new branch]      section/algorithms -&gt; section/algorithms
+Branch &#x27;section/algorithms&#x27; set up to track remote branch &#x27;section/algorithms&#x27; from &#x27;origin&#x27;.
+## section/algorithms...origin/section/algorithms
+eab9565 Add real image assets for the Alignment lesson
+6053f39 Darks lesson: centre the ROI on the brightest well-removed hot pixel</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T20-47-25-247Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T20-47-25-247Z" class="timestamp-link"><time datetime="2026-09-24T20:47:25.247Z" data-timestamp="2026-09-24T20:47:25.247Z">2026-09-24T20:47:25.247Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Committed and pushed. The branch <code>section/algorithms</code> is now on origin and tracking, with the working tree clean.</p>
+<p>Two commits went up:</p>
+<ul>
+<li><strong>Darks lesson: centre the ROI on the brightest well-removed hot pixel.</strong> Regenerated Darks assets and stats from frame f13 with the stronger ROI stretch, plus the script change in <code>tools/assets/darks_page.py</code>.</li>
+<li><strong>Add real image assets for the Alignment lesson.</strong> The new <code>assets/alignment/</code> tiles and stats, plus the generating script.</li>
+</ul>
+<p>The earlier Figma-side page work was already committed on this branch, so nothing else was pending. GitHub offered a pull request link for the branch if you want to merge to main:</p>
+<pre><code>https://github.com/jeromehollon/astrophotography-explainer/pull/new/section/algorithms
+</code></pre></div></div></div>
+<div class="message user" id="msg-2026-09-24T20-47-24-586Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-09-24T20-47-24-586Z" class="timestamp-link"><time datetime="2026-09-24T20:47:24.586Z" data-timestamp="2026-09-24T20:47:24.586Z">2026-09-24T20:47:24.586Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Push to main</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T20-47-26-243Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T20-47-26-243Z" class="timestamp-link"><time datetime="2026-09-24T20:47:26.243Z" data-timestamp="2026-09-24T20:47:26.243Z">2026-09-24T20:47:26.243Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>I'll merge the branch into main and push it.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T20-47-27-806Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T20-47-27-806Z" class="timestamp-link"><time datetime="2026-09-24T20:47:27.806Z" data-timestamp="2026-09-24T20:47:27.806Z">2026-09-24T20:47:27.806Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01Qb724EUwMt1RwHTugdmQFi">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Compare branch against local and remote main</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd &#34;/mnt/c/Users/Jerome Hollon/Documents/claude/astrophotography-explainer&#34; &amp;&amp; git fetch -q origin &amp;&amp; git log --oneline main..section/algorithms | wc -l &amp;&amp; git log --oneline section/algorithms..main | wc -l &amp;&amp; git log --oneline section/algorithms..origin/main | wc -l</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T20-47-30-756Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T20-47-30-756Z" class="timestamp-link"><time datetime="2026-09-24T20:47:30.756Z" data-timestamp="2026-09-24T20:47:30.756Z">2026-09-24T20:47:30.756Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>23
+0
+0</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T20-47-32-649Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T20-47-32-649Z" class="timestamp-link"><time datetime="2026-09-24T20:47:32.649Z" data-timestamp="2026-09-24T20:47:32.649Z">2026-09-24T20:47:32.649Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Main has nothing the branch lacks, so a fast-forward merge is clean.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T20-47-34-267Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T20-47-34-267Z" class="timestamp-link"><time datetime="2026-09-24T20:47:34.267Z" data-timestamp="2026-09-24T20:47:34.267Z">2026-09-24T20:47:34.267Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01XyCn7HC6v1XRbiEkBy9q2A">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Fast-forward main to the branch and push</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd &#34;/mnt/c/Users/Jerome Hollon/Documents/claude/astrophotography-explainer&#34; &amp;&amp; git checkout -q main &amp;&amp; git merge --ff-only section/algorithms 2&gt;&amp;1 | tail -2 &amp;&amp; git push origin main 2&gt;&amp;1 | tail -2 &amp;&amp; git checkout -q section/algorithms &amp;&amp; git log --oneline -1 origin/main</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T20-47-39-691Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T20-47-39-691Z" class="timestamp-link"><time datetime="2026-09-24T20:47:39.691Z" data-timestamp="2026-09-24T20:47:39.691Z">2026-09-24T20:47:39.691Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre> create mode 100644 tools/assets/noise_page.py
+ create mode 100644 tools/assets/welcome_page.py
+To github.com:jeromehollon/astrophotography-explainer.git
+   c2661bb..eab9565  main -&gt; main
+eab9565 Add real image assets for the Alignment lesson</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T20-47-41-864Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T20-47-41-864Z" class="timestamp-link"><time datetime="2026-09-24T20:47:41.864Z" data-timestamp="2026-09-24T20:47:41.864Z">2026-09-24T20:47:41.864Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Done. Main was fast-forwarded to the tip of <code>section/algorithms</code> and pushed to origin. Twenty-three commits moved over, with no conflicts, and main now ends at the Alignment assets commit. You are back on the <code>section/algorithms</code> branch.</p></div></div></div>
+        
+
+<div class="pagination"><a href="index.html" class="index-link">Index</a></div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 2</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 2/2</h1>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-001.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<span class="current">2</span>
+<span class="disabled">Next &rarr;</span>
+</div>
+
+        
+<div class="message user" id="msg-2026-09-24T18-08-23-440Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-09-24T18-08-23-440Z" class="timestamp-link"><time datetime="2026-09-24T18:08:23.440Z" data-timestamp="2026-09-24T18:08:23.440Z">2026-09-24T18:08:23.440Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Remove the text from the tops and bottoms of the SVG, allow the invidivudal pages to control their prose. However, keep labels for organization that are not part of the svg</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-08-29-833Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-08-29-833Z" class="timestamp-link"><time datetime="2026-09-24T18:08:29.833Z" data-timestamp="2026-09-24T18:08:29.833Z">2026-09-24T18:08:29.833Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-08-30-958Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-08-30-958Z" class="timestamp-link"><time datetime="2026-09-24T18:08:30.958Z" data-timestamp="2026-09-24T18:08:30.958Z">2026-09-24T18:08:30.958Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Removing the eyebrow, title and caption texts from the four optical-path components, and leaving the "For lesson: …" canvas notes above each one as the organisational labels.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-08-34-675Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-08-34-675Z" class="timestamp-link"><time datetime="2026-09-24T18:08:34.675Z" data-timestamp="2026-09-24T18:08:34.675Z">2026-09-24T18:08:34.675Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01NMmKwWdvTV3kQSGCf9iSGC"><div class="tool-header"><span class="tool-icon">⚙</span> mcp__plugin_figma_figma__use_figma</div><div class="tool-description">Remove eyebrow, title and caption text from the four optical-path illustration components; keep the canvas notes</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;fileKey&#34;: &#34;jtYi1LQf1fVyUAUfAgthP5&#34;,
+  &#34;skillNames&#34;: &#34;figma-use&#34;,
+  &#34;code&#34;: &#34;const page = await figma.getNodeByIdAsync(&#39;8:2&#39;); await figma.setCurrentPageAsync(page);\nconst removed = {};\nfor (const id of [&#39;35:2&#39;,&#39;35:41&#39;,&#39;35:81&#39;,&#39;14:517&#39;]) {\n  const comp = await figma.getNodeByIdAsync(id);\n  removed[id] = [];\n  for (const c of [...comp.children]) if (c.type===&#39;TEXT&#39; &amp;&amp; [&#39;eyebrow&#39;,&#39;title&#39;,&#39;caption&#39;].includes(c.name)) { removed[id].push(c.name); c.remove(); }\n}\nconst notes = page.children.filter(n=&gt;n.type===&#39;TEXT&#39; &amp;&amp; n.name.startsWith(&#39;note/&#39;)).map(n=&gt;n.characters);\nconst comp = await figma.getNodeByIdAsync(&#39;35:41&#39;); await comp.screenshot({scale:0.5});\nreturn { removed, notesKept: notes };&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T18-08-39-523Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T18-08-39-523Z" class="timestamp-link"><time datetime="2026-09-24T18:08:39.523Z" data-timestamp="2026-09-24T18:08:39.523Z">2026-09-24T18:08:39.523Z</time></a></div><div class="message-content"><div class="tool-result"><pre>{&quot;removed&quot;:{&quot;35:2&quot;:[&quot;eyebrow&quot;,&quot;title&quot;],&quot;35:41&quot;:[&quot;eyebrow&quot;,&quot;title&quot;,&quot;caption&quot;],&quot;35:81&quot;:[&quot;eyebrow&quot;,&quot;title&quot;,&quot;caption&quot;],&quot;14:517&quot;:[&quot;eyebrow&quot;,&quot;caption&quot;,&quot;title&quot;]},&quot;notesKept&quot;:[&quot;For lesson: Noise &amp; Defects&quot;,&quot;For lesson: Bias&quot;,&quot;For lesson: Darks&quot;,&quot;For lesson: Flats&quot;,&quot;For lesson: Flats, continued&quot;,&quot;For lesson: Alignment&quot;,&quot;For lesson: Algorithms&quot;]}</pre>
+<div class="image-block"><img src="data:image/png;base64,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" style="max-width: 100%"></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-08-42-495Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-08-42-495Z" class="timestamp-link"><time datetime="2026-09-24T18:08:42.495Z" data-timestamp="2026-09-24T18:08:42.495Z">2026-09-24T18:08:42.495Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-08-52-387Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-08-52-387Z" class="timestamp-link"><time datetime="2026-09-24T18:08:52.387Z" data-timestamp="2026-09-24T18:08:52.387Z">2026-09-24T18:08:52.387Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_017ok7kAjEzLLepG41N9vMob">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Record the no-prose illustration rule in the Figma state file and memory</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd &#34;/mnt/c/Users/Jerome Hollon/Documents/claude/astrophotography-explainer&#34; &amp;&amp; python3 - &lt;&lt;&#39;EOF&#39;
+import json
+p=&#39;docs/figma-state.json&#39;
+d=json.load(open(p))
+d[&#39;notes&#39;].append(&#34;Illustration components carry no eyebrow, title or caption text (owner direction 2026-09-24): the lesson page owns all prose around an illustration. The &#39;For lesson: X&#39; notes on the Illustrations canvas are organisational only. Bias/Darks/Flats components have full-height &#39;highlight-*&#39; bars (source soft colours) behind the relevant parts.&#34;)
+json.dump(d,open(p,&#39;w&#39;),indent=1,ensure_ascii=False)
+EOF
+M=/home/jerome/.claude/projects/-mnt-c-Users-Jerome-Hollon-Documents-claude-astrophotography-explainer/memory
+cat &gt; &#34;$M/illustrations-no-prose.md&#34; &lt;&lt;&#39;EOF&#39;
+---
+name: illustrations-no-prose
+description: Illustration components carry no eyebrow/title/caption; lesson pages own prose; internal labels must be plain, not pithy declaratives
+metadata:
+  type: feedback
+---
+
+Illustration (SVG) components in the Figma file hold only the drawing and its part labels. No eyebrow, title or caption inside the component; the lesson page supplies all prose. Canvas notes (&#34;For lesson: X&#34;) stay as organisation only. Labels inside a drawing are plain nouns (&#34;Layered Camera Sensor&#34;, &#34;Pixel Grid&#34;), never pithy declaratives (&#34;one part, three layers&#34;). Highlight what a lesson is about with a full-height soft-colour bar (source/*-soft) behind the relevant part, not just a stroke on the box.
+
+**Why:** owner direction on 2026-09-24 while revising the optical-path illustrations; pithy declaratives are forbidden by the editorial brief and captions duplicated page copy.
+**How to apply:** when making or editing illustrations, delete/omit top and bottom text, keep part labels, use bars for emphasis. See [[design-editorial-brief]] and [[only-specified-changes]].
+EOF
+echo &#34;- [Illustrations carry no prose](illustrations-no-prose.md) — no eyebrow/title/caption in SVG components; plain labels; full-height colour bars for emphasis&#34; &gt;&gt; &#34;$M/MEMORY.md&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T18-08-53-785Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T18-08-53-785Z" class="timestamp-link"><time datetime="2026-09-24T18:08:53.785Z" data-timestamp="2026-09-24T18:08:53.785Z">2026-09-24T18:08:53.785Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>(Bash completed with no output)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-08-57-844Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-08-57-844Z" class="timestamp-link"><time datetime="2026-09-24T18:08:57.844Z" data-timestamp="2026-09-24T18:08:57.844Z">2026-09-24T18:08:57.844Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Done. The eyebrow, title and caption texts are removed from all four optical-path components (Noise &amp; Defects, Bias, Darks, Flats), so each now holds only the drawing, its part labels and its highlight bars. The lesson pages own the prose around them.</p>
+<p>Kept as organisation on the Illustrations canvas: the seven "For lesson: …" notes above each component.</p>
+<p>Not touched: the other three illustration components (Flats continued, Alignment, Algorithms) still carry their own eyebrow, title and caption. Say the word and I'll strip those too.</p>
+<p>I also noted the rule in <code>docs/figma-state.json</code> and in memory so later illustration work follows it.</p></div></div></div>
+<div class="message user" id="msg-2026-09-24T18-22-24-555Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-09-24T18-22-24-555Z" class="timestamp-link"><time datetime="2026-09-24T18:22:24.555Z" data-timestamp="2026-09-24T18:22:24.555Z">2026-09-24T18:22:24.555Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Remove the non-optical path illustrations we'll allow the other agents to determine if they need any</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-22-29-769Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-22-29-769Z" class="timestamp-link"><time datetime="2026-09-24T18:22:29.769Z" data-timestamp="2026-09-24T18:22:29.769Z">2026-09-24T18:22:29.769Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-22-32-760Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-22-32-760Z" class="timestamp-link"><time datetime="2026-09-24T18:22:32.760Z" data-timestamp="2026-09-24T18:22:32.760Z">2026-09-24T18:22:32.760Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_017W2Qe8pjyDP6dXiLZeix1U"><div class="tool-header"><span class="tool-icon">⚙</span> mcp__plugin_figma_figma__use_figma</div><div class="tool-description">Check for instances of the three non-optical illustration components before removing them</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;fileKey&#34;: &#34;jtYi1LQf1fVyUAUfAgthP5&#34;,
+  &#34;skillNames&#34;: &#34;figma-use&#34;,
+  &#34;code&#34;: &#34;const page = await figma.getNodeByIdAsync(&#39;8:2&#39;); await figma.setCurrentPageAsync(page);\nconst pageOf = n =&gt; { while (n &amp;&amp; n.type !== &#39;PAGE&#39;) n = n.parent; return n &amp;&amp; n.name; };\nconst out = {};\nfor (const id of [&#39;28:117&#39;,&#39;28:174&#39;,&#39;28:202&#39;]) { const c = await figma.getNodeByIdAsync(id); const ins = await c.getInstancesAsync(); out[c.name] = ins.map(i =&gt; ({ id: i.id, page: pageOf(i), parent: i.parent &amp;&amp; i.parent.name })); }\nreturn out;&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T18-22-35-133Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T18-22-35-133Z" class="timestamp-link"><time datetime="2026-09-24T18:22:35.133Z" data-timestamp="2026-09-24T18:22:35.133Z">2026-09-24T18:22:35.133Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>{&quot;Flats, continued / How bright a flat should be&quot;:[],&quot;Alignment / Two exposures, three stars&quot;:[],&quot;Algorithms / One pixel, five ways to combine it&quot;:[]}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-22-37-196Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-22-37-196Z" class="timestamp-link"><time datetime="2026-09-24T18:22:37.196Z" data-timestamp="2026-09-24T18:22:37.196Z">2026-09-24T18:22:37.196Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>No instances anywhere, so removing the three components and their canvas notes is clean.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-22-39-696Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-22-39-696Z" class="timestamp-link"><time datetime="2026-09-24T18:22:39.696Z" data-timestamp="2026-09-24T18:22:39.696Z">2026-09-24T18:22:39.696Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01QTJbFz56MDtGG5Nqs8X63V"><div class="tool-header"><span class="tool-icon">⚙</span> mcp__plugin_figma_figma__use_figma</div><div class="tool-description">Remove the Flats-continued, Alignment and Algorithms illustration components and their canvas notes</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;fileKey&#34;: &#34;jtYi1LQf1fVyUAUfAgthP5&#34;,
+  &#34;skillNames&#34;: &#34;figma-use&#34;,
+  &#34;code&#34;: &#34;const page = await figma.getNodeByIdAsync(&#39;8:2&#39;); await figma.setCurrentPageAsync(page);\nconst removed = [];\nfor (const id of [&#39;28:117&#39;,&#39;28:174&#39;,&#39;28:202&#39;,&#39;36:753&#39;,&#39;36:754&#39;,&#39;36:755&#39;]) { const n = await figma.getNodeByIdAsync(id); if (n) { removed.push(n.name); n.remove(); } }\nreturn { removed, remaining: page.children.map(n =&gt; n.name) };&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-22-42-853Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-22-42-853Z" class="timestamp-link"><time datetime="2026-09-24T18:22:42.853Z" data-timestamp="2026-09-24T18:22:42.853Z">2026-09-24T18:22:42.853Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_012gy7LQYHid8wRLfGyDSdrQ">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Drop the removed components from the Figma state file</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd &#34;/mnt/c/Users/Jerome Hollon/Documents/claude/astrophotography-explainer&#34; &amp;&amp; python3 - &lt;&lt;&#39;EOF&#39;
+import json
+p=&#39;docs/figma-state.json&#39;
+d=json.load(open(p))
+c=d[&#39;entities&#39;][&#39;components&#39;]
+for k in [&#39;Flats, continued / How bright a flat should be&#39;,&#39;Alignment / Two exposures, three stars&#39;,&#39;Algorithms / One pixel, five ways to combine it&#39;]: c.pop(k,None)
+d[&#39;notes&#39;].append(&#34;Illustrations page holds only the four optical-path components (Noise &amp; Defects, Bias, Darks, Flats). The Flats-continued, Alignment and Algorithms illustrations were removed on 2026-09-24; section agents decide whether their pages need one.&#34;)
+json.dump(d,open(p,&#39;w&#39;),indent=1,ensure_ascii=False)
+EOF
+echo ok</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T18-22-44-373Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T18-22-44-373Z" class="timestamp-link"><time datetime="2026-09-24T18:22:44.373Z" data-timestamp="2026-09-24T18:22:44.373Z">2026-09-24T18:22:44.373Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>{&quot;removed&quot;:[&quot;Flats, continued / How bright a flat should be&quot;,&quot;Alignment / Two exposures, three stars&quot;,&quot;Algorithms / One pixel, five ways to combine it&quot;,&quot;note/Flats, continued&quot;,&quot;note/Alignment&quot;,&quot;note/Algorithms&quot;],&quot;remaining&quot;:[&quot;Flats / Where uneven brightness comes from&quot;,&quot;Noise &amp; Defects / Light path&quot;,&quot;Bias / Where the bias comes from&quot;,&quot;Darks / Where dark signal comes from&quot;,&quot;note/Noise &amp; Defects&quot;,&quot;note/Bias&quot;,&quot;note/Darks&quot;,&quot;note/Flats&quot;]}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T18-22-44-823Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T18-22-44-823Z" class="timestamp-link"><time datetime="2026-09-24T18:22:44.823Z" data-timestamp="2026-09-24T18:22:44.823Z">2026-09-24T18:22:44.823Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>ok</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-22-48-405Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-22-48-405Z" class="timestamp-link"><time datetime="2026-09-24T18:22:48.405Z" data-timestamp="2026-09-24T18:22:48.405Z">2026-09-24T18:22:48.405Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Removed the three non-optical illustrations (Flats continued, Alignment, Algorithms) and their "For lesson" notes. None had instances on any page, so nothing on the lesson pages was affected.</p>
+<p>The Illustrations page now holds only the four optical-path components: Noise &amp; Defects, Bias, Darks and Flats, each with its canvas note. The state file <code>docs/figma-state.json</code> no longer lists the removed components and records that section agents decide whether their pages need an illustration.</p></div></div></div>
+<div class="message user" id="msg-2026-09-24T18-25-39-644Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-09-24T18-25-39-644Z" class="timestamp-link"><time datetime="2026-09-24T18:25:39.644Z" data-timestamp="2026-09-24T18:25:39.644Z">2026-09-24T18:25:39.644Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Commit your changes and push them</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-25-43-126Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-25-43-126Z" class="timestamp-link"><time datetime="2026-09-24T18:25:43.126Z" data-timestamp="2026-09-24T18:25:43.126Z">2026-09-24T18:25:43.126Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-25-44-172Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-25-44-172Z" class="timestamp-link"><time datetime="2026-09-24T18:25:44.172Z" data-timestamp="2026-09-24T18:25:44.172Z">2026-09-24T18:25:44.172Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01HcTEmeysUhghyLkGfRzea9">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Check remote, branch and working tree</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd &#34;/mnt/c/Users/Jerome Hollon/Documents/claude/astrophotography-explainer&#34; &amp;&amp; git remote -v &amp;&amp; git branch --show-current &amp;&amp; git status --short</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T18-25-45-906Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T18-25-45-906Z" class="timestamp-link"><time datetime="2026-09-24T18:25:45.906Z" data-timestamp="2026-09-24T18:25:45.906Z">2026-09-24T18:25:45.906Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>origin	git@github.com:jeromehollon/astrophotography-explainer.git (fetch)
+origin	git@github.com:jeromehollon/astrophotography-explainer.git (push)
+main
+ D assets/flats-1/flatroi_computed.png
+ D assets/flats-1/flatroi_raw.png
+ D assets/flats-1/flatroi_removed.png
+ D assets/flats-1/flatroi_removed_none.png
+ M assets/flats-1/roi_removed_flat-as-shot.png
+ M assets/flats-1/roi_removed_flat-darkflat.png
+ M assets/flats-1/stats.json
+ M docs/figma-state.json
+ M tools/assets/flats_page1.py
+?? assets/flats-1/roi_exp2_removed.png</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-23-25-179Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-23-25-179Z" class="timestamp-link"><time datetime="2026-09-24T18:23:25.179Z" data-timestamp="2026-09-24T18:23:25.179Z">2026-09-24T18:23:25.179Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-23-25-181Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-23-25-181Z" class="timestamp-link"><time datetime="2026-09-24T18:23:25.181Z" data-timestamp="2026-09-24T18:23:25.181Z">2026-09-24T18:23:25.181Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>The working tree now has other agents' asset edits in progress, so I'll commit only my file, <code>docs/figma-state.json</code>, and push.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-23-33-094Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-23-33-094Z" class="timestamp-link"><time datetime="2026-09-24T18:23:33.094Z" data-timestamp="2026-09-24T18:23:33.094Z">2026-09-24T18:23:33.094Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01R7xbfEg2ViMGyPNyJyryU7">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit the Figma state file and push to origin main</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd &#34;/mnt/c/Users/Jerome Hollon/Documents/claude/astrophotography-explainer&#34; &amp;&amp; git add docs/figma-state.json &amp;&amp; git commit -q -F - &lt;&lt;&#39;EOF&#39;
+Record optical-path illustration rebuild in Figma state
+
+The four lesson illustrations (Noise &amp; Defects, Bias, Darks, Flats) in
+the Figma file were redrawn so a star&#39;s rays converge onto the Pixel
+Grid layer of one &#34;Layered Camera Sensor&#34; chip (Pixel Grid, Amplifier,
+ADC). Bias highlights the ADC and Darks highlights Pixel Grid plus
+Amplifier, each with a full-height soft-colour bar; the separate
+&#34;readout board&#34; was dropped because read offset and read noise come
+from the converter. Flats now shows the optical path (edge-of-field
+light blocked by the tube, dust on the filter) instead of the
+divide-equals triptych beginners could not parse.
+
+Components carry no eyebrow, title or caption any more: lesson pages
+own their prose. The Flats-continued, Alignment and Algorithms
+illustrations were removed (no instances existed) so section agents
+can decide whether their pages need one.
+
+This commit updates docs/figma-state.json: component list, completed
+step I3.illustrations-optical-path, and notes describing the new
+drawing structure and the no-prose rule.
+
+Co-Authored-By: Claude Fable 5.1 &lt;noreply@anthropic.com&gt;
+Claude-Session: https://claude.ai/code/session_01XAxSa2RNr2EKatPQPCJD5N
+EOF
+git push -q origin main &amp;&amp; git log --oneline -1 &amp;&amp; git status --short | head</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-24T18-23-37-212Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-24T18-23-37-212Z" class="timestamp-link"><time datetime="2026-09-24T18:23:37.212Z" data-timestamp="2026-09-24T18:23:37.212Z">2026-09-24T18:23:37.212Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>c2661bb Record optical-path illustration rebuild in Figma state
+ D assets/flats-1/flatroi_computed.png
+ D assets/flats-1/flatroi_raw.png
+ D assets/flats-1/flatroi_removed.png
+ D assets/flats-1/flatroi_removed_none.png
+ M assets/flats-1/roi_removed_flat-as-shot.png
+ M assets/flats-1/roi_removed_flat-darkflat.png
+ M assets/flats-1/stats.json
+ M tools/assets/flats_page1.py
+?? assets/flats-1/roi_exp2_removed.png</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-24T18-23-40-580Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-24T18-23-40-580Z" class="timestamp-link"><time datetime="2026-09-24T18:23:40.580Z" data-timestamp="2026-09-24T18:23:40.580Z">2026-09-24T18:23:40.580Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Committed and pushed to <code>origin/main</code> as c2661bb, "Record optical-path illustration rebuild in Figma state".</p>
+<p>The commit contains only <code>docs/figma-state.json</code>, since the illustration work itself lives in the Figma file and that is the sole repo file I changed. The commit body explains the redraw, the no-prose rule and the removed components.</p>
+<p>Left uncommitted on purpose: the in-progress edits under <code>assets/flats-1/</code> and <code>tools/assets/flats_page1.py</code>, which belong to another agent's asset track.</p></div></div></div>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-001.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<span class="current">2</span>
+<span class="disabled">Next &rarr;</span>
+</div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>
