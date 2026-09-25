@@ -106,3 +106,43 @@ export function rectContains(outer: Rect, inner: Rect): boolean {
 export function rectEquals(a: Rect, b: Rect): boolean {
   return a.x === b.x && a.y === b.y && a.w === b.w && a.h === b.h;
 }
+
+export function intersectRect(a: Rect | null, b: Rect | null): Rect | null {
+  if (!a || !b) return null;
+  const x0 = Math.max(a.x, b.x), y0 = Math.max(a.y, b.y);
+  const x1 = Math.min(a.x + a.w, b.x + b.w), y1 = Math.min(a.y + a.h, b.y + b.h);
+  return x1 > x0 && y1 > y0 ? { x: x0, y: y0, w: x1 - x0, h: y1 - y0 } : null;
+}
+
+/**
+ * Output samples (bin-b grid, absolute sample indices) that frame `M` can fill: warpLanczos3 gives a value only
+ * where M·(u,v) lands inside the closed frame rectangle [0,W_b−1]×[0,H_b−1] (mirrored taps cover the border).
+ * The frame's four corners are mapped back with M⁻¹ to a quadrilateral on the output grid; for our transforms
+ * (a small rotation, or 180° for the other pier side) the axis-aligned rectangle spanned by the second-smallest
+ * and second-largest corner coordinates lies inside that quadrilateral. Its integer bounds are then checked by
+ * mapping the rectangle's corner samples forward through M, the warp's own test, and any side whose corners fall
+ * outside the frame is pulled in by one sample. Returns null when the frame misses `out`.
+ */
+export function validOutputRect(M: Mat3, imageW: number, imageH: number, out: Rect): Rect | null {
+  const inv = mat3Inv(M);
+  const xs: number[] = [], ys: number[] = [];
+  for (const [x, y] of [[0, 0], [imageW - 1, 0], [0, imageH - 1], [imageW - 1, imageH - 1]]) {
+    const [u, v] = applyH(inv, x, y);
+    xs.push(u); ys.push(v);
+  }
+  xs.sort((a, b) => a - b); ys.sort((a, b) => a - b);
+  const eps = 1e-6;
+  let x0 = Math.max(Math.ceil(xs[1] - eps), out.x), x1 = Math.min(Math.floor(xs[2] + eps), out.x + out.w - 1);
+  let y0 = Math.max(Math.ceil(ys[1] - eps), out.y), y1 = Math.min(Math.floor(ys[2] + eps), out.y + out.h - 1);
+  const inside = (u: number, v: number) => { const [sx, sy] = applyH(M, u, v); return sx >= 0 && sx <= imageW - 1 && sy >= 0 && sy <= imageH - 1; };
+  for (let pass = 0; pass < 3 && x1 >= x0 && y1 >= y0; pass++) {
+    const ok = [inside(x0, y0), inside(x1, y0), inside(x0, y1), inside(x1, y1)]; // tl, tr, bl, br
+    if (ok.every(Boolean)) break;
+    if (!ok[0] || !ok[2]) x0++;
+    if (!ok[1] || !ok[3]) x1--;
+    if (!ok[0] || !ok[1]) y0++;
+    if (!ok[2] || !ok[3]) y1--;
+  }
+  if (x1 < x0 || y1 < y0) return null;
+  return { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 };
+}

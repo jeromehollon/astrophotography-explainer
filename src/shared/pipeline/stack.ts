@@ -4,9 +4,9 @@
 import { ByteLru } from '../data/lru';
 import { fetchManifest, fetchMasters, fetchNormalization } from '../data/json';
 import { fetchRoi } from '../data/roi';
-import type { Asset } from '../data/types';
+import type { Asset, Manifest } from '../data/types';
 import { calibrate, calState, flatId as flatIdOf, subtractId } from './calibrate';
-import { applyH, flipMatrix, footprint, mat3Inv, mat3Mul, outputToFrame, scaleMatrix, unionRect } from './geometry';
+import { applyH, flipMatrix, footprint, intersectRect, mat3Inv, mat3Mul, outputToFrame, scaleMatrix, unionRect, validOutputRect } from './geometry';
 import { DEFAULT_PARAMS } from './integrate';
 import type { Executor, FrameJob } from './jobs';
 import { getExecutor } from './pool';
@@ -243,6 +243,39 @@ export async function calibrateRoi(id: string, rect: Rect | null, bin: Bin, cali
   ]);
   const data = calibrate(light.data, dark ? crop(dark, light.rect, bin) : null, flat ? crop(flat, light.rect, bin) : null, flatId ? sources.fV(flatId) : 1);
   return { data, w: light.w, h: light.h, rect: light.rect };
+}
+
+/**
+ * The largest axis-aligned rectangle of the output grid that every frame of `req` contributes to, in output
+ * samples relative to the result (x, y from 0; w, h ≤ result.w, result.h), or null when no such rectangle
+ * exists. Outside it the stack is made of fewer frames (or is NaN) because dithering and the pier flip move each
+ * frame's edge inside the grid; the export autocrop (export.ts) cuts to it. Frames are described by a Manifest
+ * (fetchManifest()) or by Sources (tests). Duplicate ids count once, as in stack().
+ */
+export function commonCrop(req: StackRequest, frames: Manifest | Pick<Sources, 'frame'>): Rect | null {
+  const lookup = 'frame' in frames ? frames.frame.bind(frames) : (id: string) => {
+    const a = frames.assets[id];
+    if (!a) throw new Error(`unknown asset ${id}`);
+    return assetInfo(a);
+  };
+  const { grid } = req;
+  const bin = grid.bin;
+  const ref = lookup(grid.ref);
+  const S = scaleMatrix(bin);
+  const out: Rect = { x: grid.x / bin, y: grid.y / bin, w: grid.w / bin, h: grid.h / bin };
+  let common: Rect | null = out;
+  for (const id of new Set(req.frames)) {
+    const info = lookup(id);
+    const Mbin = mat3Mul(mat3Inv(S), mat3Mul(frameTransform(info, ref, req.align !== false), S));
+    common = intersectRect(common, validOutputRect(Mbin, Math.floor(info.width / bin), Math.floor(info.height / bin), out));
+    if (!common) return null;
+  }
+  return { x: common.x - out.x, y: common.y - out.y, w: common.w, h: common.h };
+}
+
+/** commonCrop() against the live manifest. */
+export async function commonCropLive(req: StackRequest): Promise<Rect | null> {
+  return commonCrop(req, await getLiveSources());
 }
 
 /** Where the output rect of `grid` lands in frame `id`'s sensor (bin-1), for ROI markers on the reference view. */

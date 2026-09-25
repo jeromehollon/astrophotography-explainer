@@ -1,21 +1,21 @@
 // Public API of the browser pipeline (docs/contracts.md "Pipeline"; SPEC §4.4, §4.5, §6).
 
 export type { StackRequest, StackResult, CalibrationChoice, AlgorithmName, Bin, Rect, StfParams, DisplayStf, LinearRange, Mat3, FlatLevel } from './types';
-export { stack, calibrateRoi, stackWith, canonicalKey, resultCache, backgroundNoise, gridToSensor, getLiveSources, frameTransform } from './stack';
+export { stack, calibrateRoi, stackWith, canonicalKey, resultCache, backgroundNoise, gridToSensor, getLiveSources, frameTransform, commonCrop, commonCropLive } from './stack';
 export type { Sources, FrameInfo } from './stack';
 export { fetchRoi, roiCache, inflightCount } from '../data/roi';
 export { fetchManifest, fetchNormalization, fetchMasters, fetchJson, setDataBase } from '../data/json';
 export { autoStf, mtf, stfLut, stfTable, displayLut, medianMadn, percentiles, DN_MAX } from './stf';
 export { toImageData, toRgba, difference, differenceRange, rotate180, NAN_RGB } from './display';
 export { calState, lightSub, flatCal, flatId, subtractId, calibrate } from './calibrate';
-export { footprint, outputToFrame, scaleMatrix, flipMatrix, applyH, mat3Mul, mat3Inv, LANCZOS_RADIUS } from './geometry';
+export { footprint, outputToFrame, scaleMatrix, flipMatrix, applyH, mat3Mul, mat3Inv, intersectRect, validOutputRect, LANCZOS_RADIUS } from './geometry';
 export { warpLanczos3, lanczos3, binMean } from './warp';
 export { normCoeff, normalizeInPlace } from './normalize';
 export type { NormStats, NormCoeff } from './normalize';
 export { integrateFrames, integrate1d, DEFAULT_PARAMS, erf, erfinv } from './integrate';
 export { useStack, useCalibratedRoi, RoiCanvas } from './react';
 export type { RoiCanvasProps, UseStackState, UseRoiState } from './react';
-export { exportPng, exportFits, exportFilename, fitsHeaderFor, calibTag } from './export';
+export { exportPng, exportFits, exportFilename, fitsHeaderFor, calibTag, cropResult } from './export';
 export { getExecutor, setExecutor, poolStats } from './pool';
 export { inlineExecutor } from './jobs';
 
