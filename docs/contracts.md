@@ -109,5 +109,7 @@ export function useStack(req: StackRequest | null): { result: StackResult | null
 export function RoiCanvas(props: { data: Float32Array | null; w: number; h: number; stf: ...; rotate180?: boolean; pixelated?: boolean; width: number; height: number; className? }): JSX.Element;
 ```
 Lessons that need an extra display: `difference(a, b)` centred on mid grey lives in `src/shared/pipeline/display.ts`.
+Added in phase 4 repairs: `commonCropLive(req): Promise<Rect|null>` (largest rect every frame covers, in result samples), `cropResult(result, rect)`, and `exportPng(result, stf, { rotate180?, crop? })` / `exportFits(result, header, { crop? })`.
+
 
 ## Dockerfile (owner: data), SPEC §4.7. Image serves `/` and `/api/roi` on 8080 with `data/derived/runtime` baked in at `/data` (`ASTRO_DATA=/data`).
