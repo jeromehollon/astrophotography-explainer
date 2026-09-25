@@ -1,5 +1,5 @@
 /**
- * Thank-you modal shown once per visit after the learner's first PNG download (owner request). Styled like the
+ * Thank-you modal shown once per page load after the learner's first PNG download (owner request). Styled like the
  * shared lightbox (src/shared/ui/lightbox.tsx): dimmed stage backdrop, close button top right, Escape or a
  * backdrop click closes, focus is trapped inside and returned to the opener. The three photographs are
  * assets/thanks/observatory_*.jpg (tools/assets/thanks_photos.py).
@@ -12,15 +12,19 @@ import inside from '../../../assets/thanks/observatory_1.jpg';
 import slit from '../../../assets/thanks/observatory_2.jpg';
 import { cx, T } from './ui';
 
-export const THANKS_KEY = 'thanksShown';
+// Module state, not sessionStorage: the owner wants the thank-you once per page load, so a refresh shows it again.
+let thanksShown = false;
 
-/** True the first time in this tab session; later calls return false. Storage failures count as "show it". */
+/** True the first time on this page load; later calls return false until the page is reloaded. */
 export function claimThanks(): boolean {
-  try {
-    if (sessionStorage.getItem(THANKS_KEY)) return false;
-    sessionStorage.setItem(THANKS_KEY, '1');
-  } catch { /* private mode or blocked storage: show it */ }
+  if (thanksShown) return false;
+  thanksShown = true;
   return true;
+}
+
+/** Test hook: forget that the thank-you was shown. */
+export function resetThanks(): void {
+  thanksShown = false;
 }
 
 // Pixel sizes of the bundled JPEGs (fitted inside 1600 px by tools/assets/thanks_photos.py).
